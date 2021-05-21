@@ -4,7 +4,7 @@
 ||| This module imports the core defintions and concepts.
 module Frex
 
-import public Signature
-import public Algebra
-import public Axioms
+import public Frex.Signature
+import public Frex.Algebra
+--import public Frex.Axioms
 
