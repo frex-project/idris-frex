@@ -1,0 +1,16 @@
+package frex
+authors = "Guillaume Allais, Edwin Brady, Nathan Corbin, Ohad Kammar, and Jeremy Yallop"
+modules = Frex
+        , Frex.Signature
+        , Frex.Algebra
+        , Notation
+        , Notation.Additive
+        , Notation.Multiplicative
+        , Frexlet.Monoid.Commutative
+        -- Should move to contrib
+        , Data.Setoid
+        , Syntax.TransitiveReasoning
+        
+
+depends = contrib
+sourcedir = "src"

@@ -1,0 +1,1 @@
+module Frexlet.Monoid.Commutative
