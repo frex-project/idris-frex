@@ -14,6 +14,19 @@ mapWithPosIrrelevant f (x :: xs) = f 0 x :: mapWithPosIrrelevant (\i => f (FS i)
 ||| Version of `map` with runtime-irrelevant information that the
 ||| argument is an element of the vector
 public export
-mapWithElem : (xs : Vect n a) -> (f : (x : a) -> (0 pos : x `Elem` xs) -> b) -> Vect n b
+mapWithElem : (xs : Vect n a) 
+  -> (f : (x : a) -> (0 pos : x `Elem` xs) -> b) 
+  -> Vect n b
 mapWithElem []        f = []
-mapWithElem (x :: xs) f = f x Here :: mapWithElem xs (\x,pos => f x (There pos))
+mapWithElem (x :: xs) f 
+  = f x Here :: mapWithElem xs 
+                (\x,pos => f x (There pos))
+
+-- Should probably move into contrib
+export
+mapWithElemExtensional : (xs : Vect n a) -> (f, g :  (x : a) -> (0 _ : x `Elem` xs) -> b)
+  -> ((x : a) -> (0 pos : x `Elem` xs) -> f x pos = g x pos)
+  -> mapWithElem xs f = mapWithElem xs g
+mapWithElemExtensional    []     f g prf = Refl
+mapWithElemExtensional (x :: xs) f g prf = cong2 (::) (prf x Here) (mapWithElemExtensional xs _ _ (\x,pos => prf x (There pos)))
+

@@ -106,7 +106,7 @@ sumIsGTEtoParts (x :: xs) Here
   CalcWith $
   |~ x
   ~~ x + 0 ...(sym $ plusZeroRightNeutral _)
-  <~ _ ...(plusLteMonotoneLeft x 0 _ LTEZero)
+  <~ _     ...(plusLteMonotoneLeft x 0 _ LTEZero)
 sumIsGTEtoParts {x} (y :: xs) (There later) 
   = rewrite (foldrVectHomomorphism {f = plus} {e = 0}).cons y xs in 
     CalcWith $ 
@@ -160,6 +160,27 @@ bindFueled : {0 sig : Signature} -> {0x : Type} -> {a : Algebra sig}
 bindFueled (Done   v ) env _ _ = env v
 bindFueled (Call f xs) env (S fuel) (LTESucc enough) = 
   a.Sem f $ mapWithElem xs \t,pos => bindFueled t env fuel (enoughFuel xs pos enough)
+
+depCong : {0 p : a -> Type} -> (f : (x : a) -> p x) -> (0 prf : x = y) -> f x = f y
+depCong f Refl = Refl
+
+export total
+bindFueledIndependent : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig}
+  -> (t : Term sig x) -> (env : x -> U a) 
+  -> (0 fuel1 : Nat) -> (0 enough1 : fuel1 `GTE` size t)
+  -> (0 fuel2 : Nat) -> (0 enough2 : fuel2 `GTE` size t)
+  -> bindFueled {a} t env fuel1 enough1 = bindFueled {a} t env fuel2 enough2
+bindFueledIndependent (Done y) env fuel1 enough1 fuel2 enough2 = Refl
+bindFueledIndependent (Call f xs) env (S fuel1) (LTESucc enough1) (S fuel2) (LTESucc enough2) = Calc $
+  |~ a.Sem f (mapWithElem xs (\t, pos => bindFueled t env fuel1 (enoughFuel xs pos enough1)))
+  ~~ a.Sem f (mapWithElem xs (\t, pos => bindFueled t env fuel2 (enoughFuel xs pos enough2)))
+    ...(cong (a.Sem f) $ mapWithElemExtensional xs _ _ \t,pos =>
+                         bindFueledIndependent t env _ _ _ _)
+
+-- Idris thinks this is covering for some reason...
+--bindFueledIndependent (Call _ _) _ _ LTEZero (S _) (LTESucc _) = ?h
+
+
 
 infixl 1 >>==
 
