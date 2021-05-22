@@ -86,111 +86,33 @@ data Term : (0 sig : Signature) -> Type -> Type where
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (sig.arity f) (Term sig a)
          -> Term sig a
 
-{- ------------------ Functor, Applicative, Monad ------------------------------------------- 
-
-  To define the Functor, Applicative, and Monad implementations, we
-  need to inductively call `map` etc., and that confuses the
-  termination checker.
-  
-  We use a crude solution: define the size terms, and use this size as
-  fuel.
--}
-
-||| A specialisation of `map sizeOfTerm` that helps the termination
-||| checker see something is decreasing.
-public export total
-sizeOfTerms : Vect n (Term sig x) -> Vect n Nat  
-
-||| The size of a term gives an upper bound on its depth.
-||| 
-||| It would be more natural to use `max` rather than `sum`, but
-||| `contrib`'s support for order is not great at the moment.
-public export total
-sizeOfTerm  :        (Term sig x) -> Nat  
-sizeOfTerm (Done _) = 0 
-sizeOfTerm (Call f xs) = 1 + sum (sizeOfTerms xs)
-
-sizeOfTerms [] = []
-sizeOfTerms (t :: ts) = sizeOfTerm t :: sizeOfTerms ts
-
-||| Specifies `sizeOfTerms` specialises `map sizeOfTerm`.
-export
-sizeOfTermsIsMap : (xs : Vect n (Term sig x)) -> sizeOfTerms xs = map Algebra.sizeOfTerm xs  
-sizeOfTermsIsMap [] = Refl
-sizeOfTermsIsMap (y :: xs) = cong (sizeOfTerm y ::) $ sizeOfTermsIsMap xs
-
+------------------ Functor, Applicative, Monad ------------------------------------------- 
 
 public export total
-Sized (Term sig x) where
-  size t = sizeOfTerm t
-
-export
-enoughFuel : {fuel : Nat} -> {t : Term sig x} -> (xs : Vect n (Term sig x)) -> (pos : t `Elem` xs)
-  -> (fuel `GTE` sum (sizeOfTerms xs))
-  -> (fuel `GTE` size t)
-enoughFuel {fuel} xs pos enough = CalcWith $
-    |~ sizeOfTerm t
-    <~ sum (map sizeOfTerm xs) ...(sumIsGTEtoParts _ $ mapElem pos)
-    ~~ sum (sizeOfTerms xs)    ...(cong sum $ sym $ sizeOfTermsIsMap xs)
-    <~ fuel                    ...(enough) 
-
-public export
-mapTerm : (f : x -> y) -> (t : Term sig x) 
-  -> (0 fuel : Nat) -> (0 enough: fuel `GTE` size t)
-  -> Term sig y
-mapTerm h (Done w) _ _ = Done (h w)
-mapTerm h (Call f xs) (S fuel) (LTESucc enough) 
-  = Call f $ Data.Vect.Extra.mapWithElem xs \t,pos => mapTerm h t fuel (enoughFuel xs pos enough)
-
-public export
-Functor (Term sig) where
-  map h t = mapTerm h t (size t) (LTEIsReflexive _)
-
-||| Kleisli extension operator for a `sig`-algebra, with fuel for termination
-public export
-bindFuelled : {0 sig : Signature} -> {0x : Type} -> {a : Algebra sig}
+bindTerm : {0 sig : Signature} -> {0x : Type} -> {auto a : Algebra sig}
   -> (t : Term sig x) -> (env : x -> U a) 
-  -> (0 fuel : Nat) -> (0 enough : fuel `GTE` size t)
   -> (U a) 
-bindFuelled (Done   v ) env _ _ = env v
-bindFuelled (Call f xs) env (S fuel) (LTESucc enough) = 
-  a.Sem f $ mapWithElem xs \t,pos => bindFuelled t env fuel (enoughFuel xs pos enough)
+  
 
-||| the argument to `bindFuelled`'s `mapWithElem`, needed for proofs
-bindarg : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> {xs : Vect n (Term sig x)}
-  -> (fuel : Nat) -> (enough : fuel `GTE` sum (sizeOfTerms xs))
-  -> (f : x -> U a) 
-  -> (t : Term sig x) -> (0 pos : t `Elem` xs) -> U a
-bindarg {a} {xs} fuel enough f t pos = bindFuelled {a} t f fuel (enoughFuel xs pos enough)
+public export total
+bindTerms : {0 sig : Signature} -> {0x : Type} -> {auto a : Algebra sig}
+  -> (ts : Vect n (Term sig x)) -> (env : x -> U a) 
+  -> Vect n (U a) 
+  
+bindTerms  [] env = []
+bindTerms (t :: ts) env = bindTerm t env :: bindTerms ts env
 
-export total
-bindFuelledIndependentExtensional : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig}
-  -> (t1 : Term sig x) -> (env1 : x -> U a) 
-  -> (t2 : Term sig x) -> (env2 : x -> U a)  
-  -> (t1 = t2) -> ((i : x) -> env1 i = env2 i)
-  -> (0 fuel1 : Nat) -> (0 enough1 : fuel1 `GTE` size t1)
-  -> (0 fuel2 : Nat) -> (0 enough2 : fuel2 `GTE` size t2)
-  -> bindFuelled {a} t1 env1 fuel1 enough1 = bindFuelled {a} t2 env2 fuel2 enough2
-bindFuelledIndependentExtensional (Done i) env _ _ Refl prf fuel1 enough1 fuel2 enough2 = prf i
-bindFuelledIndependentExtensional (Call f xs) env1 _ env2 Refl prf (S fuel1) (LTESucc enough1) (S fuel2) (LTESucc enough2) 
-  = Calc $
-  |~ a.Sem f (mapWithElem xs (\t, pos => bindFuelled t env1 fuel1 (enoughFuel xs pos enough1)))
-  ~~ a.Sem f (mapWithElem xs (\t, pos => bindFuelled t env2 fuel2 (enoughFuel xs pos enough2)))
-    ...(cong (a.Sem f) $ mapWithElemExtensional xs _ _ \t,pos =>
-                         bindFuelledIndependentExtensional t env1 t env2 Refl prf _ _ _ _)
-
--- Idris thinks this is covering for some reason...
---bindFuelledIndependent (Call _ _) _ _ LTEZero (S _) (LTESucc _) = ?h
+bindTerm (Done i) env = env i
+bindTerm (Call f xs) env = a.Sem f $ bindTerms  xs env
 
 
-
-infixl 1 >>==
-
-||| The Kleisli extension operator associated with each algebra
-public export
-(>>==) : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig}
-  -> (t : Term sig x) -> (env : x -> U a) -> (U a)
-(>>==) t env = bindFuelled t env (size t) (LTEIsReflexive _)
+||| Specifies `bindTerms` specialises `map bindTerm`.
+export
+bindTermsIsMap : {auto a : Algebra sig} 
+  -> (xs : Vect n (Term sig x)) -> (env : x -> U a)
+  -> bindTerms {a} xs env = map (flip (bindTerm {a}) env) xs
+bindTermsIsMap [] env = Refl
+bindTermsIsMap (y :: xs) env = cong (bindTerm y env ::) $ bindTermsIsMap xs env
 
 ||| The free `sig`-algebra over over a given type
 public export
@@ -198,15 +120,19 @@ Free : (0 sig : Signature) -> (0 x : Type) -> Algebra sig
 Free sig x = MkAlgebra (Term sig x) Call
 
 public export
+Functor (Term sig) where
+  map h t = bindTerm {a = Free _ _} t (Done . h)
+
+public export
 Applicative (Term sig) where
-  pure x = Done x
-  (<*>) fs ts = (>>==) {a = Free sig _} fs \f => 
-                (>>==) {a = Free sig b} ts \x => 
+  pure = Done
+  (<*>) fs ts = bindTerm {a = Free sig _} fs \f => 
+                bindTerm {a = Free sig b} ts \x => 
                 Done (f x)
 
 public export
 Monad (Term sig) where
-  (>>=) {b} = (>>==) {a = Free sig b}
+  (>>=) {b} = bindTerm {a = Free sig b}
 
 ||| Extends the semantic interpration of the algebra from operators to terms homomorphically
 ||| @ env : environment/valuation, with the i-th element holding the
@@ -215,7 +141,7 @@ public export
 Sem : {0 sig : Signature} -> (a : Algebra sig)
   -> Term sig (Fin n) -> (env : Vect n (U a))
   -> U a
-Sem a t env = t >>== (\i => index i env)
+Sem a t env = bindTerm t (\i => index i env)
 
 ||| Free `sig`-algebra over `n`-variables.
 public export
@@ -225,82 +151,54 @@ TermAlgebra sig n = Free sig (Fin n)
 ||| States: `(>>= f) : Free sig x -> a` is an algebra homomorphism
 export
 bindHom : {sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
-  -> Homomorphism (Free sig x) a (flip ((>>==) {a}) env)
-bindHom env f ts = ?efl
+  -> Homomorphism (Free sig x) a (flip (bindTerm {a}) env)
+bindHom env f ts = cong (a.Sem f) (bindTermsIsMap _ _)
 
-||| Monad law corresponding to right unit law of monoids, fueled version
-total
-bindFuelledPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
-    -> (t : Term sig x) 
-    -> (fuel : Nat) -> (enough : fuel `GTE` size t)
-    -> (bindFuelled {a = Free _ _} t Prelude.pure fuel enough) = t
-bindFuelledPureRightUnit (Done v) _ _ = Refl
-bindFuelledPureRightUnit (Call f xs) (S fuel) (LTESucc enough) 
-  = cong (Call f) $ vectorExtensionality _ _ \i => 
-  let maparg : (t : Term sig x) -> (0 pos : t `Elem` xs) -> Term sig x
-      maparg t pos = bindFuelled {a = Free _ _} t pure fuel (enoughFuel xs pos enough)
-  in Calc $ 
-  |~ index i (mapWithElem xs (bindarg {a = Free _ _} fuel enough pure))
-  ~~ maparg (index i xs) (finToElem xs i)
-    ...(let u = indexNaturalityWithElem i xs (bindarg {a = Free _ _} fuel enough pure) in u)
-  ~~ index i xs ...(bindFuelledPureRightUnit _ _ _)
+export total
+bindTermsPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
+    -> (ts : Vect n (Term sig x))
+    -> bindTerms {a = Free _ _} ts Prelude.pure = ts
 
 ||| Monad law corresponding to right unit law of monoids
 export total
 bindPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
     -> (t : Term sig x) 
     -> t >>= Prelude.pure = t
-bindPureRightUnit t = bindFuelledPureRightUnit t (size t) (LTEIsReflexive _)
+bindPureRightUnit (Done i) = Refl
+bindPureRightUnit (Call f xs) = cong (Call f) $ bindTermsPureRightUnit _
 
+bindTermsPureRightUnit [] = Refl
+bindTermsPureRightUnit (t :: ts) 
+  = cong2 (::) (bindPureRightUnit t)
+               (bindTermsPureRightUnit ts)
 
 namespace Universality
   ||| Like Algebra.(>>=), but pack the `sig`-homomorphism structure
   public export
   (>>=) : {sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
           -> Free sig x ~> a 
-  (>>=) env = MkHomomorphism (\t => t >>== env) (bindHom env)
-  
-depCong : {p : a -> Type} -> (f : (x : a) -> p x) -> x = y -> f x = f y
-depCong _ Refl = Refl
-  
-bindFuelledAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {a : Algebra sig}
+  (>>=) env = MkHomomorphism (flip bindTerm env) (bindHom env)
+
+export  
+bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
   -> (t : Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
-  -> (fuel : Nat) -> (enough : fuel `GTE` size t) -- luckily, one set of fuel is enough
-  -> (>>==) {a} (bindFuelled {a = Free _ _} t f fuel enough) g 
-     = bindFuelled {a} t (\x => (>>==) {a} (f x) g) fuel enough
-bindFuelledAssociative (Done v    ) f g fuel enough = Refl 
-bindFuelledAssociative (Call op xs) f g (S fuel) (LTESucc enough) 
-  {sig,x,y}
-  = let ys : Vect (sig.arity op) (Term sig y)
-        ys = mapWithElem xs \t, pos => 
-                             bindarg {a = Free _ _} fuel enough f t pos
-  in cong (a.Sem op) $ vectorExtensionality _  _ \i => Calc $ 
-  |~ index i (mapWithElem ys
-                          \t, pos => bindarg {a} _ (LTEIsReflexive _) g t pos)
-  ~~ bindarg {a} _ (LTEIsReflexive _) g 
-        (index i $ 
-          mapWithElem xs \t, pos => 
-                         bindarg {a = Free _ _} fuel enough f t pos)
-          (finToElem ys i) ...(indexNaturalityWithElem _ _ _)
-  ~~ bindarg {a} (sum (sizeOfTerms ys)) (LTEIsReflexive _) g
-       (bindarg {a = Free _ _} fuel enough f (index i xs) (finToElem xs i))
-       ?h -- Ah, not a cong, but a depCong, since the final argument depends on the previous one
-  
-       {-bindarg {a} ?h (LTEIsReflexive _) g  
-       (bindarg {a = Free _ _} fuel enough f (index i xs) (finToElem xs i))
-       ?h2-} ...(--cong (\u => bindarg {a} (sum (sizeOfTerms ys)) (LTEIsReflexive _) g u ?)
-                ?h1) --bindFuelledIndependentExtensional ? ? ? ? ?h1 ?h2 ? ? ? ?)
-  ~~ index i (mapWithElem xs \t, pos => bindarg fuel enough (\x => (>>==) {a} (f x) g) t pos)
-  ...(?help) --Need to first show (>>==) is a homomorphism mapWithElemExtensional xs _ _ \t,pos => ?help
+  -> bindTerm (bindTerm {a = Free _ _} t f) g 
+     = bindTerm {a} t (\x => bindTerm {a} (f x) g)
 
+export  
+bindTermsAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
+  -> (ts : Vect n $ Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
+  -> bindTerms {a} (bindTerms {a = Free _ _} ts f) g 
+     = bindTerms {a} ts (\x => bindTerm {a} (f x) g)
+bindTermsAssociative    []     f g = Refl
+bindTermsAssociative (t :: ts) f g 
+  = cong2 (::) (bindAssociative      t  f g)
+               (bindTermsAssociative ts f g)
 
-export 
-bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {a : Algebra sig}
-  -> (t : Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
-  -> (>>==) {a} (t >>= f) g = (>>==) {a} t (\x => (>>==) {a} (f x) g)
-bindAssociative t f g = bindFuelledAssociative t f g (size t) (LTEIsReflexive _)
-
-
+bindAssociative (Done i    ) f g = Refl
+bindAssociative (Call op xs) f g 
+  = cong (a.Sem op) 
+         (bindTermsAssociative xs f g)
 
 namespace Setoid
   public export 0
@@ -309,7 +207,7 @@ namespace Setoid
   
   export
   EqualCongruence : {n : Nat} -> (f : a ^ n -> a) -> CongruenceWRT (cast a) f
-  EqualCongruence f x y prf = ?EqualCongruence_rhs -- Vector extensionality
+  EqualCongruence f xs ys prf = cong f $ vectorExtensionality _ _ prf
   
   public export
   record SetoidAlgebra (Sig : Signature) where
@@ -340,5 +238,3 @@ namespace Setoid
   {a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> 
     Cast (a ~> b) ((the Setoid) (cast a) ~> cast b) where
       cast h = MkSetoidHomomorphism h.H.H h.congruence
-
-
