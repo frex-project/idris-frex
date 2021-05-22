@@ -11,7 +11,6 @@ import Data.Nat.Order
 import public Data.Vect
 import public Data.Vect.Elem
 import Data.Vect.Properties
-import Data.Vect.Extra
 import Data.Rel
 
 import Control.WellFounded
@@ -19,6 +18,8 @@ import Control.WellFounded
 import Syntax.PreorderReasoning
 import Decidable.Order
 import Syntax.PreorderReasoning.Generic
+
+import Data.Vect.Extra
 
 infix 10 ^
 infix 5 ~>
@@ -85,9 +86,25 @@ data Term : (0 sig : Signature) -> Type -> Type where
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (sig.arity f) (Term sig a)
          -> Term sig a
 
+{- ------------------ Functor, Applicative, Monad ------------------------------------------- 
+
+  To define the Functor, Applicative, and Monad implementations, we
+  need to inductively call `map` etc., and that confuses the
+  termination checker.
+  
+  We use a crude solution: define the size terms, and use this size as
+  fuel.
+-}
+
+||| A specialisation of `map sizeOfTerm` that helps the termination
+||| checker see something is decreasing.
 public export total
 sizeOfTerms : Vect n (Term sig x) -> Vect n Nat  
 
+||| The size of a term gives an upper bound on its depth.
+||| 
+||| It would be more natural to use `max` rather than `sum`, but
+||| `contrib`'s support for order is not great at the moment.
 public export total
 sizeOfTerm  :        (Term sig x) -> Nat  
 sizeOfTerm (Done _) = 0 
@@ -96,40 +113,16 @@ sizeOfTerm (Call f xs) = 1 + sum (sizeOfTerms xs)
 sizeOfTerms [] = []
 sizeOfTerms (t :: ts) = sizeOfTerm t :: sizeOfTerms ts
 
+||| Specifies `sizeOfTerms` specialises `map sizeOfTerm`.
+export
 sizeOfTermsIsMap : (xs : Vect n (Term sig x)) -> sizeOfTerms xs = map Algebra.sizeOfTerm xs  
 sizeOfTermsIsMap [] = Refl
 sizeOfTermsIsMap (y :: xs) = cong (sizeOfTerm y ::) $ sizeOfTermsIsMap xs
 
-sumIsGTEtoParts : {x : Nat} -> (xs : Vect n Nat) -> (x `Elem` xs) -> sum xs `GTE` x
-sumIsGTEtoParts (x :: xs) Here 
-  = rewrite (foldrVectHomomorphism {f = plus} {e = 0}).cons x xs in
-  CalcWith $
-  |~ x
-  ~~ x + 0 ...(sym $ plusZeroRightNeutral _)
-  <~ _     ...(plusLteMonotoneLeft x 0 _ LTEZero)
-sumIsGTEtoParts {x} (y :: xs) (There later) 
-  = rewrite (foldrVectHomomorphism {f = plus} {e = 0}).cons y xs in 
-    CalcWith $ 
-    |~ x
-    <~ sum xs       ...(sumIsGTEtoParts {x} xs later)
-    ~~ 0 + sum xs   ...(Refl)
-    <~ y + (sum xs) ...(plusLteMonotoneRight (sum xs) 0 y LTEZero)
 
 public export total
 Sized (Term sig x) where
   size t = sizeOfTerm t
-
-sumMonotone : {n : Nat} -> (xs, ys : Vect n Nat) 
-  -> (prf : (i : Fin n) -> index i xs `LTE` index i ys)
-  -> (sum xs `LTE` sum ys)
-sumMonotone [] [] prf = LTEZero
-sumMonotone (x :: xs) (y :: ys) prf = 
-  let prf' = sumMonotone xs ys (\i => prf (FS i)) 
-  in CalcWith $
-  |~ sum (x :: xs)
-  ~~ x + sum xs    ...((foldrVectHomomorphism {f = plus} {e = 0}).cons x xs)
-  <~ y + sum ys    ...(plusLteMonotone  (prf 0) prf')
-  ~~ sum (y :: ys) ...(sym $ (foldrVectHomomorphism {f = plus} {e = 0}).cons y ys)
 
 export
 enoughFuel : {fuel : Nat} -> {t : Term sig x} -> (xs : Vect (sig.arity f) (Term sig x)) -> (pos : t `Elem` xs)
@@ -147,12 +140,13 @@ mapTerm : (f : x -> y) -> (t : Term sig x)
   -> Term sig y
 mapTerm h (Done w) _ _ = Done (h w)
 mapTerm h (Call f xs) (S fuel) (LTESucc enough) 
-  = Call f $ mapWithElem xs \t,pos => mapTerm h t fuel (enoughFuel xs pos enough)
+  = Call f $ Data.Vect.Extra.mapWithElem xs \t,pos => mapTerm h t fuel (enoughFuel xs pos enough)
 
 public export
 Functor (Term sig) where
   map h t = mapTerm h t (size t) (LTEIsReflexive _)
 
+public export
 bindFueled : {0 sig : Signature} -> {0x : Type} -> {a : Algebra sig}
   -> (t : Term sig x) -> (env : x -> U a) 
   -> (0 fuel : Nat) -> (0 enough : fuel `GTE` size t)
@@ -160,9 +154,6 @@ bindFueled : {0 sig : Signature} -> {0x : Type} -> {a : Algebra sig}
 bindFueled (Done   v ) env _ _ = env v
 bindFueled (Call f xs) env (S fuel) (LTESucc enough) = 
   a.Sem f $ mapWithElem xs \t,pos => bindFueled t env fuel (enoughFuel xs pos enough)
-
-depCong : {0 p : a -> Type} -> (f : (x : a) -> p x) -> (0 prf : x = y) -> f x = f y
-depCong f Refl = Refl
 
 export total
 bindFueledIndependent : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig}
@@ -226,16 +217,29 @@ bindHom : {sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> 
   -> Homomorphism (Free sig x) a (flip ((>>==) {a}) env)
 bindHom env f ts = ?efl
 
+||| Monad law corresponding to right unit law of monoids, fueled version
+total
+bindFueledPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
+    -> (t : Term sig x) 
+    -> (fuel : Nat) -> (enough : fuel `GTE` size t)
+    -> (bindFueled {a = Free _ _} t Prelude.pure fuel enough) = t
+bindFueledPureRightUnit (Done v) _ _ = Refl
+bindFueledPureRightUnit (Call f xs) (S fuel) (LTESucc enough) 
+  = cong (Call f) $ vectorExtensionality _ _ \i => 
+  let maparg : (t : Term sig x) -> (0 pos : t `Elem` xs) -> Term sig x
+      maparg t pos = bindFueled {a = Free _ _} t pure fuel (enoughFuel xs pos enough)
+  in Calc $ 
+  |~ index i (mapWithElem xs maparg)
+  ~~ maparg (index i xs) (finToElem xs i)
+    ...(let u = indexNaturalityWithElem i xs maparg in u)
+  ~~ index i xs ...(bindFueledPureRightUnit _ _ _)
+
 ||| Monad law corresponding to right unit law of monoids
 export total
 bindPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
     -> (t : Term sig x) 
-    -> (t >>= Prelude.pure) = t
-bindPureRightUnit (Done v) = Refl
-bindPureRightUnit (Call f xs) = ?h1 {-cong (Call f) $ Calc $
-  |~ map (>>= pure) xs
-  ~~ map id xs  ...(assert_total (mapExtensional _ _ bindPureRightUnit _))
-  ~~ xs         ...(mapId _) -}
+    -> t >>= Prelude.pure = t
+bindPureRightUnit t = bindFueledPureRightUnit t (size t) (LTEIsReflexive _)
 
 {-
 export 

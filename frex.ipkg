@@ -10,7 +10,7 @@ modules = Frex
         -- Should move to contrib
         , Data.Setoid
         , Syntax.TransitiveReasoning
-        , Data.Vect.Extra
+        --, Data.Vect.Extra1 --Currently not used
         
 
 depends = contrib
