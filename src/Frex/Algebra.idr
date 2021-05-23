@@ -200,23 +200,31 @@ bindAssociative (Call op xs) f g
   = cong (a.Sem op) 
          (bindTermsAssociative xs f g)
 
+-- It'll be useful to also have algebras quotiented by a
+-- proof-relevant relation
 namespace Setoid
+  ||| The equivalence relation on `a` is a congruence w.r.t. the operation `f`.
   public export 0
   CongruenceWRT : {n : Nat} -> (a : Setoid) -> (f : (U a) ^ n -> U a) -> Type
   CongruenceWRT a f = SetoidHomomorphism (VectSetoid n a) a f
-  
+
+  ||| Equality is always a congruence  
   export
   EqualCongruence : {n : Nat} -> (f : a ^ n -> a) -> CongruenceWRT (cast a) f
   EqualCongruence f xs ys prf = cong f $ vectorExtensionality _ _ prf
   
+  ||| A setoid algebra: an algebra over a setoid whose equivalence
+  ||| relation respects all the algebraic operations
   public export
   record SetoidAlgebra (Sig : Signature) where
     constructor MkSetoidAlgebra
+    ||| Underlying algebra
     algebra : Algebra Sig
+    ||| Equivalence relation making the carrier a setoid
     equivalence : Equivalence (U algebra)
+    ||| All algebraic operations respect the equivalence relation
     congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence) `CongruenceWRT` (algebra.Sem f)
     
-  
   public export
   Cast (SetoidAlgebra sig) Setoid where
     cast a = MkSetoid (U $ a.algebra) (equivalence a)
@@ -229,20 +237,26 @@ namespace Setoid
       , congruence = \f, xs, ys, ext => cong (a.Sem f) $ vectorExtensionality _ _ ext
       }
 
+  ||| Setoid homomorphisms between `SetoidAlgebra`s
   public export
   record (~>) {Sig : Signature} (A, B : SetoidAlgebra Sig) where
     constructor MkSetoidAlgebraHomomorphism
+    ||| Ordinary algebra homomorphism
     H : algebra A ~> algebra B
+    ||| Respecting the equivalence relation
     congruence : SetoidHomomorphism (cast A) (cast B) (.H H)
 
   {a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> 
     Cast (a ~> b) ((the Setoid) (cast a) ~> cast b) where
       cast h = MkSetoidHomomorphism h.H.H h.congruence
+      
+  ||| The setoid equivalence is a congruence wrt. all algebraic terms
   export total
   bindCongruence : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
     -> (t : Term sig (U x)) -> SetoidHomomorphism (x ~~> cast a) (cast a)
          (\u => bindTerm {a = a.algebra} t (u.H))
   
+  ||| Auxiliary function used in the inductive argument for `bindCongruence`
   export total
   bindTermsCongruence : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
     -> (ts : Vect n $ Term sig (U x)) -> SetoidHomomorphism (x ~~> cast a) (VectSetoid n $ cast a)
@@ -256,4 +270,34 @@ namespace Setoid
                       (bindTerms {a = a.algebra} xs g.H) 
                       (\i => bindTermsCongruence xs f g prf i)
 
-  -- To show that eval : (x ~~> a) ~> a is an algebra homomorphism, we'll use powers  
+  public export
+  eval : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
+    -> (t : Term sig (U x)) -> (x ~~> cast a) ~> (cast a)
+  eval t = MkSetoidHomomorphism (\env => bindTerm {a = a.algebra} t env.H) (bindCongruence t)
+  
+  {- NB: even once we define the power of `a` by `x`, `eval t : (x ~~>  a) ~> a` may not
+         be a homomorphism of `SetoidAlgebra`. Eg:
+  
+         For example (an instance of the Eckmann-Hilton argument):
+
+         Take `a` to be a non-commutative monoid, with u,v
+         non-commuting, for example, strings with concatenation:
+         
+           t : Term Monoid Bool
+           t = True * False
+           f True  = a.Sem 1 []
+           f False = u
+           g True  = v
+           g False = a.sem 1 []
+           
+           and then:
+           
+           eval t (f * g) = eval t \case {True => 1 * v; False => u * 1}
+                          = (v * u)
+                          
+           while:
+           
+           (eval t f) * (eval t g) = (1 * u) * (v * 1) = u * v
+           
+           and these are different.
+  -}
