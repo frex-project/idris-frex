@@ -42,7 +42,7 @@ uncurry {n = 0  } f xs = f
 uncurry {n = S n} f xs = Algebra.uncurry (f $ head xs) (tail xs)
 
 ||| States: each operation has an interpretation
-public export 
+public export
 algebraOver : (sig : Signature) -> (a : Type) -> Type
 sig `algebraOver` a = (f : sig.Op) -> a ^ (sig.arity f) -> a
 
@@ -89,7 +89,7 @@ data Term : (0 sig : Signature) -> Type -> Type where
 ------------------ Functor, Applicative, Monad ------------------------------------------- 
 
 public export total
-bindTerm : {0 sig : Signature} -> {0x : Type} -> {auto a : Algebra sig}
+bindTerm : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig}
   -> (t : Term sig x) -> (env : x -> U a) 
   -> (U a) 
   
@@ -150,7 +150,7 @@ TermAlgebra sig n = Free sig (Fin n)
 
 ||| States: `(>>= f) : Free sig x -> a` is an algebra homomorphism
 export
-bindHom : {sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
+bindHom : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
   -> Homomorphism (Free sig x) a (flip (bindTerm {a}) env)
 bindHom env f ts = cong (a.Sem f) (bindTermsIsMap _ _)
 
@@ -175,9 +175,9 @@ bindTermsPureRightUnit (t :: ts)
 namespace Universality
   ||| Like Algebra.(>>=), but pack the `sig`-homomorphism structure
   public export
-  (>>=) : {sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
+  eval : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} -> (env : x -> U a)
           -> Free sig x ~> a 
-  (>>=) env = MkHomomorphism (flip bindTerm env) (bindHom env)
+  eval env = MkHomomorphism (flip bindTerm env) (bindHom env)
 
 export  
 bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
@@ -238,3 +238,22 @@ namespace Setoid
   {a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> 
     Cast (a ~> b) ((the Setoid) (cast a) ~> cast b) where
       cast h = MkSetoidHomomorphism h.H.H h.congruence
+  export total
+  bindCongruence : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
+    -> (t : Term sig (U x)) -> SetoidHomomorphism (x ~~> cast a) (cast a)
+         (\u => bindTerm {a = a.algebra} t (u.H))
+  
+  export total
+  bindTermsCongruence : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
+    -> (ts : Vect n $ Term sig (U x)) -> SetoidHomomorphism (x ~~> cast a) (VectSetoid n $ cast a)
+         (\u => bindTerms {a = a.algebra} ts (u.H))
+  bindTermsCongruence (t :: _ ) f g prf FZ     = bindCongruence t f g prf
+  bindTermsCongruence (_ :: ts) f g prf (FS i) = bindTermsCongruence ts f g prf i
+  
+  bindCongruence (Done v   ) f g prf = prf _
+  bindCongruence {a} (Call op xs) f g prf 
+    = a.congruence op (bindTerms {a = a.algebra} xs f.H) 
+                      (bindTerms {a = a.algebra} xs g.H) 
+                      (\i => bindTermsCongruence xs f g prf i)
+
+  -- To show that eval : (x ~~> a) ~> a is an algebra homomorphism, we'll use powers  
