@@ -51,13 +51,13 @@ public export
 lftNeutrality : {sig : Signature} -> EqSpec sig [0,2]
 lftNeutrality neutral product =
     let uvw = notation neutral product in
-    MkEquation 2 $ O1 .+. X 0 =-= X 0
+    MkEquation 1 $ O1 .+. X 0 =-= X 0
 
 public export
 rgtNeutrality : {sig : Signature} -> EqSpec sig [0,2]
 rgtNeutrality neutral product =
     let uvw = notation neutral product in
-    MkEquation 2 $ X 0 .+. O1 =-= X 0
+    MkEquation 1 $ X 0 .+. O1 =-= X 0
 
 public export
 associativity : {sig : Signature} -> EqSpec sig [2]
