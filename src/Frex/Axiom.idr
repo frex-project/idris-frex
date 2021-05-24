@@ -35,8 +35,8 @@ call (MkOp f) = curry (Call f)
 
 public export
 notation : {sig : Signature} -> (neutral : OpWithArity sig 0) -> (product : OpWithArity sig 2)
-  -> Additive1 (Term sig (Fin k))
-notation neutral product = MkAdditive1 (call neutral) (call product)
+  -> Additive (Term sig (Fin k))
+notation neutral product = MkAdditive (call neutral) (call product)
 
 public export
 X : {sig : Signature} -> Fin k -> Term sig (Fin k)
@@ -51,18 +51,17 @@ public export
 lftNeutrality : {sig : Signature} -> EqSpec sig [0,2]
 lftNeutrality neutral product =
     let uvw = notation neutral product in
-    MkEquation 1 $ O1 .+. X 0 =-= X 0
+    MkEquation 1 $ O + X 0 =-= X 0
 
 public export
 rgtNeutrality : {sig : Signature} -> EqSpec sig [0,2]
 rgtNeutrality neutral product =
     let uvw = notation neutral product in
-    MkEquation 1 $ X 0 .+. O1 =-= X 0
+    MkEquation 1 $ X 0 + O =-= X 0
 
 public export
 associativity : {sig : Signature} -> EqSpec sig [2]
 associativity product =
-    let (.+.) = call product in
-    MkEquation 3 $ X 0 .+. (X 1 .+. X 2) =-= (X 0 .+. X 1) .+. X 2
-
+    let (+) = call product in
+    MkEquation 3 $ X 0 + (X 1 + X 2) =-= (X 0 + X 1) + X 2
 
