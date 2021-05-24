@@ -269,7 +269,8 @@ namespace Setoid
     = a.congruence op (bindTerms {a = a.algebra} xs f.H) 
                       (bindTerms {a = a.algebra} xs g.H) 
                       (\i => bindTermsCongruence xs f g prf i)
-
+  
+  ||| Evaluation of algebraic terms in a SetoidAlgebra is a setoid homomorphism
   public export
   eval : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
     -> (t : Term sig (U x)) -> (x ~~> cast a) ~> (cast a)

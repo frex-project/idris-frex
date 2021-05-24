@@ -6,5 +6,6 @@ module Frex
 
 import public Frex.Signature
 import public Frex.Algebra
---import public Frex.Axioms
+import public Frex.Presentation
+
 

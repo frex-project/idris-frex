@@ -3,10 +3,12 @@ authors = "Guillaume Allais, Edwin Brady, Nathan Corbin, Ohad Kammar, and Jeremy
 modules = Frex
         , Frex.Signature
         , Frex.Algebra
+        , Frex.Presentation
         , Frex.Axiom
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
+        , Frexlet.Monoid
         , Frexlet.Monoid.Commutative
         -- Should move to contrib
         , Data.Setoid
