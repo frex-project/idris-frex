@@ -17,3 +17,6 @@ record Presentation where
   0 Axiom   : Type
   axiom     : (ax : Axiom) -> Equation signature 
 
+public export %hint
+projectSignature : Presentation -> Signature
+projectSignature pres = pres.signature

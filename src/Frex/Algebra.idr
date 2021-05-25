@@ -55,27 +55,6 @@ record Algebra (Sig : Signature) where
   0 U   : Type
   Sem : Sig `algebraOver` U
   
-||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
-public export 0
-Preserves : {sig : Signature}
-         -> (a, b : Algebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
-Preserves {sig} a b h f
-  = (xs : Vect (arity f) (U a)) 
-    -> h (a.Sem f xs) = b.Sem f (map h xs)
-
-||| States: the function `h : U a -> U b` preserves all `sig`-operations
-public export 0
-Homomorphism : {sig : Signature} -> (a, b : Algebra sig) -> (h : U a -> U b) -> Type
-Homomorphism a b h = (f : Op sig) -> Preserves a b h f
-
-||| Homomorphisms between `Sig`-algebras
-||| @H : function between the carriers
-||| @preserves : satisfying the homomorphism property
-public export
-record (~>) {Sig : Signature} (a, b : Algebra Sig) where
-  constructor MkHomomorphism
-  H : U a -> U b
-  preserves : Homomorphism a b H
 
 ||| Algebraic terms of this signature with variables in the given type
 public export
@@ -159,12 +138,6 @@ public export
 TermAlgebra : (0 sig : Signature) -> (n : Nat) -> Algebra sig
 TermAlgebra sig n = Free sig (Fin n)
 
-||| States: `(>>= f) : Free sig x -> a` is an algebra homomorphism
-export
-bindHom : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
-  -> Homomorphism (Free sig x) a (flip (bindTerm {a}) env)
-bindHom env f ts = cong (a.Sem f) (bindTermsIsMap _ _)
-
 export total
 bindTermsPureRightUnit : {0 sig : Signature} -> {0 x : Type} 
     -> (ts : Vect n (Term sig x))
@@ -182,34 +155,6 @@ bindTermsPureRightUnit [] = Refl
 bindTermsPureRightUnit (t :: ts) 
   = cong2 (::) (bindPureRightUnit t)
                (bindTermsPureRightUnit ts)
-
-namespace Universality
-  ||| Like Algebra.(>>=), but pack the `sig`-homomorphism structure
-  public export
-  eval : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} -> (env : x -> U a)
-          -> Free sig x ~> a 
-  eval env = MkHomomorphism (flip bindTerm env) (bindHom env)
-
-export  
-bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
-  -> (t : Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
-  -> bindTerm (bindTerm {a = Free _ _} t f) g 
-     = bindTerm {a} t (\x => bindTerm {a} (f x) g)
-
-export  
-bindTermsAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
-  -> (ts : Vect n $ Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
-  -> bindTerms {a} (bindTerms {a = Free _ _} ts f) g 
-     = bindTerms {a} ts (\x => bindTerm {a} (f x) g)
-bindTermsAssociative    []     f g = Refl
-bindTermsAssociative (t :: ts) f g 
-  = cong2 (::) (bindAssociative      t  f g)
-               (bindTermsAssociative ts f g)
-
-bindAssociative (Done i    ) f g = Refl
-bindAssociative (Call op xs) f g 
-  = cong (a.Sem op) 
-         (bindTermsAssociative xs f g)
 
 -- It'll be useful to also have algebras quotiented by a
 -- proof-relevant relation
@@ -236,9 +181,17 @@ namespace Setoid
     ||| All algebraic operations respect the equivalence relation
     congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence) `CongruenceWRT` (algebra.Sem f)
     
+  public export 0
+  U : SetoidAlgebra sig -> Type  
+  U a = Algebra.U a.algebra
+  
   public export
   Cast (SetoidAlgebra sig) Setoid where
     cast a = MkSetoid (U $ a.algebra) (equivalence a)
+    
+  public export total
+  cast : (a : SetoidAlgebra sig) -> Preorder (U a) (a.equivalence.relation)
+  cast a = cast $ cast {to = Setoid} a
   
   public export
   Cast (Algebra sig) (SetoidAlgebra sig) where
@@ -248,19 +201,95 @@ namespace Setoid
       , congruence = \f, xs, ys, ext => cong (a.Sem f) $ vectorExtensionality _ _ ext
       }
 
-  ||| Setoid homomorphisms between `SetoidAlgebra`s
-  public export
-  record (~>) {Sig : Signature} (A, B : SetoidAlgebra Sig) where
-    constructor MkSetoidAlgebraHomomorphism
-    ||| Ordinary algebra homomorphism
-    H : algebra A ~> algebra B
-    ||| Respecting the equivalence relation
-    congruence : SetoidHomomorphism (cast A) (cast B) (.H H)
 
-  {a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> 
-    Cast (a ~> b) ((the Setoid) (cast a) ~> cast b) where
-      cast h = MkSetoidHomomorphism h.H.H h.congruence
-      
+
+-------------------- Homomorphisms -------------------------------
+
+  ||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
+  public export 0
+  Preserves : {sig : Signature}
+           -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
+  Preserves {sig} a b h f
+    = (xs : Vect (arity f) (U a)) 
+      -> b.equivalence.relation (h $ a.algebra.Sem f xs) (b.algebra.Sem f (map h xs))
+
+  ||| States: the function `h : U a -> U b` preserves all `sig`-operations
+  public export 0
+  Homomorphism : {sig : Signature} -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> Type
+  Homomorphism a b h = (f : Op sig) -> Preserves a b h f
+
+  ||| Homomorphisms between Setoid `Sig`-algebras
+  ||| @H : setoid morphism between the carriers
+  ||| @preserves : satisfying the homomorphism property
+  public export
+  record (~>) {Sig : Signature} (a, b : SetoidAlgebra Sig) where
+    constructor MkSetoidHomomorphism
+    ||| Underlying Setoid homomorphism
+    H : cast {to = Setoid} a ~> cast b
+    ||| Preservation of `Sig`-operations up to the setoid's equivalence
+    preserves : Homomorphism a b (.H H)
+
+  {- NB: We need to have a Setoid homomorphism, to allow preserving
+     the operations up to the setoid equivalence.
+  -}
+
+  public export
+  id : (a : SetoidAlgebra sig) -> a ~> a
+  id a = MkSetoidHomomorphism (Setoid.id $ cast a) 
+          \f,xs => CalcWith @{cast a} $
+          |~ a.algebra.Sem f xs
+          ~~ a.algebra.Sem f (map id xs) ...(cong (a.algebra.Sem f) $ sym (mapId _))
+
+  public export
+  (.) : {a,b,c : SetoidAlgebra sig} -> b ~> c -> a ~> b -> a ~> c
+  g . f  = MkSetoidHomomorphism (H g . H f) \op, xs => CalcWith @{cast c} $
+    |~ g.H.H (f.H.H (a.algebra.Sem op xs))                
+    <~ g.H.H (b.algebra.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
+    <~ c.algebra.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
+    ~~ c.algebra.Sem op (map (\x => g.H.H (f.H.H x)) xs) ...(cong (c.algebra.Sem op) 
+                                                            $ mapFusion _ _ _)
+                                                            
+-- Back to (non-setoid) Algebra
+
+public export 0
+(~>) : (a,b : Algebra sig) -> Type
+a ~> b = cast {to=SetoidAlgebra sig} a ~> cast b
+
+||| States: `(>>= f) : Free sig x -> a` is an algebra homomorphism
+export
+bindHom : {0 sig : Signature} -> {0 x : Type} -> {a : Algebra sig} -> (env : x -> U a)
+  -> Homomorphism {sig} (cast $ Free sig x) (cast a) (flip (bindTerm {a}) env)
+bindHom env f ts = cong (a.Sem f) (bindTermsIsMap _ _)
+
+namespace Universality
+  ||| Like Algebra.(>>=), but pack the `sig`-homomorphism structure
+  public export
+  eval : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} -> (env : x -> U a)
+          -> Free sig x ~> a 
+  eval env = MkSetoidHomomorphism (cast $ flip bindTerm env) (bindHom env)
+
+export  
+bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
+  -> (t : Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
+  -> bindTerm (bindTerm {a = Free _ _} t f) g 
+     = bindTerm {a} t (\x => bindTerm {a} (f x) g)
+
+export  
+bindTermsAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
+  -> (ts : Vect n $ Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
+  -> bindTerms {a} (bindTerms {a = Free _ _} ts f) g 
+     = bindTerms {a} ts (\x => bindTerm {a} (f x) g)
+bindTermsAssociative    []     f g = Refl
+bindTermsAssociative (t :: ts) f g 
+  = cong2 (::) (bindAssociative      t  f g)
+               (bindTermsAssociative ts f g)
+
+bindAssociative (Done i    ) f g = Refl
+bindAssociative (Call op xs) f g 
+  = cong (a.Sem op) 
+         (bindTermsAssociative xs f g)
+
+namespace Setoid
   ||| The setoid equivalence is a congruence wrt. all algebraic terms
   export total
   bindCongruence : {0 sig : Signature} -> {0 x : Setoid} -> {a : SetoidAlgebra sig} 
@@ -313,3 +342,36 @@ namespace Setoid
            
            and these are different.
   -}
+
+namespace Term
+  ||| Every term over x induces an `x`-ary operation. 
+  ||| States: `h` preserves the this operation.
+  public export 0
+  Preserves : (a,b : SetoidAlgebra sig) -> (h : U a -> U b) -> (t : Term sig x) -> Type
+  Preserves a b h t = (env : x -> U a) -> 
+  b.equivalence.relation 
+    (h (bindTerm {a = a.algebra} t env))
+    (bindTerm {a = b.algebra} t (h . env))
+
+  ||| Homomorphism preserve all algebraic operations
+  public export
+  homoPreservesSem : {a,b : SetoidAlgebra sig} -> (h : a ~> b) -> (t : Term sig x) ->
+    Preserves a b h.H.H t
+    
+  ||| Auxiliary generalisation to prove `homoPreservesSem`.
+  public export
+  homoPreservesSemMap : {a,b : SetoidAlgebra sig} -> (h : a ~> b) -> (ts : Vect n $ Term sig x) ->
+    (env : x -> U a) -> 
+    (VectSetoid n $ cast b).equivalence.relation
+      (map h.H.H (bindTerms {a = a.algebra} ts env))
+      (bindTerms {a = b.algebra} ts (h.H.H . env))
+  homoPreservesSemMap h (t :: ts) env  FZ    = homoPreservesSem h t env
+  homoPreservesSemMap h (t :: ts) env (FS i) = homoPreservesSemMap h ts env i
+
+  homoPreservesSem h (Done v    ) env = b.equivalence.reflexive _ 
+  homoPreservesSem h (Call op ts) env = CalcWith @{cast b} $
+    |~ h.H.H (a.algebra.Sem op (bindTerms {a = a.algebra} ts env))
+    <~ b.algebra.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
+    <~ b.algebra.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
+                                                                          $ homoPreservesSemMap {a,b}
+                                                                              h ts env)

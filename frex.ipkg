@@ -5,6 +5,8 @@ modules = Frex
         , Frex.Algebra
         , Frex.Presentation
         , Frex.Axiom
+        , Frex.Model
+        , Frex.Powers
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
