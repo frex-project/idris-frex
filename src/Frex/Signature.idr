@@ -5,7 +5,13 @@ module Frex.Signature
 public export
 record Signature where
   constructor MkSignature
-  Op    : Type
-  arity : Op -> Nat
+  OpWithArity : Nat -> Type
 
 
+public export
+Op : Signature -> Type
+Op sig = (n : Nat ** sig.OpWithArity n)
+
+public export
+arity : {auto 0 sig : Signature} -> Op sig -> Nat
+arity = fst

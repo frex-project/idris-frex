@@ -7,5 +7,5 @@ module Frex
 import public Frex.Signature
 import public Frex.Algebra
 import public Frex.Presentation
-
+import public Frex.Axiom
 

@@ -44,7 +44,7 @@ uncurry {n = S n} f xs = Algebra.uncurry (f $ head xs) (tail xs)
 ||| States: each operation has an interpretation
 public export
 algebraOver : (sig : Signature) -> (a : Type) -> Type
-sig `algebraOver` a = (f : sig.Op) -> a ^ (sig.arity f) -> a
+sig `algebraOver` a = (f : Op sig) -> a ^ (arity f) -> a
 
 ||| An algebra for a signature Sig consists of:
 ||| @U : A type called the carrier
@@ -58,9 +58,9 @@ record Algebra (Sig : Signature) where
 ||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
 public export 0
 Preserves : {sig : Signature}
-         -> (a, b : Algebra sig) -> (h : U a -> U b) -> (f : sig.Op) -> Type
+         -> (a, b : Algebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
 Preserves {sig} a b h f
-  = (xs : Vect (sig.arity f) (U a)) 
+  = (xs : Vect (arity f) (U a)) 
     -> h (a.Sem f xs) = b.Sem f (map h xs)
 
 ||| States: the function `h : U a -> U b` preserves all `sig`-operations
@@ -83,7 +83,7 @@ data Term : (0 sig : Signature) -> Type -> Type where
   ||| A variable with the given index
   Done : {0 sig : Signature} -> a -> Term sig a
   ||| An operator, applied to a vector of sub-terms
-  Call : {0 sig : Signature} -> (f : Op sig) -> Vect (sig.arity f) (Term sig a)
+  Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
          -> Term sig a
 
 ------------------ Functor, Applicative, Monad ------------------------------------------- 
@@ -118,6 +118,17 @@ bindTermsIsMap (y :: xs) env = cong (bindTerm y env ::) $ bindTermsIsMap xs env
 public export
 Free : (0 sig : Signature) -> (0 x : Type) -> Algebra sig
 Free sig x = MkAlgebra (Term sig x) Call
+
+||| The corresponding  n-ary operation over the term algebra
+public export
+call : {n : Nat} -> sig.OpWithArity n -> n `ary` (Term sig x)
+call f = curry (Call (n ** f))
+
+||| Smart constructor for variables
+public export
+X : {0 sig : Signature} -> Fin k -> Term sig (Fin k)
+X = Done
+
 
 public export
 Functor (Term sig) where
