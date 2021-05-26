@@ -22,7 +22,7 @@ import Syntax.PreorderReasoning.Generic
 import Data.Vect.Extra
 
 infix 10 ^
-infix 5 ~>
+infix 5 ~>, <~>
 
 ||| N-ary tuples
 public export
@@ -200,9 +200,11 @@ namespace Setoid
       , equivalence = EqualEquivalence (U a)
       , congruence = \f, xs, ys, ext => cong (a.Sem f) $ vectorExtensionality _ _ ext
       }
-
-
-
+  namespace Homomorphism
+    public export
+    cast : {a : SetoidAlgebra sig} -> (f : Op sig) -> VectSetoid (arity {sig} f) (cast a) ~> cast a
+    cast f = MkSetoidHomomorphism (a.algebra.Sem f) (a.congruence f)
+    
 -------------------- Homomorphisms -------------------------------
 
   ||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
@@ -375,3 +377,44 @@ namespace Term
     <~ b.algebra.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
                                                                           $ homoPreservesSemMap {a,b}
                                                                               h ts env)
+public export
+record (<~>) {0 sig : Signature} (a, b : SetoidAlgebra sig) where
+  constructor MkIsomorphism
+  Iso : cast {to = Setoid} a <~> cast b
+  FwdHomo : Homomorphism a b (Iso).Fwd.H
+
+public export
+BwdHomo : {0 sig : Signature} -> (a, b : SetoidAlgebra sig) -> 
+  (iso : a <~> b) -> Homomorphism b a (iso.Iso).Bwd.H
+BwdHomo a b iso f xs = CalcWith @{cast a} $
+  let id' : cast b ~> cast b
+      id' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
+  in 
+  |~ iso.Iso.Bwd.H (b.algebra.Sem f xs)
+  <~ iso.Iso.Bwd.H (b.algebra.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs))) 
+          ...((iso.Iso.Bwd . cast f).homomorphic _ _ 
+             $ CalcWith @{cast $ VectSetoid _ $ cast b} 
+             $ |~ xs 
+               <~ map (id b).H.H xs ...(\i => reflect (cast b) $ sym $ indexNaturality _ id _)
+               <~ map (iso.Iso.Fwd.H . iso.Iso.Bwd.H) xs   
+                    ...(let id_eq_id' = (cast b ~~> cast b).equivalence.symmetric 
+                              id' (id b).H 
+                              (iso.Iso.Iso.FwdBwdId)
+                        in (VectMap).homomorphic (id b).H id' id_eq_id' xs)
+               ~~ map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs) 
+                    ...(sym $ mapFusion _ _ _))
+  <~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.algebra.Sem f (map iso.Iso.Bwd.H xs))) 
+                                            ...(iso.Iso.Bwd.homomorphic _ _ 
+                                               $ b.equivalence.symmetric _ _
+                                               $ iso.FwdHomo f _)
+  <~ a.algebra.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
+
+||| Reverse an isomorphism
+public export
+sym : {a, b : SetoidAlgebra sig} -> a <~> b -> b <~> a
+sym iso = MkIsomorphism (sym iso.Iso) (BwdHomo _ _ iso)
+
+
+public export
+{a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> Cast (a <~> b) (a ~> b) where
+  cast iso = MkSetoidHomomorphism iso.Iso.Fwd iso.FwdHomo

@@ -6,6 +6,7 @@ import Decidable.Order
 
 import Data.Vect
 import Data.HVect
+import Data.Vect.Properties
 
 public export
 record Equivalence (A : Type) where
@@ -50,6 +51,10 @@ public export
   reflexive  = x.reflexive
 
 public export
+reflect : (a : Setoid) -> {x, y : U a} -> x = y -> a.equivalence.relation x y
+reflect a Refl = a.equivalence.reflexive _
+
+public export
 MkPreorder : {0 a : Type} -> {0 rel : a -> a -> Type} 
   -> (reflexive : (x : a) -> rel x x)
   -> (transitive : (x,y,z : a) -> rel x y -> rel y z -> rel x z)
@@ -77,7 +82,7 @@ VectSetoid n a = MkSetoid (Vect n (U a))
   , transitive = \xs, ys, zs, prf1, prf2, i => a.equivalence.transitive _ _ _ (prf1 i) (prf2 i)
   }
 
-infix 5 ~>, ~~>
+infix 5 ~>, ~~>, <~>
 
 
 public export 0
@@ -93,8 +98,8 @@ record (~>) (A,B : Setoid) where
   homomorphic : SetoidHomomorphism A B H
 
 public export
-Cast (a -> b) (cast {to=Setoid} a ~> cast b) where
-  cast f = MkSetoidHomomorphism f \x,y, prf => cong f prf
+{b : Setoid} -> Cast (a -> U b) (cast {to=Setoid} a ~> b) where
+  cast f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
 
 ||| Identity Setoid homomorphism  
 public export
@@ -106,7 +111,7 @@ public export
 (.) : {a,b,c : Setoid} -> b ~> c -> a ~> b -> a ~> c 
 g . f = MkSetoidHomomorphism (H g . H f) \x,y,prf => g.homomorphic _ _ (f.homomorphic _ _ prf)
 
-public export 0
+public export
 (~~>) : (a,b : Setoid) -> Setoid
 %unbound_implicits off
 (~~>) a b = MkSetoid (a ~> b) 
@@ -119,4 +124,43 @@ public export 0
   , transitive = \f,g,h,f_eq_g, g_eq_h, x => b.equivalence.transitive _ _ _ (f_eq_g x) (g_eq_h x)
   }
 %unbound_implicits on
+
+||| Two setoid homomorphism are each other's inverses
+public export
+record Isomorphism {a, b : Setoid} (Fwd : a ~> b) (Bwd : b ~> a) where
+  constructor IsIsomorphism
+  BwdFwdId : (a ~~> a).equivalence.relation (Bwd . Fwd) (id a)
+  FwdBwdId : (b ~~> b).equivalence.relation (Fwd . Bwd) (id b)
+
+||| Setoid isomorphism
+public export
+record (<~>) (a, b : Setoid) where
+  constructor MkIsomorphism
+  Fwd : a ~> b
+  Bwd : b ~> a
+
+  Iso : Isomorphism Fwd Bwd  
+  
+
+||| Reverse an isomorphism
+public export
+sym : a <~> b -> b <~> a
+sym iso = MkIsomorphism iso.Bwd iso.Fwd (IsIsomorphism iso.Iso.FwdBwdId iso.Iso.BwdFwdId)
+
+
+public export
+VectMap : {a, b : Setoid} -> (a ~~> b) ~> ((VectSetoid n a) ~~> (VectSetoid n b))
+VectMap = MkSetoidHomomorphism 
+  (\f => MkSetoidHomomorphism 
+            (\xs => map f.H xs) 
+            \xs, ys, prf, i  => CalcWith @{cast b} $
+              |~ index i (map f.H xs)
+              ~~ f.H (index i xs)     ...(indexNaturality _ _ _)
+              <~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
+              ~~ index i (map f.H ys) ...(sym $ indexNaturality _ _ _))
+  \f,g,prf,xs,i => CalcWith @{cast b} $
+    |~ index i (map f.H xs)
+    ~~ f.H (index i xs) ...(indexNaturality _ _ _)
+    <~ g.H (index i xs) ...(prf _)
+    ~~ index i (map g.H xs) ...(sym $ indexNaturality _ _ _)
 
