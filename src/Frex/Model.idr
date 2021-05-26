@@ -9,6 +9,8 @@ import Data.Setoid
 import Data.Vect
 import Data.Vect.Extra
 
+import Decidable.Order
+
 infix 1 =|
 
 %default total
@@ -87,6 +89,10 @@ record Model (Pres : Presentation) where
   Algebra  : SetoidAlgebra (Pres).signature
   ||| The algebra validates all the equations
   Validate : Validates Pres Algebra
+
+public export
+cast : (a : Model pres) -> Preorder (a.Algebra.algebra.U) (a.Algebra.equivalence.relation)
+cast a = cast a.Algebra
 
 ||| Type carrying the model
 public export 0

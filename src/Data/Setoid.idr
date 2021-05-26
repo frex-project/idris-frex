@@ -116,12 +116,12 @@ public export
 %unbound_implicits off
 (~~>) a b = MkSetoid (a ~> b) 
   let 0 relation : (f, g : a ~> b) -> Type
-      relation f g = (x : U a) -> b.equivalence.relation (H f x) (H g x)
+      relation f g = (x : U a) -> b.equivalence.relation (f.H x) (g.H x)
   in MkEquivalence
   { relation
-  , reflexive = \f,x => b.equivalence.reflexive _
-  , symmetric = \f,g,prf,x => b.equivalence.symmetric _ _ (prf x)
-  , transitive = \f,g,h,f_eq_g, g_eq_h, x => b.equivalence.transitive _ _ _ (f_eq_g x) (g_eq_h x)
+  , reflexive = \f,v => b.equivalence.reflexive (f.H v)
+  , symmetric = \f,g,prf,w => b.equivalence.symmetric _ _ (prf w)
+  , transitive = \f,g,h,f_eq_g, g_eq_h, q => b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
   }
 %unbound_implicits on
 
