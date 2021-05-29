@@ -7,7 +7,8 @@ modules = Frex
         , Frex.Axiom
         , Frex.Model
         , Frex.Powers
-        , Frex.Definition
+        , Frex.Powers.Definition
+        , Frex.Powers.Construction
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
