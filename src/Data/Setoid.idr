@@ -164,3 +164,20 @@ VectMap = MkSetoidHomomorphism
     <~ g.H (index i xs) ...(prf _)
     ~~ index i (map g.H xs) ...(sym $ indexNaturality _ _ _)
 
+||| Quotient a type by an function into a setoid
+|||
+||| Instance of the more general coequaliser of two setoid morphisms.
+public export
+Quotient : (0 a : Type) -> {b : Setoid} -> (a -> U b) -> Setoid
+Quotient a {b} q = MkSetoid a 
+  let 0 Relation : a -> a -> Type
+      Relation x y = b.equivalence.relation
+        (q x)
+        (q y)
+  in MkEquivalence 
+    { relation = Relation
+    , reflexive = \x => b.equivalence.reflexive (q x)
+    , symmetric =  \x,y=> b.equivalence.symmetric (q x) (q y)
+    , transitive = \x,y,z  => b.equivalence.transitive (q x) (q y) (q z)
+    }
+

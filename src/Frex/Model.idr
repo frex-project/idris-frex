@@ -91,6 +91,10 @@ record Model (Pres : Presentation) where
   Validate : Validates Pres Algebra
 
 public export
+Cast (Model pres) Setoid where
+  cast a = cast a.Algebra
+
+public export
 cast : (a : Model pres) -> Preorder (a.Algebra.algebra.U) (a.Algebra.equivalence.relation)
 cast a = cast a.Algebra
 
@@ -117,3 +121,11 @@ Sem : {0 pres : Presentation} -> (a : Model pres) ->
   (f : Op pres.signature) -> (U a) ^ (arity f) -> U a
 Sem a = a.Algebra.algebra.Sem
 
+||| The setoid of homomorphisms between models with pointwise equivalence.
+public export
+(~~>) : (a, b : Model pres) -> Setoid
+%unbound_implicits off
+(~~>) a b = Quotient (a ~> b) 
+                      {b = (cast {to = Setoid} a) ~~> cast b}
+                     (\h => h.H)
+%unbound_implicits on

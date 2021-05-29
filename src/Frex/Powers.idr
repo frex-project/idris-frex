@@ -11,6 +11,9 @@ import Frex.Model
 import Data.Vect
 import Data.Vect.Properties
 
+
+import public Frex.Powers.Definition
+
 parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
   public export
   PowerSetoid : Setoid
