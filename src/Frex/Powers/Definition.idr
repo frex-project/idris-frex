@@ -44,8 +44,10 @@ parameters {Pres : Presentation} {X : Setoid} {A : Model Pres}
     public export 0
     UniqueExtension : (other : Parameterisation Pres X A) -> 
       (extend : other ~> XtoA) -> Type
-    UniqueExtension other extend = (extend' : other ~> XtoA) ->
-       (f : U $ other.Model) -> extend'.H.H.H f = extend.H.H.H f
+    UniqueExtension other extend = (extend1, extend2 : other ~> XtoA) ->
+       (f : U $ other.Model) -> (cast $ XtoA .Model).equivalence.relation
+          (extend1.H.H.H f)
+          (extend2.H.H.H f)
     
     public export 0
     Uniqueness : Extension -> Type

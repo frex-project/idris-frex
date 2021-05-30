@@ -117,9 +117,9 @@ id a = Setoid.id (a.Algebra)
 
 ||| Interpretation of an operator in a model
 public export
-Sem : {0 pres : Presentation} -> (a : Model pres) ->
+(.Sem) : {0 pres : Presentation} -> (a : Model pres) ->
   (f : Op pres.signature) -> (U a) ^ (arity f) -> U a
-Sem a = a.Algebra.algebra.Sem
+(.Sem) a = a.Algebra.algebra.Sem
 
 ||| The setoid of homomorphisms between models with pointwise equivalence.
 public export

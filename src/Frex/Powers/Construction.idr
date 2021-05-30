@@ -88,3 +88,46 @@ namespace Model
                                                ...(sym $ pointwiseBind _ _ _)
   
   
+public export 
+(^) : {pres : Presentation} -> 
+  (a : Model pres) -> (x : Setoid) -> Power x a
+  
+%unbound_implicits off
+a ^ x = MkPower 
+  (MkParameterisation 
+     (x ~~> a) 
+     $ MkSetoidHomomorphism
+       eval
+       \x,y,x_eq_y,f => f.homomorphic _ _ x_eq_y)
+  $ IsUniversal 
+  { Exists = \other => 
+      MkParameterisationMorphism 
+        (MkSetoidHomomorphism 
+          (MkSetoidHomomorphism 
+               (\u => MkSetoidHomomorphism (\i => 
+                  let f  = other.Eval.H i
+                  in f.H.H u)
+                 \i,j,i_eq_j => 
+                   (other.Eval).homomorphic i j i_eq_j u)
+            \u,v,u_eq_v,i =>
+              let phi : other.Model ~> a
+                  phi = .H (.Eval other) i
+              in  phi.H.homomorphic u v u_eq_v)
+          \op,env,i => 
+             let OtoA : (other.Model ~> a)
+                        -- Not sure why we need the annotation --- idris bug?
+                 OtoA = (the (U x -> U (other.Model ~~> a))
+                            ((other.Eval).H)) i
+             in CalcWith @{cast a} $
+             |~ OtoA .H.H (other.Model.Sem op env)
+             <~ a.Sem op (map (OtoA .H.H) env) ...(OtoA .preserves op env)
+                                                  -- vv too disgusting...
+             ~~ a.Sem op (map (\phi => phi.H i) (map _ env))
+                              ...(cong (a.Sem op)
+                                 $ sym $ mapFusion _ _ env))
+        \u,i => (cast a).equivalence.reflexive _
+  , Unique = \other, extend1,extend2,u,i => CalcWith @{cast a} $
+      |~ (the _ $ extend1.H.H.H u).H i
+      ~~  _ ...( ?h3)
+  }
+%unbound_implicits off

@@ -125,6 +125,8 @@ public export
   }
 %unbound_implicits on
 
+
+
 ||| Two setoid homomorphism are each other's inverses
 public export
 record Isomorphism {a, b : Setoid} (Fwd : a ~> b) (Bwd : b ~> a) where
