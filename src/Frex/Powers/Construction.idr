@@ -128,6 +128,8 @@ a ^ x = MkPower
         \u,i => (cast a).equivalence.reflexive _
   , Unique = \other, extend1,extend2,u,i => CalcWith @{cast a} $
       |~ (the _ $ extend1.H.H.H u).H i
-      ~~  _ ...( ?h3)
+      <~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve u i)
+      <~ (the _ $ extend2.H.H.H u).H i  ...((cast a).equivalence.symmetric _ _ $ 
+                                            extend2.preserve u i)
   }
 %unbound_implicits off
