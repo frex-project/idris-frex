@@ -52,8 +52,9 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
     in 
     |~ bindTerm {a = b.algebra} t env
     <~ bindTerm {a = b.algebra} t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
-             ...((eval {a = b, x = cast x} t).homomorphic (cast env) 
-                                                          (iso.Iso.Fwd . (iso.Iso.Bwd . cast env))
+             ...((eval {a = b, x = cast x} t).homomorphic 
+                   (Prelude.cast env) 
+                   (iso.Iso.Fwd . (iso.Iso.Bwd . Prelude.cast env))
                 \i => (cast b ~~> cast b).equivalence.symmetric id_b' (id b).H 
                          iso.Iso.Iso.FwdBwdId  
                          (env i))
