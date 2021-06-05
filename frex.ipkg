@@ -9,6 +9,7 @@ modules = Frex
         , Frex.Powers
         , Frex.Powers.Definition
         , Frex.Powers.Construction
+        , Frex.Powers.Fin
         , Notation
         , Notation.Additive
         , Notation.Multiplicative

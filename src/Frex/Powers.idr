@@ -3,3 +3,4 @@ module Frex.Powers
 
 import public Frex.Powers.Definition
 import public Frex.Powers.Construction
+import public Frex.Powers.Fin
