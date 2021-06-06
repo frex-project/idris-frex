@@ -8,6 +8,7 @@ modules = Frex
         , Frex.Model
         , Frex.Powers
         , Frex.Powers.Definition
+        , Frex.Powers.Abstract
         , Frex.Powers.Construction
         , Frex.Powers.Fin
         , Notation

@@ -5,6 +5,7 @@ import Frex.Signature
 import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
+import Decidable.Order
 
 import Data.Vect
 import Data.Vect.Properties
@@ -55,23 +56,17 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
     \f, phis => A .equivalence.reflexive 
               $ ((X ~~> A).algebra.Sem f phis).H x
   
+  -- In fact, holds on the nose (i.e., with equality), but it's much
+  -- easier to just use the existing homoPreservesSem (which also
+  -- holds on the nose...)
   public export
   pointwiseBind : (t : Term Sig y) -> (env : y -> U (X ~~> A)) -> (x : U X) ->
-    (bindTerm {a = (X ~~> A).algebra} t               env).H x = 
-     bindTerm {a = A .algebra       } t \i => (env i).H x
-  
-  public export
-  pointwiseBindTerms : (ts : Vect n $ Term Sig y) -> (env : y -> U (X ~~> A)) -> (x : U X) ->
-    map (\phi => .H phi x) (bindTerms {a = (X ~~> A).algebra} ts               env) =
-    bindTerms {a = A .algebra       } ts \i => (env i).H x
-  pointwiseBindTerms    []     env x = Refl
-  pointwiseBindTerms (t :: ts) env x 
-    = cong2 (::) (pointwiseBind      t  env x) 
-                 (pointwiseBindTerms ts env x)
-  
-  pointwiseBind (Done v   ) env x = Refl
-  pointwiseBind (Call f ts) env x = cong (A .algebra.Sem f) $ pointwiseBindTerms ts env x
-  
+    A .equivalence.relation
+     ((bindTerm {a = (X ~~> A).algebra} t        env  ).H x)
+      (bindTerm {a = A .algebra       } t \i => (env i).H x)
+  pointwiseBind t env x 
+    = homoPreservesSem (Frex.Powers.Construction.eval x) t env
+
 namespace Model
   public export
   (~~>) : {pres : Presentation} -> (x : Setoid) -> (a : Model pres) -> Model pres
@@ -80,12 +75,13 @@ namespace Model
               in MkModel X_to_A
               \ax, env, x => CalcWith @{cast a} $
               |~ (bindTerm {a = X_to_A   .algebra} (pres.axiom ax).lhs env).H x
-              ~~ bindTerm  {a = a.Algebra.algebra} (pres.axiom ax).lhs (\i => (env i).H x)
+              <~ bindTerm  {a = a.Algebra.algebra} (pres.axiom ax).lhs (\i => (env i).H x)
                                                ...(pointwiseBind _ _ _)
               <~ bindTerm  {a = a.Algebra.algebra} (pres.axiom ax).rhs (\i => (env i).H x)
                                                ...(a.Validate _ _)
-              ~~ (bindTerm {a = X_to_A .algebra} (pres.axiom ax).rhs env).H x  
-                                               ...(sym $ pointwiseBind _ _ _)
+              <~ (bindTerm {a = X_to_A .algebra} (pres.axiom ax).rhs env).H x  
+                                               ...(_.symmetric _ _  $ 
+                                                   pointwiseBind _ _ _)
   
   
 public export 
@@ -133,4 +129,3 @@ a ^ x = MkPower
                                             extend2.preserve u i)
   }
 %unbound_implicits off
-

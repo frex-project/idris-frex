@@ -55,7 +55,7 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
              ...((eval {a = b, x = cast x} t).homomorphic 
                    (Prelude.cast env) 
                    (iso.Iso.Fwd . (iso.Iso.Bwd . Prelude.cast env))
-                \i => (cast b ~~> cast b).equivalence.symmetric id_b' (id b).H 
+                \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H 
                          iso.Iso.Iso.FwdBwdId  
                          (env i))
     <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env)) 
@@ -125,8 +125,12 @@ public export
 ||| The setoid of homomorphisms between models with pointwise equivalence.
 public export
 (~~>) : (a, b : Model pres) -> Setoid
-%unbound_implicits off
-(~~>) a b = Quotient (a ~> b) 
-                      {b = (cast {to = Setoid} a) ~~> cast b}
-                     (\h => h.H)
-%unbound_implicits on
+(~~>) a b = a.Algebra ~~> b.Algebra
+
+public export
+transport : {pres : Presentation} -> (a : Model pres) -> 
+  {b : SetoidAlgebra (pres.signature)} ->
+  (a.Algebra <~> b) ->
+   Model pres
+transport a iso = MkModel b $
+  isoPreservesModels pres iso a.Validate

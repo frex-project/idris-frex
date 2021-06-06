@@ -418,3 +418,12 @@ sym iso = MkIsomorphism (sym iso.Iso) (BwdHomo _ _ iso)
 public export
 {a : SetoidAlgebra sig} -> {b : SetoidAlgebra sig} -> Cast (a <~> b) (a ~> b) where
   cast iso = MkSetoidHomomorphism iso.Iso.Fwd iso.FwdHomo
+
+||| The setoid of homomorphisms between algebras with pointwise equivalence.
+public export
+(~~>) : (a, b : SetoidAlgebra sig) -> Setoid
+%unbound_implicits off
+(~~>) a b = Quotient (a ~> b) 
+                      {b = (cast {to = Setoid} a) ~~> cast b}
+                     (\h => h.H)
+%unbound_implicits on

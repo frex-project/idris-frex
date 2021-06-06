@@ -2,7 +2,7 @@
 module Data.Setoid
 
 import public Syntax.PreorderReasoning.Generic
-import Decidable.Order
+import public Decidable.Order
 
 import Data.Vect
 import Data.HVect
