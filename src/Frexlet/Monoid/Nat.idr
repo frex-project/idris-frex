@@ -6,6 +6,7 @@ import Frexlet.Monoid.Theory
 
 import Data.Nat
 
+||| Additive monoid structure over the natural numbers
 public export
 Additive : Monoid
 Additive = MkModel
@@ -21,6 +22,7 @@ Additive = MkModel
       Associativity => \env => plusAssociative _ _ _
   }
 
+||| Multiplicative monoid structure over the natural numbers
 public export
 Multiplicative : Monoid
 Multiplicative = MkModel

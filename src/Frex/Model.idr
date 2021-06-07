@@ -33,11 +33,17 @@ public export 0
   (a : SetoidAlgebra sig ** eq.Var -> U a.algebra) -> Type
 eq =| (a ** env) = models a eq env
 
+||| States: `pres.signature`-algebra `a` satisfies the given equation.
+public export 0
+ValidatesEquation : (eq : Equation sig) -> (a : SetoidAlgebra sig) -> Type
+ValidatesEquation eq a = (env : eq.Var -> U a.algebra) ->
+  eq =| (a ** env)
+
+
 ||| States: `pres.signature`-algebra `a` satisfies all the axioms of `pres`.
 public export 0
 Validates : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) -> Type
-Validates pres a = (ax : pres.Axiom) -> (env : (pres.axiom ax).Var -> U a.algebra) ->
-  pres.axiom ax =| (a ** env)
+Validates pres a = (ax : pres.Axiom) -> ValidatesEquation (pres.axiom ax) a
 
 parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   ||| Isomorphisms let us replace the semantics of one algebra with another
@@ -122,6 +128,12 @@ public export
   (f : Op pres.signature) -> (U a) ^ (arity f) -> U a
 (.Sem) a = a.Algebra.algebra.Sem
 
+||| nary interpretation of an operator in a model
+public export
+(.sem) : {n : Nat} -> (a : Model pres) -> (op : pres.signature.OpWithArity n) -> n `ary` (U a)
+(.sem) {n} a op = curry $ a.Sem (n ** op)
+
+
 ||| The setoid of homomorphisms between models with pointwise equivalence.
 public export
 (~~>) : (a, b : Model pres) -> Setoid
@@ -134,3 +146,4 @@ transport : {pres : Presentation} -> (a : Model pres) ->
    Model pres
 transport a iso = MkModel b $
   isoPreservesModels pres iso a.Validate
+

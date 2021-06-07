@@ -3,6 +3,9 @@ module Frexlet.Monoid.Theory
 
 import Frex
 
+import Notation.Additive
+
+
 public export
 data Operation : Nat -> Type where
   Neutral : Operation 0
@@ -28,3 +31,4 @@ MonoidTheory = MkPresentation Theory.Signature Theory.Axiom \case
 public export
 Monoid : Type
 Monoid = Model MonoidTheory
+
