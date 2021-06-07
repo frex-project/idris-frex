@@ -2,7 +2,7 @@
 module Frex.Algebra
 
 import Frex.Signature
-import Notation
+import public Notation
 
 import Data.Setoid
 import Data.Nat
@@ -46,15 +46,27 @@ public export
 algebraOver : (sig : Signature) -> (a : Type) -> Type
 sig `algebraOver` a = (f : Op sig) -> a ^ (arity f) -> a
 
+public export
+algebraOver' : (sig : Signature) -> (a : Type) -> Type
+sig `algebraOver'` a = {n : Nat} -> (f : sig.OpWithArity n) -> n `ary` a
+
+
 ||| An algebra for a signature Sig consists of:
 ||| @U : A type called the carrier
 ||| @Sem : a semantic interpretation for each Sig-operation
+||| The smart constructor `MkAlgebra` is more usable in concrete cases
 public export
 record Algebra (Sig : Signature) where
-  constructor MkAlgebra
+  constructor MakeAlgebra
   0 U   : Type
   Sem : Sig `algebraOver` U
   
+||| Smart constructor for an algebra for a signature Sig:
+||| @U : A type called the carrier
+||| @Sem : a semantic interpretation for each Sig-operation
+public export
+MkAlgebra : {0 Sig : Signature} -> (0 U : Type) -> (Sem : Sig `algebraOver'` U) -> Algebra Sig
+MkAlgebra u sem = MakeAlgebra u \f => uncurry (sem (snd f))
 
 ||| Algebraic terms of this signature with variables in the given type
 public export
@@ -96,7 +108,7 @@ bindTermsIsMap (y :: xs) env = cong (bindTerm y env ::) $ bindTermsIsMap xs env
 ||| The free `sig`-algebra over over a given type
 public export
 Free : (0 sig : Signature) -> (0 x : Type) -> Algebra sig
-Free sig x = MkAlgebra (Term sig x) Call
+Free sig x = MakeAlgebra (Term sig x) Call
 
 ||| The corresponding  n-ary operation over the term algebra
 public export

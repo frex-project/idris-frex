@@ -23,7 +23,7 @@ parameters {0 Sig : Signature} (N : Nat) (A : SetoidAlgebra Sig)
   
   public export
   FinPowerAlgebra : Algebra Sig
-  FinPowerAlgebra = MkAlgebra (U FinPowerSetoid) \op, xss =>
+  FinPowerAlgebra = MakeAlgebra (U FinPowerSetoid) \op, xss =>
     map (A .algebra.Sem op) (transpose xss)
 
   public export

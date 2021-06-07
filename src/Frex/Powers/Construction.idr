@@ -21,7 +21,7 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
 
   public export
   PowerAlgebra : Algebra Sig
-  PowerAlgebra = MkAlgebra (U PowerSetoid)
+  PowerAlgebra = MakeAlgebra (U PowerSetoid)
       \f,phis => 
       MkSetoidHomomorphism (\i => (A).algebra.Sem f (map (\phi => phi.H i) phis)) 
                            \u, v, prf => congruence A f _ _ \i =>

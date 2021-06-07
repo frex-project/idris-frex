@@ -6,7 +6,7 @@ import Frex.Presentation
 import Frex.Algebra
 
 import Notation
-import Notation.Additive
+import public Notation.Additive
 
 import Data.Fin
 
@@ -16,6 +16,7 @@ infix 1 =-=
 public export
 (=-=) : {0 a : Type} -> (t, s : Term sig a) 
                   -> (Term sig a, Term sig a)
+t =-= s = (t, s)
 
 ||| Smart constructor for equations over finitely many variables
 public export
