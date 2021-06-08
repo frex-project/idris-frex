@@ -11,6 +11,7 @@ modules = Frex
         , Frex.Powers.Abstract
         , Frex.Powers.Construction
         , Frex.Powers.Fin
+        , Frex.Coproduct
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
