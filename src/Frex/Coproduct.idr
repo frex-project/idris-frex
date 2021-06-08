@@ -62,6 +62,21 @@ parameters {Pres : Presentation} {L, R : Model Pres} (Coprod : L <~.~> R)
   Extender : Type
   Extender = (other : L <~.~> R) -> (Coprod ~> other)
   
+  -- The following boilerplate lets us define a concrete `Extender` in stages.
+  -- Were we to have co-pattern matching, we wouldn't need this boilerplate since we
+  -- could define the various fields of Extender in stages
+  
+  ||| Data for function underlying an Extender   
+  public export 0
+  ExtenderFunction : Type
+  ExtenderFunction = (other : L <~.~> R) -> U (Coprod .Sink) -> U (other.Sink)
+  
+  ||| Data for SetoidHomomorphism underlying an Extender
+  public export 0
+  ExtenderSetoidHomomorphism : Type
+  ExtenderSetoidHomomorphism = (other : L <~.~> R) -> 
+    cast {to = Setoid} (Coprod .Sink) ~> cast (other.Sink)
+    
   ||| There's at most one cospan morphism out of `Coprod` into any other cospan
   public export 0
   Uniqueness : Type
