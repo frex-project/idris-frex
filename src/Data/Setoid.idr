@@ -65,9 +65,14 @@ public export
 cast : (a : Setoid) -> Preorder (U a) (a.equivalence.relation)
 cast a = MkPreorder a.equivalence.reflexive a.equivalence.transitive
 
+namespace ToSetoid
+  public export
+  irrelevantCast : (0 a : Type) -> Setoid 
+  irrelevantCast a = MkSetoid a (EqualEquivalence a)
+  
 public export
 Cast Type Setoid where
-  cast a = MkSetoid a (EqualEquivalence a)
+  cast a = irrelevantCast a
   
 public export
 VectSetoid : (n : Nat) -> (a : Setoid) -> Setoid
@@ -98,7 +103,7 @@ record (~>) (A,B : Setoid) where
   homomorphic : SetoidHomomorphism A B H
 
 public export
-mate : {b : Setoid} -> (a -> U b) -> (cast {to=Setoid} a ~> b)
+mate : {b : Setoid} -> (a -> U b) -> (cast a ~> b)
 mate f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
 
 ||| Identity Setoid homomorphism  

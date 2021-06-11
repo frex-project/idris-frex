@@ -8,6 +8,8 @@ import Frex.Presentation
 import Data.Setoid
 import Data.Vect
 import Data.Vect.Extra
+import Data.HVect
+import Data.Fin
 
 import Decidable.Order
 
@@ -110,6 +112,15 @@ public export 0
 U : {0 pres : Presentation} -> Model pres -> Type
 U m = Algebra.U (m.Algebra.algebra)
 
+public export
+(.equivalence) : (a : Model pres) -> Equivalence (U a)
+(.equivalence) a = a.Algebra.equivalence
+
+||| Equivalence relation underlying a model
+public export 0
+(.rel) : (a : Model pres) -> (x, y : U a) -> Type
+(.rel) a = a.equivalence.relation
+
 ||| Homomorphism between models
 public export
 (~>) : {pres : Presentation} -> (a, b : Model pres) -> Type
@@ -147,3 +158,33 @@ transport : {pres : Presentation} -> (a : Model pres) ->
 transport a iso = MkModel b $
   isoPreservesModels pres iso a.Validate
 
+%unbound_implicits off
+||| N-ary congruence in a term with `n` varialbes
+public export
+(.cong) : {0 pres : Presentation} -> (a : Model pres) -> (0 n : Nat)
+  -> (t : Term pres.signature (U a `Either` Fin n))
+  -> (lhs, rhs : Vect n (U a)) 
+  -> HVect (tabulate \i => (cast a).equivalence.relation 
+       (index i lhs) 
+       (index i rhs))
+  -> (cast a).equivalence.relation 
+       (bindTerm {a = a.Algebra.algebra} t $ either Prelude.id $ flip index lhs)
+       (bindTerm {a = a.Algebra.algebra} t $ either Prelude.id $ flip index rhs)
+(.cong) a n t lhs rhs prfs 
+  = (Setoid.eval {x = cast $ U a `Either` Fin n} t).homomorphic 
+      (mate $ either Prelude.id $ flip index lhs)
+      (mate $ either Prelude.id $ flip index rhs)
+      \case
+        Left  x => (cast a).equivalence.reflexive x
+        Right i => replace {p = id} 
+              (indexTabulate _ _)
+              (index i prfs)
+%unbound_implicits on    
+
+public export                        
+Dyn : (i : Fin n) -> Term sig (a `Either` Fin n)
+Dyn i = Done (Right i)
+              
+public export                        
+Sta : (x : a) -> Term sig (a `Either` Fin n)
+Sta x = Done (Left x)

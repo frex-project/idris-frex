@@ -203,7 +203,7 @@ namespace Setoid
     
   public export total
   cast : (a : SetoidAlgebra sig) -> Preorder (U a) (a.equivalence.relation)
-  cast a = cast $ cast {to = Setoid} a
+  cast a = cast $ Prelude.cast {to = Setoid} a
   
   public export
   Cast (Algebra sig) (SetoidAlgebra sig) where
@@ -214,7 +214,8 @@ namespace Setoid
       }
   namespace Homomorphism
     public export
-    cast : {a : SetoidAlgebra sig} -> (f : Op sig) -> VectSetoid (arity {sig} f) (cast a) ~> cast a
+    cast : {a : SetoidAlgebra sig} -> (f : Op sig) -> 
+      VectSetoid (arity {sig} f) (Prelude.cast a) ~> cast a
     cast f = MkSetoidHomomorphism (a.algebra.Sem f) (a.congruence f)
     
 -------------------- Homomorphisms -------------------------------

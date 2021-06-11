@@ -17,6 +17,7 @@ modules = Frex
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
+        , Notation.Action
         , Frexlet.Monoid
         , Frexlet.Monoid.Theory
         , Frexlet.Monoid.Nat
@@ -25,6 +26,8 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Theory
         , Frexlet.Monoid.Commutative.Nat
         , Frexlet.Monoid.Commutative.NatSemiLinear
+        , Frexlet.Monoid.Commutative.NatSemiLinear.Sum
+        , Frexlet.Monoid.Commutative.Notation.Core
         -- Should move to contrib
         , Data.Setoid
         --, Data.Vect.Extra1 --Currently not used
