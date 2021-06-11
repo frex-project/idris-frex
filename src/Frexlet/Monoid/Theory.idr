@@ -3,9 +3,6 @@ module Frexlet.Monoid.Theory
 
 import Frex
 
-import Notation.Additive
-
-
 public export
 data Operation : Nat -> Type where
   Neutral : Operation 0
@@ -29,6 +26,17 @@ MonoidTheory = MkPresentation Theory.Signature Theory.Axiom \case
     Associativity => associativity Product
 
 public export
+MonoidStructure : Type
+MonoidStructure = SetoidAlgebra Theory.Signature
+
+public export
 Monoid : Type
 Monoid = Model MonoidTheory
 
+public export
+Unit : Op Signature
+Unit = MkOp {sig = Signature} Neutral
+
+public export
+Prod : Op Signature
+Prod = MkOp {sig = Signature} Product

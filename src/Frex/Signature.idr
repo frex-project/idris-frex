@@ -15,3 +15,7 @@ Op sig = (n : Nat ** sig.OpWithArity n)
 public export
 arity : {auto 0 sig : Signature} -> Op sig -> Nat
 arity = fst
+
+public export
+MkOp : {0 sig : Signature} -> {n : Nat} -> (op : sig.OpWithArity n) -> Op sig
+MkOp {n} op = (n ** op)

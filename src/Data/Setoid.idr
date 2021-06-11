@@ -98,8 +98,8 @@ record (~>) (A,B : Setoid) where
   homomorphic : SetoidHomomorphism A B H
 
 public export
-{b : Setoid} -> Cast (a -> U b) (cast {to=Setoid} a ~> b) where
-  cast f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
+mate : {b : Setoid} -> (a -> U b) -> (cast {to=Setoid} a ~> b)
+mate f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
 
 ||| Identity Setoid homomorphism  
 public export

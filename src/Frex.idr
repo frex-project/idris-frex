@@ -12,4 +12,5 @@ import public Frex.Presentation
 import public Frex.Axiom
 import public Frex.Model
 import public Frex.Powers
+import public Frex.Free
 

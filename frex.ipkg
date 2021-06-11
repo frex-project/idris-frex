@@ -12,6 +12,8 @@ modules = Frex
         , Frex.Powers.Construction
         , Frex.Powers.Fin
         , Frex.Coproduct
+        , Frex.Free
+        , Frex.Free.Construction
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
@@ -22,6 +24,7 @@ modules = Frex
         , Frexlet.Monoid.Commutative
         , Frexlet.Monoid.Commutative.Theory
         , Frexlet.Monoid.Commutative.Nat
+        , Frexlet.Monoid.Commutative.NatSemiLinear
         -- Should move to contrib
         , Data.Setoid
         --, Data.Vect.Extra1 --Currently not used

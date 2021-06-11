@@ -41,3 +41,11 @@ Cast CommutativeMonoid Monoid where
     { Algebra  = cmonoid.Algebra
     , Validate = \ax => cmonoid.Validate (Mon ax)
     }
+
+public export
+Zero : Op Signature
+Zero = MkOp {sig = Signature} Neutral
+
+public export
+Plus : Op Signature
+Plus = MkOp {sig = Signature} Product

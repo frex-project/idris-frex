@@ -7,9 +7,6 @@ import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
 
-import Data.Vect
-import Data.Vect.Properties
-
 infixr 3 <~.~>
 
 ||| A cospan between models of a presentation. Looks a bit like this: \o/

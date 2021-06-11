@@ -10,8 +10,8 @@ import Data.Nat.Order
 
 import public Data.Vect
 import public Data.Vect.Elem
-import Data.Vect.Properties
-import Data.Rel
+import public Data.Vect.Properties
+import public Data.Rel
 
 import Control.WellFounded
 
@@ -280,15 +280,15 @@ namespace Universality
   public export
   eval : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} -> (env : x -> U a)
           -> Free sig x ~> a 
-  eval env = MkSetoidHomomorphism (cast $ flip bindTerm env) (bindHom env)
+  eval env = MkSetoidHomomorphism (mate $ flip bindTerm env) (bindHom env)
 
-export  
+public export  
 bindAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
   -> (t : Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
   -> bindTerm (bindTerm {a = Free _ _} t f) g 
-     = bindTerm {a} t (\x => bindTerm {a} (f x) g)
+     = bindTerm {a} t (\i : x => bindTerm {a} (f i) g)
 
-export  
+public export  
 bindTermsAssociative : {0 sig : Signature} -> {0 x, y : Type} -> {auto a : Algebra sig}
   -> (ts : Vect n $ Term sig x) -> (f : x -> Term sig y) -> (g : y -> U a) 
   -> bindTerms {a} (bindTerms {a = Free _ _} ts f) g 
@@ -439,3 +439,24 @@ public export
                       {b = (cast {to = Setoid} a) ~~> cast b}
                      (\h => h.H)
 %unbound_implicits on
+
+||| nary interpretation of an operator in an algebra
+public export
+(.sem) : {n : Nat} -> (a : SetoidAlgebra sig) -> (op : sig.OpWithArity n) -> n `ary` (U a)
+(.sem) {n} a op = curry $ a.algebra.Sem (n ** op)
+
+||| Each operation in the signature is an algebraic operation
+public export
+callEqSem : {sig : Signature} -> (a : Algebra sig) -> (op : Op sig) 
+  -> (xs : Vect (arity op) (U a)) ->
+     (bindTerm {a} (Call op (tabulate Done)) (\i => index i xs))
+     =
+     (a.Sem op xs)
+callEqSem a op xs = Calc $
+  |~ bindTerm (Call op (tabulate Done)) (\i => index i xs) 
+  ~~ a.Sem op (map (flip bindTerm (\i => index i xs)) (tabulate Done))
+       ...((Universality.eval {a} (\i => index i xs)).preserves op (tabulate Done))
+  ~~ a.Sem op (tabulate (\i => index i xs)) 
+       ...(cong (a.Sem op) $ sym $ mapTabulate _ _)
+  ~~ a.Sem op xs ...(cong (a.Sem op) $ vectorExtensionality _ _ $ indexTabulate _)
+
