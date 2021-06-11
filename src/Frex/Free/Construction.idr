@@ -90,130 +90,160 @@ QuotientData pres x = MkPresetoidAlgebra {Sig = pres.signature}
   }
   
 public export
-F : {pres : Presentation} -> (x : Setoid) -> Model pres
-F {pres} x = QuotientModel pres $ QuotientData pres x
-  
+F : (pres : Presentation) -> (x : Setoid) -> Model pres
+F pres x = QuotientModel pres $ QuotientData pres x
+
 public export
-Free : (pres : Presentation) -> (x : Setoid) -> Free pres x
-%unbound_implicits off
--- If only we had copatterns...
-Free pres x = MkFree 
-  { Data = MkModelOver 
-      { Model = F x
-      , Env   = MkSetoidHomomorphism
-        { H = \i => Done {sig = pres.signature} i
-        , homomorphic = \i,j,prf => Include (Assume prf)
-        }
-      }
-  , UP   = IsFree 
-    { Exists = \other => 
+FreeDataEnv : (pres : Presentation) -> (x : Setoid) -> x ~> cast (F pres x)
+FreeDataEnv pres x = MkSetoidHomomorphism
+  { H = \i => Done {sig = pres.signature} i
+  , homomorphic = \i,j,prf => Include (Assume prf)
+  }
+
+public export
+FreeData : (pres : Presentation) -> (x : Setoid) -> pres `ModelOver` x
+FreeData pres x = MkModelOver 
+  { Model = F pres x
+  , Env   = FreeDataEnv pres x
+  }
+
+public export
+FreeUPExistsHHH : (pres : Presentation) -> (x : Setoid) -> ExtenderFunction (FreeData pres x)
+FreeUPExistsHHH pres x other = flip (bindTerm {a = other.Model.Algebra.algebra}) (other.Env.H)
+
+public export
+FreeUPExistsHHHomomorphic : (pres : Presentation) -> (x : Setoid) -> (other : pres `ModelOver` x) -> 
+  SetoidHomomorphism (cast $ F pres x) (cast {from = Model pres} $ other.Model) 
+    (FreeUPExistsHHH pres x other)
+FreeUPExistsHHHomomorphic pres x other (Done i) (Done j) (Include (Assume prf))  
+  = other.Env.homomorphic i j prf
+FreeUPExistsHHHomomorphic pres x other _ _ (Refl t ) 
+  = (cast other.Model).equivalence.reflexive _
+FreeUPExistsHHHomomorphic pres x other _ _ (Sym prf) 
+  = (cast other.Model).equivalence.symmetric _ _ $ FreeUPExistsHHHomomorphic pres x other _ _ prf 
+FreeUPExistsHHHomomorphic pres x other _ _ (Transitive prf1 prf2) 
+  = (cast other.Model).equivalence.transitive _ _ _ (FreeUPExistsHHHomomorphic pres x other _ _prf1) 
+                                                    (FreeUPExistsHHHomomorphic pres x other _ _prf2)
+FreeUPExistsHHHomomorphic pres x other _ _ (ByAxiom eq env) 
+  = CalcWith @{cast other.Model} $
+  |~ bindTerm {a = other.Model.Algebra.algebra} 
+        (bindTerm {a = Free _ _} 
+           (pres.axiom eq).lhs env) 
+        other.Env.H
+  ~~ bindTerm {a = other.Model.Algebra.algebra} 
+          (pres.axiom eq).lhs
+          (\i => bindTerm {a = other.Model.Algebra.algebra} 
+                (env i) 
+                other.Env.H)                                ...(bindAssociative 
+                                                                 {a = other.Model.Algebra.algebra} 
+                                                                 _ _ _)
+  <~ bindTerm {a = other.Model.Algebra.algebra} 
+          (pres.axiom eq).rhs
+          (\i => bindTerm {a = other.Model.Algebra.algebra} 
+                (env i) 
+                other.Env.H)                                ...(other.Model.Validate eq _)
+  ~~ bindTerm {a = other.Model.Algebra.algebra} 
+        (bindTerm {a = Free _ _} 
+           (pres.axiom eq).rhs env) 
+        other.Env.H                                         ...(sym $ 
+                                                                bindAssociative 
+                                                                  {a = other.Model.Algebra.algebra} 
+                                                                  _ _ _)
+FreeUPExistsHHHomomorphic pres x other _ _ (Congruence {vars, lhs, rhs} u eqForEq) = 
+  let q = \i => FreeUPExistsHHHomomorphic pres x other _ _ (eqForEq i)
+      lhs',rhs' : cast vars ~> cast other.Model
+      lhs' = mate (FreeUPExistsHHH pres x other . lhs)
+      rhs' = mate (FreeUPExistsHHH pres x other . rhs)
+  in CalcWith @{cast other.Model} $
+    |~ bindTerm {a = other.Model.Algebra.algebra}
+         (bindTerm {a = Free _ _ } u lhs)
+         other.Env.H
+    ~~ bindTerm {a = other.Model.Algebra.algebra } u
+         (\i : vars => 
+           bindTerm {a = other.Model.Algebra.algebra}
+             (lhs i)
+             other.Env.H)                             ...(bindAssociative 
+                                                            {a = other.Model.Algebra.algebra} 
+                                                             _ _ _)
+    <~ bindTerm {a = other.Model.Algebra.algebra } u
+         (\i : vars => 
+           bindTerm {a = other.Model.Algebra.algebra}
+             (rhs i)
+             other.Env.H)                             ...((Setoid.eval u).homomorphic lhs' rhs' q)
+    ~~ bindTerm {a = other.Model.Algebra.algebra}
+         (bindTerm {a = Free _ _ } u rhs)
+         other.Env.H                                  ...(sym $ 
+                                                          bindAssociative 
+                                                            {a = other.Model.Algebra.algebra} 
+                                                            _ _ _)
+
+public export
+FreeUPExistsHH : (pres : Presentation) -> (x : Setoid) -> ExtenderSetoidHomomorphism (FreeData pres x)
+FreeUPExistsHH pres x other = 
+  MkSetoidHomomorphism 
+    { H = FreeUPExistsHHH pres x other
+    , homomorphic = FreeUPExistsHHHomomorphic pres x other
+    }
+
+public export
+FreeUPExists : (pres : Presentation) -> (x : Setoid) -> Extender (FreeData pres x)
+FreeUPExists pres x other = 
         let homo : Term pres.signature (U x) -> U other.Model
-            homo = flip (bindTerm {a = other.Model.Algebra.algebra}) (other.Env.H)
+            homo = FreeUPExistsHHH pres x other
         in MkHomomorphism 
         { H = MkSetoidHomomorphism 
-            { H = MkSetoidHomomorphism
-                  { H = homo
-                  , homomorphic = let 
-                      lemma : {t, s : Term pres.signature (U x)} -> 
-                              (prf : (|-) {pres} (QuotientData pres x) t s) ->
-                              (cast other.Model).equivalence.relation
-                                 (homo t)
-                                 (homo s)
-                      lemma {t = Done i, s = Done j} (Include (Assume prf)) 
-                        = other.Env.homomorphic i j prf
-                      lemma (Refl t ) = (cast other.Model).equivalence.reflexive _
-                      lemma (Sym prf) = (cast other.Model).equivalence.symmetric _ _ $ lemma prf
-                      lemma (Transitive prf1 prf2) 
-                        = (cast other.Model).equivalence.transitive _ _ _ (lemma prf1) 
-                                                                          (lemma prf2)
-                      lemma (ByAxiom eq env) = CalcWith @{cast other.Model} $
-                        |~ bindTerm {a = other.Model.Algebra.algebra} 
-                              (bindTerm {a = Free _ _} 
-                                 (pres.axiom eq).lhs env) 
-                              other.Env.H
-                        ~~ _ {-bindTerm {a = Free pres.signature (U x)} 
-                                (pres.axiom eq).lhs
-                                (\i => bindTerm {a = other.Model.Algebra.algebra} 
-                                      (env i) 
-                                      other.Env.H)-}
-                           ...(bindAssociative {a = other.Model.Algebra.algebra} _ _ _)
-                        <~ _ ...(other.Model.Validate eq _)
-                        ~~ bindTerm {a = other.Model.Algebra.algebra} 
-                              (bindTerm {a = Free _ _} 
-                                 (pres.axiom eq).rhs env) 
-                              other.Env.H
-                            ...(sym $ bindAssociative {a = other.Model.Algebra.algebra} _ _ _)
-                      lemma (Congruence {vars, lhs, rhs} u eqForEq) = 
-                         let q = \x => lemma (eqForEq x)
-                             lhs',rhs' : cast vars ~> cast other.Model
-                             lhs' = mate (homo . lhs)
-                             rhs' = mate (homo . rhs)
-                             p := (Setoid.eval {x = cast vars
-                                               , sig = pres.signature} u).homomorphic  
-                                  lhs' rhs' q
-                         in CalcWith @{cast other.Model} $
-                           |~ bindTerm {a = other.Model.Algebra.algebra}
-                                (bindTerm {a = Free _ _ } u lhs)
-                                other.Env.H
-                           ~~ _ {-bindTerm {a = Free pres.signature vars } u
-                                (\i : vars => 
-                                  bindTerm {a = other.Model.Algebra.algebra}
-                                    (lhs i)
-                                    other.Env.H)-}
-                                ...(bindAssociative {a = other.Model.Algebra.algebra} 
-                                      _ _ _)
-                           <~ _ ...(p)
-                           ~~ bindTerm {a = other.Model.Algebra.algebra}
-                                (bindTerm {a = Free _ _ } u rhs)
-                                other.Env.H
-                                ...(sym $ bindAssociative {a = other.Model.Algebra.algebra} _ _ _)
-                    in \t,s => lemma {t} {s}
-                  }
+            { H = FreeUPExistsHH pres x other
             , preserves = \op, xs => reflect (cast other.Model) $
                 (Universality.eval {a = other.Model.Algebra.algebra}
                             other.Env.H).preserves op xs
             }
         , preserves = \x => reflect (cast other.Model) Refl
         }
-    , Unique = \other, extend1, extend2 => 
-                 let Other : Setoid
-                     Other = cast {from = Model pres} other.Model
-                     FX : Model pres
-                     FX = F x
-                     lemma : (t : U (FX)) -> (Other).equivalence.relation
-                         (extend1.H.H.H t)
-                         (extend2.H.H.H t)
-                     lemmaMap : forall n. (ts : Vect n (U $ FX)) -> 
-                       (VectSetoid n Other).equivalence.relation
-                         (map extend1.H.H.H ts)
-                         (map extend2.H.H.H ts)
-                     lemmaMap [] _ impossible
-                     lemmaMap (t :: ts) FZ     = lemma t
-                     lemmaMap (t :: ts) (FS i) = lemmaMap ts i
-                       
-                     lemma donej@(Done j) = 
-                       -- This is truly messed up. There's a bug somewhere in the typechecker.
-                       -- Still true though!
-                       let u : Other .equivalence.relation
-                                 (extend1.H.H.H donej)
-                                 (other.Env.H j)
-                           u = extend1.preserves j
-                           v := Other .equivalence.symmetric _ _ (extend2.preserves j)
-                       in CalcWith @{cast Other} $
-                       |~ extend1.H.H.H donej
-                       <~ other.Env.H j          ...(u)
-                       <~ extend2.H.H.H donej    ...(v)
-                    
-                     lemma (Call op xs) = CalcWith @{cast Other} $
-                       |~  extend1.H.H.H (Call op xs)
-                       ~~  extend1.H.H.H ((FX).Sem op xs) ...(Refl)
-                       <~  other.Model.Sem op (map extend1.H.H.H xs) ...(extend1.H.preserves op xs)
-                       <~  other.Model.Sem op (map extend2.H.H.H xs) 
-                            ...(other.Model.Algebra.congruence op _ _ $ lemmaMap xs)
-                       <~  extend2.H.H.H ((FX).Sem op xs)   ...((Other).equivalence.symmetric _ _ 
-                                                               $ extend2.H.preserves op xs)
-                       ~~  extend2.H.H.H (Call op xs)                ...(Refl)
-                 in lemma
+        
+public export
+FreeUPUnique : (pres : Presentation) -> (x : Setoid) -> Uniqueness (FreeData pres x)
+
+public export
+FreeUPUniqueMap : (pres : Presentation) -> (x : Setoid) -> (other : pres `ModelOver` x) ->
+  (extend1, extend2 : FreeData pres x  ~> other) ->
+  forall n. (ts : Vect n (U $ F pres x)) -> 
+            (VectSetoid n (cast other.Model)).equivalence.relation
+               (map extend1.H.H.H ts)
+               (map extend2.H.H.H ts)
+FreeUPUniqueMap pres x other extend1 extend2 []          _ impossible
+FreeUPUniqueMap pres x other extend1 extend2 (t :: _ )  FZ
+  = FreeUPUnique pres x other extend1 extend2 t
+FreeUPUniqueMap pres x other extend1 extend2 (_ :: ts) (FS i) 
+  = FreeUPUniqueMap pres x other extend1 extend2 ts i
+
+FreeUPUnique pres x other extend1 extend2 (Done j) 
+  = CalcWith @{cast other.Model} $
+    |~ extend1.H.H.H (Done j)
+    <~ other.Env.H j          ...(extend1.preserves j)
+    <~ extend2.H.H.H (Done j) ...((cast other.Model).equivalence.symmetric _ _ (extend2.preserves j))
+
+FreeUPUnique pres x other extend1 extend2 (Call op xs) 
+  = CalcWith @{cast other.Model} $
+  |~  extend1.H.H.H (Call op xs)
+  ~~  extend1.H.H.H ((F pres x).Sem op xs)      ...(Refl)
+  <~  other.Model.Sem op (map extend1.H.H.H xs) ...(extend1.H.preserves op xs)
+  <~  other.Model.Sem op (map extend2.H.H.H xs) ...(other.Model.Algebra.congruence op _ _ 
+                                                   $ FreeUPUniqueMap pres x other extend1 extend2 xs)
+  <~  extend2.H.H.H ((F pres x).Sem op xs)      ...((cast other.Model).equivalence.symmetric _ _ 
+                                                 $ extend2.H.preserves op xs)
+  ~~  extend2.H.H.H (Call op xs)                ...(Refl)
+  
+public export
+FreeIsFree : (pres : Presentation) -> (x : Setoid) -> Freeness (FreeData pres x)
+FreeIsFree pres x = IsFree 
+    { Exists = FreeUPExists pres x        
+    , Unique = FreeUPUnique pres x
     }
-  } 
-%unbound_implicits on
+
+public export
+Free : (pres : Presentation) -> (x : Setoid) -> Free pres x
+Free pres x = MkFree 
+  { Data = FreeData pres x
+  , UP   = FreeIsFree pres x
+  }
+
