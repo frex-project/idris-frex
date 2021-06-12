@@ -8,10 +8,6 @@ import Notation.Additive
 import Notation.Multiplicative
 
 public export
-(.Additive) : (monoid : Monoid) -> Additive (U monoid)
-monoid.Additive = MkAdditive (monoid.sem Neutral) (monoid.sem Product)
-
-public export
 (.Additive1) : (monoid : Monoid) -> Additive1 (U monoid)
 monoid.Additive1 = MkAdditive1 (monoid.sem Neutral) (monoid.sem Product)
 
@@ -22,10 +18,6 @@ monoid.Additive2 = MkAdditive2 (monoid.sem Neutral) (monoid.sem Product)
 public export
 (.Additive3) : (monoid : Monoid) -> Additive3 (U monoid)
 monoid.Additive3 = MkAdditive3 (monoid.sem Neutral) (monoid.sem Product)
-
-public export
-(.Multiplicative) : (monoid : Monoid) -> Multiplicative (U monoid)
-monoid.Multiplicative = MkMultiplicative (monoid.sem Neutral) (monoid.sem Product)
 
 public export
 (.Multiplicative1) : (monoid : Monoid) -> Multiplicative1 (U monoid)
