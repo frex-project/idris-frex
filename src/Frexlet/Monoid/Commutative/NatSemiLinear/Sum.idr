@@ -162,8 +162,11 @@ sumCommutative a (x :: xs) (y :: ys) =
   <~ (x .+. a.sum xs) .+. (y .+. a.sum ys) ...(interchange a _ _ _ _)
   ~~ a.sum (x :: xs) .+. a.sum (y :: ys)   ...(Refl)
 
+
+||| NB: a,b are explicit since we can't recover them from the
+||| homomorphism between them as algebras alone.
 public export
-sumPreservation  : {a, b : CommutativeMonoid} -> 
+sumPreservation  : (a, b : CommutativeMonoid) ->
   let %hint 
       notationA : Action1 Nat (U a)
       notationA = NatAction1 a 
@@ -173,8 +176,8 @@ sumPreservation  : {a, b : CommutativeMonoid} ->
   in (h : a ~> b) -> {0 n : Nat} -> (xs : Vect n (U a)) ->
   b.rel (h.H.H (a.sum xs))
         (b.sum (map h.H.H xs))
-sumPreservation h    []     = h.preserves Zero [] 
-sumPreservation h (x :: xs) =
+sumPreservation a b h    []     = h.preserves Zero [] 
+sumPreservation a b h (x :: xs) =
   let %hint 
       notationA : Action1 Nat (U a)
       notationA = NatAction1 a 
@@ -186,6 +189,6 @@ sumPreservation h (x :: xs) =
   ~~ h.H.H (x .+. a.sum xs)           ...(Refl)
   <~ h.H.H x .+. h.H.H (a.sum xs)     ...(h.preserves Plus [_,_])
   <~ h.H.H x .+. b.sum (map h.H.H xs) ...(b.cong 1 (Sta _ .+. Dyn 0) [_] [_] 
-                                          [sumPreservation _ _])
+                                          [sumPreservation _ _ _ _])
   ~~ b.sum (map h.H.H (x :: xs))      ...(Refl)
 

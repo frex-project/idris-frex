@@ -30,6 +30,8 @@ modules = Frex
         , Frexlet.Monoid.Commutative.NatSemiLinear.Mult
         , Frexlet.Monoid.Commutative.NatSemiLinear.Dirac
         , Frexlet.Monoid.Commutative.Notation.Core
+        , Frexlet.Monoid.Commutative.Free
+        , Frexlet.Monoid.Commutative.Free.Slow
         -- Should move to contrib
         , Data.Setoid
         --, Data.Vect.Extra1 --Currently not used

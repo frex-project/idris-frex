@@ -94,9 +94,10 @@ multDistributesOverPlusRight a (S n) x y =
   <~ (x .+. n *. x) .+. (y .+. n *. y)     ...(interchange a _ _ _ _)
   ~~ (1 + n) *. x .+. (1 + n) *. y         ...(Refl)
 
-
+||| NB: a,b are explicit since we can't recover them from the
+||| homomorphism between them as algebras alone.
 public export
-multPreservation : {a, b : CommutativeMonoid} ->
+multPreservation : (a, b : CommutativeMonoid) ->
   let %hint 
       notationA : Action1 Nat (U a)
       notationA = NatAction1 a 
@@ -106,8 +107,8 @@ multPreservation : {a, b : CommutativeMonoid} ->
   in (h : a ~> b) -> (n : Nat) -> (x : U a) ->
   b.rel (h.H.H (n *. x))
         (n *. h.H.H x)
-multPreservation h  0    x = h.preserves Zero []
-multPreservation h (S n) x = 
+multPreservation a b h  0    x = h.preserves Zero []
+multPreservation a b h (S n) x = 
   let %hint 
       notationA : Action1 Nat (U a)
       notationA = NatAction1 a 
@@ -119,6 +120,6 @@ multPreservation h (S n) x =
   ~~ h.H.H (x .+. n *. x)       ...(Refl)
   <~ h.H.H x .+. h.H.H (n *. x) ...(h.preserves Plus [x, n *.x])
   <~ h.H.H x .+. n *. h.H.H x   ...(b.cong 1 (Sta (h.H.H x) .+. Dyn 0) [_] [_]
-                                    [multPreservation h n x])
+                                    [multPreservation a b h n x])
   ~~ (1 + n) *. h.H.H x         ...(Refl)
 

@@ -3,7 +3,7 @@ module Frexlet.Monoid.Commutative.Nat
 
 import Frex
 import public Frexlet.Monoid
-import Frexlet.Monoid.Nat
+import public Frexlet.Monoid.Nat
 import Frexlet.Monoid.Commutative.Theory
 
 import Notation
