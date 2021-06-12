@@ -27,6 +27,8 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Nat
         , Frexlet.Monoid.Commutative.NatSemiLinear
         , Frexlet.Monoid.Commutative.NatSemiLinear.Sum
+        , Frexlet.Monoid.Commutative.NatSemiLinear.Mult
+        , Frexlet.Monoid.Commutative.NatSemiLinear.Dirac
         , Frexlet.Monoid.Commutative.Notation.Core
         -- Should move to contrib
         , Data.Setoid

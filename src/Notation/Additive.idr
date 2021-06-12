@@ -8,12 +8,6 @@ import public Data.Fun.Extra
 infixl 8 .+., :+:, |+|, +., +:, +|, .+, :+, |+
 
 public export
-interface Additive a where
-  constructor MkAdditive
-  O   : 0 `ary` a 
-  (+) : 2 `ary` a
-
-public export
 interface Additive1 a where
   constructor MkAdditive1
   O1    : 0 `ary` a
@@ -60,10 +54,6 @@ public export
 interface AdditiveActedBy3 a b where
   constructor MkAdditiveActedBy3
   (|+) : [a, b] `ary` a
-
-public export
-Cast (HVect [0 `ary` a, 2 `ary` a]) (Additive a) where
-  cast = uncurry MkAdditive 
 
 public export
 Cast (HVect [0 `ary` a, 2 `ary` a]) (Additive1 a) where

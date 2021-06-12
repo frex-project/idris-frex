@@ -8,12 +8,6 @@ import public Data.Fun.Extra
 infixl 9 .*., :*:, |*|, *., *:, *|, .*, :*, |*
 
 public export
-interface Multiplicative a where
-  constructor MkMultiplicative
-  I   : 0 `ary` a 
-  (*) : 2 `ary` a
-
-public export
 interface Multiplicative1 a where
   constructor MkMultiplicative1
   I1    : 0 `ary` a
@@ -60,10 +54,6 @@ public export
 interface MultiplicativeActedBy3 a b where
   constructor MkMultiplicativeActedBy3
   (|*) : [a, b] `ary` a
-
-public export
-Cast (HVect [0 `ary` a, 2 `ary` a]) (Multiplicative a) where
-  cast = uncurry MkMultiplicative 
 
 public export
 Cast (HVect [0 `ary` a, 2 `ary` a]) (Multiplicative1 a) where

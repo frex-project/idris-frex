@@ -161,3 +161,31 @@ sumCommutative a (x :: xs) (y :: ys) =
                                                [sumCommutative a xs ys])
   <~ (x .+. a.sum xs) .+. (y .+. a.sum ys) ...(interchange a _ _ _ _)
   ~~ a.sum (x :: xs) .+. a.sum (y :: ys)   ...(Refl)
+
+public export
+sumPreservation  : {a, b : CommutativeMonoid} -> 
+  let %hint 
+      notationA : Action1 Nat (U a)
+      notationA = NatAction1 a 
+      %hint
+      notationB : Action1 Nat (U b)
+      notationB = NatAction1 b
+  in (h : a ~> b) -> {0 n : Nat} -> (xs : Vect n (U a)) ->
+  b.rel (h.H.H (a.sum xs))
+        (b.sum (map h.H.H xs))
+sumPreservation h    []     = h.preserves Zero [] 
+sumPreservation h (x :: xs) =
+  let %hint 
+      notationA : Action1 Nat (U a)
+      notationA = NatAction1 a 
+      %hint
+      notationB : Action1 Nat (U b)
+      notationB = NatAction1 b
+  in CalcWith @{cast b} $
+  |~ h.H.H (a.sum (x :: xs))
+  ~~ h.H.H (x .+. a.sum xs)           ...(Refl)
+  <~ h.H.H x .+. h.H.H (a.sum xs)     ...(h.preserves Plus [_,_])
+  <~ h.H.H x .+. b.sum (map h.H.H xs) ...(b.cong 1 (Sta _ .+. Dyn 0) [_] [_] 
+                                          [sumPreservation _ _])
+  ~~ b.sum (map h.H.H (x :: xs))      ...(Refl)
+

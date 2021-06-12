@@ -188,3 +188,9 @@ Dyn i = Done (Right i)
 public export                        
 Sta : (x : a) -> Term sig (a `Either` Fin n)
 Sta x = Done (Left x)
+
+public export
+(.validate) : {0 n : Nat} -> (a : Model pres) -> (ax : Axiom pres) -> 
+  {auto 0 ford : Fin n = (pres.axiom ax).Var} -> (env : Vect n (U a)) ->
+  (pres.axiom ax) =| (a.Algebra ** replace {p = \i => i -> U a} ford (flip Vect.index env))
+a.validate ax env = a.Validate ax \i => index (replace {p = id} (sym ford) i) env

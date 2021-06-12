@@ -24,10 +24,10 @@ namespace Model
 
 public export
 (.sum) : (a : CommutativeMonoid) -> Vect n (U a) -> U a
-(.sum) a xs = let _ : Additive (U a) = Prelude.cast (Core.Model.cast a) in
+(.sum) a xs = let _ : Additive1 (U a) = Prelude.cast (Core.Model.cast a) in
   case xs of
-    [] => O
-    (x :: xs) => x + a.sum xs
+    [] => O1
+    (x :: xs) => x .+. a.sum xs
 
 public export
 mult : (a : CommutativeMonoid) -> Nat -> U a -> U a
