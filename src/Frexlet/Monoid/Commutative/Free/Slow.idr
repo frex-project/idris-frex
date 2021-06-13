@@ -19,77 +19,13 @@ import public Frexlet.Monoid.Commutative.Nat
 import Decidable.Equality
 import Data.Bool.Decidable
 import Data.Nat
+import public Data.Vect.Extra
+import Data.Vect.Extra1
 
 import Frexlet.Monoid.Commutative.Free
 
 %default total
 
-
-lemma1 : (n : Nat) -> (i,j : Fin n) -> (xs : Vect n Nat) -> 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-      %hint 
-      notation' : Action1 Nat (U $ Commutative.Nat.Additive)
-      notation' = NatAction1 Additive
-  in index i ((index j xs) *. (unit n j)) = (dirac i j) *. (index j xs)
-lemma1 n i j xs = 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-      %hint 
-      notation' : Action1 Nat (U $ Commutative.Nat.Additive)
-      notation' = NatAction1 Additive
-  in Calc $
-  |~ index i ((index j xs) *. (unit n j)) 
-  ~~ (index j xs) *  (index i $ unit n j) ...(pointwiseMult n (index j xs) (unit n j) i)
-  ~~ (index j xs) *. (index i $ unit n j) ...(sym $ multActionNat _ _)
-  ~~ (index j xs) *. (dirac j i)          ...(cong ((index j xs) *.) $ indexTabulate (dirac j) i)
-  ~~ (index j xs) *. (dirac i j)          ...(cong (index j xs *.) $ diracSym _ _)
-  ~~ (dirac i j ) *. (index j xs)         ...(actionNatCommutative _ _)
-
-lemma2 : (n : Nat) -> (i : Fin n) -> (xs : Vect n Nat) -> 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-      %hint
-      notation' : Action1 Nat (U $ Commutative.Nat.Additive)
-      notation' = NatAction1 Additive
-  in map (index i) (tabulate \j => (index j xs) *. (unit n j))
-  =  tabulate (\j => (dirac i j) *. (index j xs))
-lemma2 n i xs = 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-      %hint 
-      notation' : Action1 Nat (U $ Commutative.Nat.Additive)
-      notation' = NatAction1 Additive
-  in Calc $
-        |~ map (index i) (tabulate \j => (index j xs) *. (unit n j))
-        ~~ tabulate (\j => (index i $ (index j xs) *. (unit n j))) ...(sym $ mapTabulate (index i) 
-                                                                      \j => (index j xs) *. (unit n j))
-        ~~ tabulate (\j => (dirac i j) *. (index j xs)) ...(tabulateExtensional _ _
-                                                           $ \j => lemma1 n i j xs)
+%unbound_implicits off
 
 
-export
-normalForm : (n : Nat) -> (xs : U (Model n)) -> 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-  in (Model n).sum (tabulate \i => (index i xs) *. (unit n i)) = xs
-normalForm n xs = vectorExtensionality _ _ $ \i => 
-  let %hint 
-      notation : Action1 Nat (U $ Model n)
-      notation = NatAction1 (Model n)
-      %hint 
-      notation' : Action1 Nat (U $ Commutative.Nat.Additive)
-      notation' = NatAction1 Additive
-  in Calc $
-  |~ index i ((Model n).sum (tabulate \i => (index i xs) *. (unit n i)))
-  ~~ (Additive).sum (map (index i) (tabulate \i => (index i xs) *. (unit n i))) 
-                                                                 ...(pointwiseSum n _ _)
-  ~~ (Additive).sum (tabulate \j => (dirac i j) *. (index j xs)) ...(cong (Additive).sum $ 
-                                                                    lemma2 n i xs)
-  ~~ index i xs                                                  ...(convolveDirac Additive _ _)
-  

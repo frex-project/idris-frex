@@ -31,6 +31,17 @@ a.sum = MkSetoidHomomorphism
   }
 
 public export
+sumTabulateExtensional : {n : Nat} -> (a : CommutativeMonoid) -> (f, g : Fin n -> U a) ->
+  (cast {to=Setoid} (Fin n) ~~> cast a).equivalence.relation (mate f) (mate g)  ->
+  a.rel (a.sum $ tabulate f)
+        (a.sum $ tabulate g)
+sumTabulateExtensional {n = 0  } a f g prf = a.equivalence.reflexive _
+sumTabulateExtensional {n = S n} a f g prf = a.cong 2 (Dyn 0 .+. Dyn 1) [_,_] [_,_]
+  [ prf 0
+  , sumTabulateExtensional a (f . FS) (g . FS) (\i => prf (FS i))
+  ]
+
+public export
 sumZeroZero : (a : CommutativeMonoid) -> (n : Nat) -> 
   let %hint notation : Action1 Nat (U a)
       notation = NatAction1 a in
@@ -133,15 +144,15 @@ interchange a x y z w =
   <~  x .+.((z .+. y) .+. w) ...(a.cong 1 (Sta x .+. (Dyn 0 .+. Sta w)) [_] [_]
                                 [a.Validate Commutativity (flip index [_, _])])
   <~ (x .+. z) .+. (y .+. w) ...(a.equivalence.symmetric _ _ $ lemma x z y w)
-  
+
 public export
-sumCommutative : {n : Nat} -> (a : CommutativeMonoid) -> (xs, ys : Vect n (U a)) ->
+sumCommutative : {n : Nat} -> (a : CommutativeMonoid) -> (f,g : Fin n -> U a) ->
   let %hint 
       notation : Action1 Nat (U a)
       notation = NatAction1 a 
-  in a.rel (a.sum $ tabulate \i => (index i xs) .+. (index i ys))
-           (a.sum xs .+. a.sum ys)
-sumCommutative a    []        []     = 
+  in a.rel (a.sum $ tabulate \i => f i .+. g i)
+           (a.sum (tabulate f) .+. a.sum (tabulate g))
+sumCommutative {n = 0} a f g = 
   let %hint 
       notation : Action1 Nat (U a)
       notation = NatAction1 a 
@@ -149,18 +160,21 @@ sumCommutative a    []        []     =
   |~ O1
   <~ O1 .+. O1 ...(a.equivalence.symmetric _ _ $ 
                    a.Validate (Mon LftNeutrality) (const O1))
-sumCommutative a (x :: xs) (y :: ys) = 
+sumCommutative {n = S n} a f g = 
   let %hint 
       notation : Action1 Nat (U a)
       notation = NatAction1 a 
   in CalcWith @{cast a} $      
-  |~ a.sum (tabulate \i => (index i (x :: xs)) .+. (index i (y :: ys)))
-  ~~ (x .+. y) .+. a.sum (tabulate \i => index i xs .+. index i ys)     
-                                           ...(Refl)
-  <~ (x .+. y) .+. (a.sum xs .+. a.sum ys) ...(a.cong 1 (Sta (x .+. y) :+: Dyn 0) [_] [_]
-                                               [sumCommutative a xs ys])
-  <~ (x .+. a.sum xs) .+. (y .+. a.sum ys) ...(interchange a _ _ _ _)
-  ~~ a.sum (x :: xs) .+. a.sum (y :: ys)   ...(Refl)
+  |~ a.sum (tabulate \i => f i .+. g i)
+  ~~ (f 0 .+. g 0) .+. a.sum (tabulate \i => (f . FS) i .+. (g . FS) i)
+              ...(Refl)
+  <~ (f 0 .+. g 0) .+. (a.sum (tabulate $ f . FS) .+. a.sum (tabulate $ g . FS))
+              ...(a.cong 1 (Sta (f 0 .+. g 0) :+: Dyn 0) [_] [_]
+                                               [sumCommutative a _ _])
+  <~ (f 0 .+. (a.sum $ tabulate $ f . FS)) .+. (g 0 .+. (a.sum $ tabulate $ g . FS))
+              ...(interchange a _ _ _ _)
+  ~~ a.sum (tabulate f) .+. a.sum (tabulate g)
+              ...(Refl)
 
 
 ||| NB: a,b are explicit since we can't recover them from the

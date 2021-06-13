@@ -20,6 +20,20 @@ import Frexlet.Monoid.Commutative.NatSemiLinear.Sum
 %default total
 
 -- ----------------------------------------------------------------- --- [Mult]
+public export
+multIsHomomorphism : (a : CommutativeMonoid) -> (n : Nat) -> 
+  SetoidHomomorphism (cast a) (cast a) (mult a n)
+multIsHomomorphism a 0 x y prf = a.equivalence.reflexive _ 
+multIsHomomorphism a (S k) x y prf = a.cong 2 (Dyn 0 .+. Dyn 1) [_,_] [_,_]
+  [ prf
+  , multIsHomomorphism a k x y prf]
+
+public export
+multSetoidHomomorphism : (a : CommutativeMonoid) -> (n : Nat) -> (cast a ~> cast a)
+multSetoidHomomorphism a n = MkSetoidHomomorphism
+  { H = mult a n
+  , homomorphic = multIsHomomorphism a n
+  }
 
 public export
 multUnit : (a : CommutativeMonoid) -> 

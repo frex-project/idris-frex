@@ -34,7 +34,7 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Free.Slow
         -- Should move to contrib
         , Data.Setoid
-        --, Data.Vect.Extra1 --Currently not used
+        , Data.Vect.Extra1
         
 
 depends = contrib
