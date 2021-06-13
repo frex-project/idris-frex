@@ -13,4 +13,5 @@ import public Frex.Axiom
 import public Frex.Model
 import public Frex.Powers
 import public Frex.Free
+import public Frex.Coproduct
 

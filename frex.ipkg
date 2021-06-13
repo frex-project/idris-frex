@@ -31,7 +31,7 @@ modules = Frex
         , Frexlet.Monoid.Commutative.NatSemiLinear.Dirac
         , Frexlet.Monoid.Commutative.Notation.Core
         , Frexlet.Monoid.Commutative.Free
-        , Frexlet.Monoid.Commutative.Free.Slow
+        , Frexlet.Monoid.Commutative.Coproduct
         -- Should move to contrib
         , Data.Setoid
         , Data.Vect.Extra1

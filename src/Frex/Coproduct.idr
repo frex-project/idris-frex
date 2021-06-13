@@ -35,13 +35,14 @@ parameters {Pres : Presentation} {L, R : Model Pres} (C, D : L <~.~> R)
     (h . (C .Rgt))
          (D .Rgt)
 
-parameters {Pres : Presentation} {L, R : Model Pres} (C, D : L <~.~> R)
-  ||| A morphism preserving both arms of a cospan
-  public export
-  record Preserves (H : C .Sink ~> D .Sink) where
-    constructor IsPreserving
-    Lft : PreservesLft C D H
-    Rgt : PreservesRgt C D H
+||| A morphism preserving both arms of a cospan
+public export
+record Preserves 
+    {Pres : Presentation} {L, R : Model Pres} (C, D : L <~.~> R) 
+    (H : C .Sink ~> D .Sink) where
+  constructor IsPreserving
+  Lft : PreservesLft C D H
+  Rgt : PreservesRgt C D H
 
 
 ||| A morphism between cospans
@@ -73,6 +74,12 @@ parameters {Pres : Presentation} {L, R : Model Pres} (Coprod : L <~.~> R)
   ExtenderSetoidHomomorphism : Type
   ExtenderSetoidHomomorphism = (other : L <~.~> R) -> 
     cast {to = Setoid} (Coprod .Sink) ~> cast (other.Sink)
+    
+  ||| Data for AlgebraHomomorphism underlying an Extender
+  public export 0
+  ExtenderHomomorphism : Type
+  ExtenderHomomorphism = (other : L <~.~> R) -> 
+    (Coprod .Sink) ~> (other.Sink)
     
   ||| There's at most one cospan morphism out of `Coprod` into any other cospan
   public export 0
