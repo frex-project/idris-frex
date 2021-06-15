@@ -14,6 +14,7 @@ modules = Frex
         , Frex.Coproduct
         , Frex.Free
         , Frex.Free.Construction
+        , Frex.Frex
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
@@ -32,6 +33,7 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Notation.Core
         , Frexlet.Monoid.Commutative.Free
         , Frexlet.Monoid.Commutative.Coproduct
+        , Frexlet.Monoid.Commutative.Frex
         -- Should move to contrib
         , Data.Setoid
         , Data.Vect.Extra1
