@@ -7,10 +7,17 @@ on:
     branches:
       - main
 
+########################################################################
+## CONFIGURATION
+########################################################################
+
+env:
+  IDRIS2_COMMIT: a28bc655440e963591aaa7cfc47adefc4e785452
+  SCHEME: scheme
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: snazzybucket/idris2:latest
     steps:
 
       - name: Initialise variables
@@ -20,8 +27,32 @@ jobs:
           if [[ '${{ github.ref }}' == 'refs/heads/main' ]]; then
              echo "AGDA_DEPLOY=true" >> $GITHUB_ENV
           fi
+          echo "$HOME/.idris2/bin" >> $GITHUB_PATH
 
-      - name: Checkout
+      # This caching step allows us to save a lot of building time by only
+      # rebuilding Idris2 from boostrap if absolutely necessary
+      - name: Cache Idris2
+        uses: actions/cache@v2
+        id: cache-idris2
+        with:
+          path: |
+            ~/.idris2
+          key: ${{ runner.os }}-${{ env.IDRIS2_COMMIT }}
+
+      - name: Install Chez
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chezscheme
+
+      - name: Install Idris2
+        if: steps.cache-cabal.outputs.cache-hit != 'true'
+        run: |
+          git clone https://github.com/idris-lang/idris2
+          cd idris2
+          git checkout ${{ env.IDRIS2_COMMIT }}
+          make bootstrap && make install
+
+      - name: Checkout idris-frex
         uses: actions/checkout@v2
 
       - name: Build package
