@@ -25,3 +25,5 @@ The library has two parts:
 
   An extensible collection of instances of the basic definitions
   covering common algebraic structures.
+
+[![Ubuntu](https://github.com/frex-project/idris-frex/actions/workflows/ci-ubuntu.yml/badge.svg)](https://github.com/frex-project/idris-frex/actions/workflows/ci-ubuntu.yml)
