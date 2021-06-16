@@ -1,0 +1,39 @@
+name: Ubuntu
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: snazzybucket/idris2:latest
+    steps:
+
+      - name: Initialise variables
+        shell: bash
+        run: |
+          # Only deploy if the build follows from pushing to main
+          if [[ '${{ github.ref }}' == 'refs/heads/main' ]]; then
+             echo "AGDA_DEPLOY=true" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build package
+        run: idris2 --build frex.ipkg
+
+      - name: Build HTML doc
+        run: idris2 --mkdoc frex.ipkg
+
+      - name: Deploy HTML
+        uses: JamesIves/github-pages-deploy-action@4.1.3
+        if: ${{ success() && env.AGDA_DEPLOY }}
+
+        with:
+          branch: gh-pages
+          folder: build/docs/
