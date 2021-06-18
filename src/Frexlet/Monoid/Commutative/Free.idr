@@ -251,8 +251,8 @@ FreeExtenderHomomorphism : {n : Nat} -> ExtenderAlgebraHomomorphism (FreeCommuta
 FreeExtenderHomomorphism other = MkSetoidHomomorphism
   { H = FreeExtenderSetoidHomomorphism other
   , preserves = \case
-      (0 ** Neutral) => extenderPreservesZero other
-      (2 ** Product) => extenderPreservesPlus other
+      MkOp Neutral => extenderPreservesZero other
+      MkOp Product => extenderPreservesPlus other
   }
 
 public export

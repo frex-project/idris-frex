@@ -44,8 +44,8 @@ Cast CommutativeMonoid Monoid where
 
 public export
 Zero : Op Signature
-Zero = MkOp {sig = Signature} Neutral
+Zero = MkOp Neutral
 
 public export
 Plus : Op Signature
-Plus = MkOp {sig = Signature} Product
+Plus = MkOp Product

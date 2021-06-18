@@ -25,8 +25,8 @@ public export 0
 models : {sig : Signature} -> (a : SetoidAlgebra sig) -> (eq : Equation sig)
   -> (env : eq.Var -> U a.algebra) -> Type
 models a eq env = a.equivalence.relation
-                    (bindTerm {a = a.algebra} eq.lhs env)
-                    (bindTerm {a = a.algebra} eq.rhs env)
+                    (a.Sem eq.lhs env)
+                    (a.Sem eq.rhs env)
 
 ||| Like `models`, but the arguments are reversed and packed slightly
 ||| more compactly, makes nice syntax sometimes
@@ -53,13 +53,13 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   semPreservation : (t : Term sig x) -> (env : x -> U b) ->
     b.equivalence.relation 
       (bindTerm {a = b.algebra} t env)
-      (iso.Iso.Fwd.H $ bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env))
+      (iso.Iso.Fwd.H $ a.Sem t (iso.Iso.Bwd.H . env))
   semPreservation {x} t env = CalcWith @{cast b} $
     let id_b' : cast b ~> cast b
         id_b' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
     in 
-    |~ bindTerm {a = b.algebra} t env
-    <~ bindTerm {a = b.algebra} t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
+    |~ b.Sem t env
+    <~ b.Sem t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
              ...((eval {a = b, x = cast x} t).homomorphic 
                    (mate env) 
                    (iso.Iso.Fwd . (iso.Iso.Bwd . mate env))
@@ -78,10 +78,10 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
     let env' : eq.Var -> U a
         env' = iso.Iso.Bwd.H . env
     in
-    |~ bindTerm {a = b.algebra} eq.lhs env
+    |~ b.Sem eq.lhs env
     <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.lhs env') ...(semPreservation eq.lhs env)
     <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.rhs env') ...(_.homomorphic _ _ prf)
-    <~ bindTerm {a = b.algebra} eq.rhs env                 ...(b.equivalence.symmetric _ _
+    <~ b.Sem eq.rhs env                                     ...(b.equivalence.symmetric _ _
                                                               $ semPreservation eq.rhs env)
 
 ||| Algebra isomorphisms preserve transport models
@@ -98,6 +98,36 @@ record Model (Pres : Presentation) where
   Algebra  : SetoidAlgebra (Pres).signature
   ||| The algebra validates all the equations
   Validate : Validates Pres Algebra
+
+{-
+  So the next few lines are a bit... silly. Here's what's happening.
+  
+  What we want to write is this:
+
+  Semantic (Model pres) (Op pres.signature) where
+    (.SemType) a = a.Algebra.SemType
+    (.Sem)     a = a.Algebra.Sem
+  
+  
+  However, that's not going to work in practice.
+  
+  In this implementation above, we have a metavariable `pres`.  Idris2
+  currently refuses to solve any metavariables as part of interface
+  resolution. As a consequence, even if unification works out that
+  `a ~ Model pres0`, it won't propagate that to solve `pres ~ pres0`.
+  
+  To get around that, we use a forded auto-implicit:
+-}
+
+public export
+(ford : pres.signature = sig) => Semantic (Model pres) (Op sig) where
+  (.SemType) a = (replace {p = SetoidAlgebra} ford a.Algebra).SemType
+  (.Sem)     a = (replace {p = SetoidAlgebra} ford a.Algebra).Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (Model pres) (Term sig x) where
+  (.SemType) a = (replace {p = SetoidAlgebra} ford a.Algebra).SemType
+  (.Sem)     a = (replace {p = SetoidAlgebra} ford a.Algebra).Sem
 
 public export
 Cast (Model pres) Setoid where
@@ -133,17 +163,10 @@ id a = Setoid.id (a.Algebra)
 
 -- Composition comes from Frex.Algebra already
 
-||| Interpretation of an operator in a model
-public export
-(.Sem) : {0 pres : Presentation} -> (a : Model pres) ->
-  (f : Op pres.signature) -> (U a) ^ (arity f) -> U a
-(.Sem) a = a.Algebra.algebra.Sem
-
 ||| nary interpretation of an operator in a model
 public export
 (.sem) : {n : Nat} -> (a : Model pres) -> (op : pres.signature.OpWithArity n) -> n `ary` (U a)
-(.sem) {n} a op = curry $ a.Sem (n ** op)
-
+(.sem) a op = Algebra.curry $ a.Sem (MkOp op)
 
 ||| The setoid of homomorphisms between models with pointwise equivalence.
 public export
@@ -168,8 +191,8 @@ public export
        (index i lhs) 
        (index i rhs))
   -> (cast a).equivalence.relation 
-       (bindTerm {a = a.Algebra.algebra} t $ either Prelude.id $ flip index lhs)
-       (bindTerm {a = a.Algebra.algebra} t $ either Prelude.id $ flip index rhs)
+       (a.Sem t $ either Prelude.id $ flip index lhs)
+       (a.Sem t $ either Prelude.id $ flip index rhs)
 (.cong) a n t lhs rhs prfs 
   = (Setoid.eval {x = cast $ U a `Either` Fin n} t).homomorphic 
       (mate $ either Prelude.id $ flip index lhs)

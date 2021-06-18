@@ -17,6 +17,16 @@ record ModelOver (Pres : Presentation) (X : Setoid) where
   constructor MkModelOver  
   Model : Model Pres
   Env : X ~> cast Model
+
+public export
+(ford : pres.signature = sig) => Semantic (ModelOver pres x) (Op sig) where
+  (.SemType) a = a.Model.SemType
+  (.Sem)     a = a.Model.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (ModelOver pres x) (Term sig y) where
+  (.SemType) a = a.Model.SemType
+  (.Sem)     a = a.Model.Sem
   
 parameters {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X)
   ||| States: Homomorphism between the models over X.
@@ -77,3 +87,13 @@ record Free (Pres : Presentation) (X : Setoid) where
   constructor MkFree
   Data : Pres `ModelOver` X
   UP   : Freeness Data
+
+public export
+(ford : pres.signature = sig) => Semantic (Free pres x) (Op sig) where
+  (.SemType) a = a.Data.SemType
+  (.Sem)     a = a.Data.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (Free pres x) (Term sig y) where
+  (.SemType) a = a.Data.SemType
+  (.Sem)     a = a.Data.Sem

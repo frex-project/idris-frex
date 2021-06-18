@@ -35,8 +35,8 @@ Monoid = Model MonoidTheory
 
 public export
 Unit : Op Signature
-Unit = MkOp {sig = Signature} Neutral
+Unit = MkOp Neutral
 
 public export
 Prod : Op Signature
-Prod = MkOp {sig = Signature} Product
+Prod = MkOp Product

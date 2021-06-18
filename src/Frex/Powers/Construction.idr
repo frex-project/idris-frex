@@ -23,7 +23,7 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
   PowerAlgebra : Algebra Sig
   PowerAlgebra = MakeAlgebra (U PowerSetoid)
       \f,phis => 
-      MkSetoidHomomorphism (\i => (A).algebra.Sem f (map (\phi => phi.H i) phis)) 
+      MkSetoidHomomorphism (\i => (A).Sem f (map (\phi => phi.H i) phis)) 
                            \u, v, prf => congruence A f _ _ \i =>
                              CalcWith @{cast A} $
                              |~ index i (map (\phi => phi.H u) phis)
@@ -54,7 +54,7 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
     (MkSetoidHomomorphism (\phi => phi.H x) 
                           (\phi, psi, prf => prf x))
     \f, phis => A .equivalence.reflexive 
-              $ ((X ~~> A).algebra.Sem f phis).H x
+              $ ((X ~~> A).Sem f phis).H x
   
   -- In fact, holds on the nose (i.e., with equality), but it's much
   -- easier to just use the existing homoPreservesSem (which also
@@ -62,26 +62,23 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
   public export
   pointwiseBind : (t : Term Sig y) -> (env : y -> U (X ~~> A)) -> (x : U X) ->
     A .equivalence.relation
-     ((bindTerm {a = (X ~~> A).algebra} t        env  ).H x)
-      (bindTerm {a = A .algebra       } t \i => (env i).H x)
+     (((X ~~> A).Sem t        env  ).H x)
+     (        A .Sem t \i => (env i).H x)
   pointwiseBind t env x 
     = homoPreservesSem (Frex.Powers.Construction.eval x) t env
 
 namespace Model
   public export
   (~~>) : {pres : Presentation} -> (x : Setoid) -> (a : Model pres) -> Model pres
-  (~~>) x a = let X_to_A : SetoidAlgebra pres.signature
-                  X_to_A = x ~~> a.Algebra
-              in MkModel X_to_A
+  (~~>) x a = 
+    let X_to_A : SetoidAlgebra pres.signature
+        X_to_A = x ~~> a.Algebra
+    in MkModel X_to_A
               \ax, env, x => CalcWith @{cast a} $
-              |~ (bindTerm {a = X_to_A   .algebra} (pres.axiom ax).lhs env).H x
-              <~ bindTerm  {a = a.Algebra.algebra} (pres.axiom ax).lhs (\i => (env i).H x)
-                                               ...(pointwiseBind _ _ _)
-              <~ bindTerm  {a = a.Algebra.algebra} (pres.axiom ax).rhs (\i => (env i).H x)
-                                               ...(a.Validate _ _)
-              <~ (bindTerm {a = X_to_A .algebra} (pres.axiom ax).rhs env).H x  
-                                               ...(_.symmetric _ _  $ 
-                                                   pointwiseBind _ _ _)
+    |~ (X_to_A .Sem (pres.axiom ax).lhs env).H x
+    <~ a       .Sem (pres.axiom ax).lhs (\i => (env i).H x) ...(pointwiseBind _ _ _)
+    <~ a       .Sem (pres.axiom ax).rhs (\i => (env i).H x) ...(a.Validate _ _)
+    <~ (X_to_A .Sem (pres.axiom ax).rhs env).H x            ...(_.symmetric _ _ $ pointwiseBind _ _ _)
   
   
 public export 

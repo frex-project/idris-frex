@@ -9,13 +9,11 @@ record Signature where
 
 
 public export
-Op : Signature -> Type
-Op sig = (n : Nat ** sig.OpWithArity n)
+record Op (Sig : Signature) where
+  constructor MkOp
+  {fst : Nat}
+  snd : (Sig).OpWithArity fst
 
 public export
 arity : {auto 0 sig : Signature} -> Op sig -> Nat
 arity = fst
-
-public export
-MkOp : {0 sig : Signature} -> {n : Nat} -> (op : sig.OpWithArity n) -> Op sig
-MkOp {n} op = (n ** op)

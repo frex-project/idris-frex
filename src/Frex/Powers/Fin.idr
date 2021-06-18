@@ -31,13 +31,13 @@ indexHomomorphismLemma :  {0 sig : Signature} -> (n: Nat) -> (a: SetoidAlgebra s
   (i : Fin n) -> (op : Op sig) -> 
   (zss : Vect (arity op) (U $ FinPowerSetoid n a)) ->
   a.equivalence.relation
-     (index i (map (a.algebra.Sem op) (transpose zss)))
+     (index i (map (a.Sem op) (transpose zss)))
      (a.algebra.Sem op (map (index i) zss))
 indexHomomorphismLemma n a i op zss = CalcWith @{cast a} $
-        |~ index i (map (a.algebra.Sem op) (transpose zss))
-        ~~ a.algebra.Sem op (     index i $ transpose zss)  
+        |~ index i (map (a.Sem op) (transpose zss))
+        ~~ a.Sem op (     index i $ transpose zss)  
              ...(indexNaturality _ _ _)
-        <~ a.algebra.Sem op (map (index i)            zss)  
+        <~ a.Sem op (map (index i)            zss)  
              ...(a.congruence op _ _ $ reflect (VectSetoid _ $ cast a) 
                  $ indexTranspose _ _)
   
@@ -58,12 +58,12 @@ FinPowerSetoidAlgebra n a =
         <~ index i (index j yss)        ...(prf j i)
         ~~ index j (map (index i)  yss) ...(sym $ indexNaturality _ _ _)
   in CalcWith @{cast a} $
-  |~ index i (map (a.algebra.Sem op) (transpose xss))
-  <~ a.algebra.Sem op (map (index i) xss) ...(indexHomomorphismLemma n a _ _ _)
-  <~ a.algebra.Sem op (map (index i) yss) ...(a.congruence op 
-                                                 (map (index i) xss) 
-                                                 (map (index i) yss) lemma)
-  <~ index i (map (a.algebra.Sem op) 
+  |~ index i (map (a.Sem op) (transpose xss))
+  <~ a.Sem op (map (index i) xss) ...(indexHomomorphismLemma n a _ _ _)
+  <~ a.Sem op (map (index i) yss) ...(a.congruence op 
+                                       (map (index i) xss) 
+                                       (map (index i) yss) lemma)
+  <~ index i (map (a.Sem op) 
                   (transpose yss))         ...((cast a).equivalence.symmetric 
                                                 _ _ $
                                                indexHomomorphismLemma n a _ _ _)
@@ -81,9 +81,8 @@ pointwiseBind : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig}
   -> (t : Term sig y) -> (env : y -> Vect n (U a)) -> (x : Fin n) ->
   a.equivalence.relation
    (index x
-    (bindTerm {a = (n `FinPowerSetoidAlgebra` a).algebra} 
-                                     t            env))
-  (  bindTerm {a = a.algebra       } t (index x . env))
+    ((n `FinPowerSetoidAlgebra` a).Sem t            env))
+    (                           a .Sem t (index x . env))
 pointwiseBind t env x = homoPreservesSem (Fin.eval x) t env
 
 public export
@@ -113,13 +112,13 @@ representation =
           }
       }
   , FwdHomo = \op, xss, i => CalcWith @{cast a} $
-      |~ index i ((n `FinPowerSetoidAlgebra` a).algebra.Sem op xss)
-      <~ a.algebra.Sem op (map (index i) xss) 
+      |~ index i ((n `FinPowerSetoidAlgebra` a).Sem op xss)
+      <~ a.Sem op (map (index i) xss) 
            ...((eval i).preserves op xss)
-      ~~ a.algebra.Sem op (map (\xs => (fwd xs).H i)      xss) 
+      ~~ a.Sem op (map (\xs => (fwd xs).H i)      xss) 
            ...(Refl)
-      ~~ a.algebra.Sem op (map (\phi => phi.H i) (map fwd xss)) 
-           ...(cong (a.algebra.Sem op) $ sym $
+      ~~ a.Sem op (map (\phi => phi.H i) (map fwd xss)) 
+           ...(cong (a.Sem op) $ sym $
                mapFusion _ _ _)
   }
 

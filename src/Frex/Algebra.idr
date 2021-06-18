@@ -3,6 +3,7 @@ module Frex.Algebra
 
 import Frex.Signature
 import public Notation
+import public Notation.Semantic
 
 import Data.Setoid
 import Data.Nat
@@ -59,8 +60,13 @@ public export
 record Algebra (Sig : Signature) where
   constructor MakeAlgebra
   0 U   : Type
-  Sem : Sig `algebraOver` U
-  
+  Semantics : Sig `algebraOver` U
+
+public export
+Semantic (Algebra sig) (Op sig) where
+  (.SemType) a op = (U a) ^ (arity op) -> U a
+  (.Sem) a op = a.Semantics op
+      
 ||| Smart constructor for an algebra for a signature Sig:
 ||| @U : A type called the carrier
 ||| @Sem : a semantic interpretation for each Sig-operation
@@ -97,11 +103,16 @@ bindTerm (Done i) env = env i
 bindTerm (Call f xs) env = a.Sem f $ bindTerms  xs env
 
 
+public export
+Semantic (Algebra sig) (Term sig x) where
+  (.SemType) a t = (env : x -> U a) -> U a
+  (.Sem) a t = bindTerm t
+
 ||| Specifies `bindTerms` specialises `map bindTerm`.
 export
 bindTermsIsMap : {auto a : Algebra sig} 
   -> (xs : Vect n (Term sig x)) -> (env : x -> U a)
-  -> bindTerms {a} xs env = map (flip (bindTerm {a}) env) xs
+  -> bindTerms {a} xs env = map (flip a.Sem env) xs
 bindTermsIsMap [] env = Refl
 bindTermsIsMap (y :: xs) env = cong (bindTerm y env ::) $ bindTermsIsMap xs env
 
@@ -113,37 +124,27 @@ Free sig x = MakeAlgebra (Term sig x) Call
 ||| The corresponding  n-ary operation over the term algebra
 public export
 call : {n : Nat} -> sig.OpWithArity n -> n `ary` (Term sig x)
-call f = curry (Call (n ** f))
+call f = curry (Call (MkOp f))
 
 ||| Smart constructor for variables
 public export
 X : {0 sig : Signature} -> Fin k -> Term sig (Fin k)
 X = Done
 
-
 public export
 Functor (Term sig) where
-  map h t = bindTerm {a = Free _ _} t (Done . h)
+  map h t = (Free sig _).Sem t (Done . h)
 
 public export
 Applicative (Term sig) where
   pure = Done
-  (<*>) fs ts = bindTerm {a = Free sig _} fs \f => 
-                bindTerm {a = Free sig b} ts \x => 
+  (<*>) fs ts = (Free sig _).Sem fs \f => 
+                (Free sig _).Sem ts \x => 
                 Done (f x)
 
 public export
 Monad (Term sig) where
-  (>>=) {b} = bindTerm {a = Free sig b}
-
-||| Extends the semantic interpration of the algebra from operators to terms homomorphically
-||| @ env : environment/valuation, with the i-th element holding the
-|||         algebra value to substitute for the i-th variable
-public export
-Sem : {0 sig : Signature} -> (a : Algebra sig)
-  -> Term sig (Fin n) -> (env : Vect n (U a))
-  -> U a
-Sem a t env = bindTerm t (\i => index i env)
+  (>>=) = (Free sig _).Sem
 
 ||| Free `sig`-algebra over `n`-variables.
 public export
@@ -193,6 +194,16 @@ namespace Setoid
     ||| All algebraic operations respect the equivalence relation
     congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence) `CongruenceWRT` (algebra.Sem f)
     
+  public export
+  Semantic (SetoidAlgebra sig) (Op sig) where
+    (.SemType) a op = a.algebra.SemType op
+    (.Sem) a op = a.algebra.Sem op
+    
+  public export
+  Semantic (SetoidAlgebra sig) (Term sig x) where
+    (.SemType) a = a.algebra.SemType
+    (.Sem) a = a.algebra.Sem
+    
   public export 0
   U : SetoidAlgebra sig -> Type  
   U a = Algebra.U a.algebra
@@ -216,7 +227,7 @@ namespace Setoid
     public export
     cast : {a : SetoidAlgebra sig} -> (f : Op sig) -> 
       VectSetoid (arity {sig} f) (Prelude.cast a) ~> cast a
-    cast f = MkSetoidHomomorphism (a.algebra.Sem f) (a.congruence f)
+    cast f = MkSetoidHomomorphism (a.Sem f) (a.congruence f)
     
 -------------------- Homomorphisms -------------------------------
 
@@ -226,7 +237,7 @@ namespace Setoid
            -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
   Preserves {sig} a b h f
     = (xs : Vect (arity f) (U a)) 
-      -> b.equivalence.relation (h $ a.algebra.Sem f xs) (b.algebra.Sem f (map h xs))
+      -> b.equivalence.relation (h $ a.Sem f xs) (b.Sem f (map h xs))
 
   ||| States: the function `h : U a -> U b` preserves all `sig`-operations
   public export 0
@@ -252,16 +263,16 @@ namespace Setoid
   id : (a : SetoidAlgebra sig) -> a ~> a
   id a = MkSetoidHomomorphism (Setoid.id $ cast a) 
           \f,xs => CalcWith @{cast a} $
-          |~ a.algebra.Sem f xs
-          ~~ a.algebra.Sem f (map id xs) ...(cong (a.algebra.Sem f) $ sym (mapId _))
+          |~ a.Sem f xs
+          ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))
 
   public export
   (.) : {a,b,c : SetoidAlgebra sig} -> b ~> c -> a ~> b -> a ~> c
   g . f  = MkSetoidHomomorphism (H g . H f) \op, xs => CalcWith @{cast c} $
-    |~ g.H.H (f.H.H (a.algebra.Sem op xs))                
-    <~ g.H.H (b.algebra.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
-    <~ c.algebra.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
-    ~~ c.algebra.Sem op (map (\x => g.H.H (f.H.H x)) xs) ...(cong (c.algebra.Sem op) 
+    |~ g.H.H (f.H.H (a.Sem op xs))                
+    <~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
+    <~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
+    ~~ c.Sem op (map (\x => g.H.H (f.H.H x)) xs) ...(cong (c.Sem op) 
                                                             $ mapFusion _ _ _)
                                                             
 -- Back to (non-setoid) Algebra
@@ -385,9 +396,9 @@ namespace Term
 
   homoPreservesSem h (Done v    ) env = b.equivalence.reflexive _ 
   homoPreservesSem h (Call op ts) env = CalcWith @{cast b} $
-    |~ h.H.H (a.algebra.Sem op (bindTerms {a = a.algebra} ts env))
-    <~ b.algebra.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
-    <~ b.algebra.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
+    |~ h.H.H (a.Sem op (bindTerms {a = a.algebra} ts env))
+    <~ b.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
+    <~ b.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
                                                                           $ homoPreservesSemMap {a,b}
                                                                               h ts env)
 public export
@@ -403,8 +414,8 @@ BwdHomo a b iso f xs = CalcWith @{cast a} $
   let id' : cast b ~> cast b
       id' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
   in 
-  |~ iso.Iso.Bwd.H (b.algebra.Sem f xs)
-  <~ iso.Iso.Bwd.H (b.algebra.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs))) 
+  |~ iso.Iso.Bwd.H (b.Sem f xs)
+  <~ iso.Iso.Bwd.H (b.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs))) 
           ...((iso.Iso.Bwd . cast f).homomorphic _ _ 
              $ CalcWith @{cast $ VectSetoid _ $ cast b} 
              $ |~ xs 
@@ -416,11 +427,11 @@ BwdHomo a b iso f xs = CalcWith @{cast a} $
                         in (VectMap).homomorphic (id b).H id' id_eq_id' xs)
                ~~ map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs) 
                     ...(sym $ mapFusion _ _ _))
-  <~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.algebra.Sem f (map iso.Iso.Bwd.H xs))) 
+  <~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.Sem f (map iso.Iso.Bwd.H xs))) 
                                             ...(iso.Iso.Bwd.homomorphic _ _ 
                                                $ b.equivalence.symmetric _ _
                                                $ iso.FwdHomo f _)
-  <~ a.algebra.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
+  <~ a.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
 
 ||| Reverse an isomorphism
 public export
@@ -444,7 +455,7 @@ public export
 ||| nary interpretation of an operator in an algebra
 public export
 (.sem) : {n : Nat} -> (a : SetoidAlgebra sig) -> (op : sig.OpWithArity n) -> n `ary` (U a)
-(.sem) {n} a op = curry $ a.algebra.Sem (n ** op)
+(.sem) {n} a op = Algebra.curry $ a.Sem (MkOp op)
 
 ||| Each operation in the signature is an algebraic operation
 public export

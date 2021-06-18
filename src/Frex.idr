@@ -27,11 +27,11 @@ frexify : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
   (eq : ( Term pres.signature (U a `Either` Fin n)
         , Term pres.signature (U a `Either` Fin n))) ->
   {auto prf : frex.Data.Model.rel 
-     (bindTerm {a = frex.Data.Model.Algebra.algebra} (fst eq) (frexEnv frex).H)
-     (bindTerm {a = frex.Data.Model.Algebra.algebra} (snd eq) (frexEnv frex).H)}
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
      ->
-  a.rel (bindTerm {a = a.Algebra.algebra} (fst eq) (either Prelude.id (flip Vect.index env)))
-        (bindTerm {a = a.Algebra.algebra} (snd eq) (either Prelude.id (flip Vect.index env)))
+  a.rel (a.Sem (fst eq) (either Prelude.id (flip Vect.index env)))
+        (a.Sem (snd eq) (either Prelude.id (flip Vect.index env)))
 frexify frex env eq = 
   let AX : Model pres
       AX = frex.Data.Model

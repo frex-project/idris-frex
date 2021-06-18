@@ -20,6 +20,17 @@ record (<~.~>) {Pres : Presentation} (L, R : Model Pres) where
   ||| Right 'arm' of the cospan (\o/)
   Rgt  : R ~> Sink
 
+public export
+(ford : pres.signature = sig) => Semantic ((<~.~>) {Pres = pres} a b) (Op sig) where
+  (.SemType) a = a.Sink.SemType
+  (.Sem)     a = a.Sink.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic ((<~.~>) {Pres = pres} a b) (Term sig y) where
+  (.SemType) a = a.Sink.SemType
+  (.Sem)     a = a.Sink.Sem
+
+
 parameters {Pres : Presentation} {L, R : Model Pres} (C, D : L <~.~> R)
   ||| `Pres`-homomorphism preserving the Lft-arm of a cospan
   public export 0
@@ -102,3 +113,13 @@ record Coproduct {Pres : Presentation} (L, R : Model Pres) where
   constructor MkCoproduct
   Data : L <~.~> R
   UP : Universality Data
+
+public export
+(ford : pres.signature = sig) => Semantic (Coproduct {Pres = pres} a b) (Op sig) where
+  (.SemType) c = c.Data.SemType
+  (.Sem)     c = c.Data.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (Coproduct {Pres = pres} a b) (Term sig y) where
+  (.SemType) c = c.Data.SemType
+  (.Sem)     c = c.Data.Sem

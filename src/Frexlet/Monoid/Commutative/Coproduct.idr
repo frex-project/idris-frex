@@ -69,10 +69,10 @@ CoprodSetoid a b = MkSetoid
 public export
 CoprodAlgebraCongruence : (a, b : CommutativeMonoid) -> (op : Op Signature) -> 
   CongruenceWRT (CoprodSetoid a b) ((CoprodAlgebraStructure a b).Sem op)
-CoprodAlgebraCongruence a b (0 ** Neutral)      xy1       xy2       prf 
-   = ( a.Algebra.congruence (0 ** Neutral) [] [] (\i => case i of {})
-     , b.Algebra.congruence (0 ** Neutral) [] [] (\i => case i of {}))
-CoprodAlgebraCongruence a b op@(2 ** Product) [xy1,xy2] [uv1,uv2] prf 
+CoprodAlgebraCongruence a b (MkOp Neutral)      xy1       xy2       prf 
+   = ( a.Algebra.congruence (MkOp Neutral) [] [] (\i => case i of {})
+     , b.Algebra.congruence (MkOp Neutral) [] [] (\i => case i of {}))
+CoprodAlgebraCongruence a b op@(MkOp Product) [xy1,xy2] [uv1,uv2] prf 
    = ( a.Algebra.congruence Plus [fst xy1, fst xy2] [fst uv1, fst uv2] 
          \case {0 => fst (prf 0); 1 => fst (prf 1)}
      , b.Algebra.congruence Plus [snd xy1, snd xy2] [snd uv1, snd uv2] 
@@ -124,13 +124,13 @@ CoprodLftSetoidHomomorphism a b x y prf = (prf, b.equivalence.reflexive _)
 public export
 CoprodLftHomomorphism : (a, b : CommutativeMonoid)  -> 
   Homomorphism a.Algebra (Coprod a b).Algebra (CoprodLftFunction a b)
-CoprodLftHomomorphism a b (0 ** Neutral) [] 
+CoprodLftHomomorphism a b (MkOp Neutral) [] 
   = let %hint aNotation : Action1 Nat (U a)
         aNotation = NatAction1 (a)
         %hint bNotation : Action1 Nat (U b)
         bNotation = NatAction1 (b)
   in (Coprod a b).equivalence.reflexive (O1, O1)
-CoprodLftHomomorphism a b (2 ** Product) [x1,x2] = 
+CoprodLftHomomorphism a b (MkOp Product) [x1,x2] = 
   let %hint aNotation : Action1 Nat (U a)
       aNotation = NatAction1 (a)
       %hint bNotation : Action1 Nat (U b)
@@ -156,13 +156,13 @@ CoprodRgtSetoidHomomorphism a b x y prf = (a.equivalence.reflexive _, prf)
 public export
 CoprodRgtHomomorphism : (a, b : CommutativeMonoid)  -> 
   Homomorphism b.Algebra (Coprod a b).Algebra (CoprodRgtFunction a b)
-CoprodRgtHomomorphism a b (0 ** Neutral) [] 
+CoprodRgtHomomorphism a b (MkOp Neutral) [] 
   = let %hint aNotation : Action1 Nat (U a)
         aNotation = NatAction1 (a)
         %hint bNotation : Action1 Nat (U b)
         bNotation = NatAction1 (b)
   in (Coprod a b).equivalence.reflexive (O1, O1)
-CoprodRgtHomomorphism a b (2 ** Product) [y1,y2] = 
+CoprodRgtHomomorphism a b (MkOp Product) [y1,y2] = 
   let %hint aNotation : Action1 Nat (U a)
       aNotation = NatAction1 (a)
       %hint bNotation : Action1 Nat (U b)
@@ -214,7 +214,7 @@ ExtenderSetoidHomomorphism a b other
 public export
 ExtenderIsHomomorphism : (a, b : CommutativeMonoid) -> (other : a <~.~> b) ->
   Homomorphism (Coprod a b).Algebra other.Sink.Algebra (ExtenderFunction a b other)
-ExtenderIsHomomorphism a b other (0 ** Neutral) [] 
+ExtenderIsHomomorphism a b other (MkOp Neutral) [] 
   = let %hint otherNotation : Action1 Nat (U other.Sink)
         otherNotation = NatAction1 (other.Sink)
         %hint aNotation : Action1 Nat (U a)
@@ -230,7 +230,7 @@ ExtenderIsHomomorphism a b other (0 ** Neutral) []
                     [other.Lft.preserves Zero []
                     ,other.Rgt.preserves Zero []])
     <~ O1 ...(other.Sink.validate (Mon LftNeutrality) [O1])
-ExtenderIsHomomorphism a b other (2 ** Product) [(x1,y1),(x2,y2)] 
+ExtenderIsHomomorphism a b other (MkOp Product) [(x1,y1),(x2,y2)] 
   = let %hint otherNotation : Action1 Nat (U other.Sink)
         otherNotation = NatAction1 (other.Sink)
         %hint aNotation : Action1 Nat (U a)

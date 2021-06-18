@@ -11,7 +11,7 @@
 
 idris2docs_venv
 /docs/build
-
+output
 # Editor/IDE Related
 # WARNING:
 #   do not put comments on the same line as a regex

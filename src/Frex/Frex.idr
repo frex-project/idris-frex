@@ -18,7 +18,17 @@ record Extension {Pres : Presentation} (A : Model Pres)(X : Setoid) where
   Model : Model Pres
   Embed : A ~> Model
   Var   : X ~> cast Model
-  
+
+public export
+(ford : pres.signature = sig) => Semantic (Extension {Pres = pres} a x) (Op sig) where
+  (.SemType) c = c.Model.SemType
+  (.Sem)     c = c.Model.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (Extension {Pres = pres} a x) (Term sig y) where
+  (.SemType) c = c.Model.SemType
+  (.Sem)     c = c.Model.Sem
+      
 public export
 record (~>) {Pres : Presentation} {A : Model Pres} {X : Setoid} 
             (Extension1, Extension2 : Extension A X) where
@@ -115,6 +125,16 @@ record Frex {Pres : Presentation} (A : Model Pres) (X : Setoid) where
   constructor MkFrex
   Data : Extension A X
   UP   : Universality Data
+
+public export
+(ford : pres.signature = sig) => Semantic (Frex {Pres = pres} a x) (Op sig) where
+  (.SemType) c = c.Data.SemType
+  (.Sem)     c = c.Data.Sem
+
+public export
+(ford : pres.signature = sig) => Semantic (Frex {Pres = pres} a x) (Term sig y) where
+  (.SemType) c = c.Data.SemType
+  (.Sem)     c = c.Data.Sem
 
 public export
 CoproductAlgebraWithFree : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
