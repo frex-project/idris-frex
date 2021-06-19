@@ -21,6 +21,8 @@ modules = Frex
         , Notation.Action
         , Frexlet.Monoid
         , Frexlet.Monoid.Theory
+        , Frexlet.Monoid.Frex
+        , Frexlet.Monoid.Frex.Structure
         , Frexlet.Monoid.Nat
         , Frexlet.Monoid.Notation
         , Frexlet.Monoid.Commutative
