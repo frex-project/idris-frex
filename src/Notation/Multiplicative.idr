@@ -64,6 +64,10 @@ Cast (HVect [0 `ary` a, 2 `ary` a]) (Multiplicative2 a) where
   cast = uncurry MkMultiplicative2 
 
 public export
+Cast (HVect [0 `ary` a, 2 `ary` a]) (Multiplicative3 a) where
+  cast = uncurry MkMultiplicative3
+
+public export
 Cast ([a,b] `ary` b) (MultiplicativeActsOn a b) where
   cast = MkMultiplicativeActsOn
 

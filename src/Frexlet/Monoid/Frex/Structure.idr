@@ -18,13 +18,12 @@ import Frexlet.Monoid.Theory
 import Frexlet.Monoid.Notation
 
 import Notation.Multiplicative
+import Notation.Action
 
 import Data.List
 import Data.List.Elem
 
 import Data.Setoid.Pair
-
-infixl 7 <><
 
 ||| A list of elements alternating between two types starting and
 ||| ending with an `ult`imate.
@@ -201,3 +200,13 @@ FrexStructure a x = MkSetoidAlgebra
           AppendHomomorphism a x (is1,js1) (is2,js2) (MkAnd (prf 0) (prf 1))
     }
 
+public export
+FrexSetoid : (a : Monoid) -> (x : Setoid) -> Setoid
+FrexSetoid a x = cast $ FrexStructure a x
+
+public export
+MonAction : (a : Monoid) -> (s : Setoid) -> ActionData (U a) (FrexCarrier a s)
+MonAction a s = 
+  [ a.mult
+  , (FrexStructure a s).sem Neutral
+  , (FrexStructure a s).sem Product]

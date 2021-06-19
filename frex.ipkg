@@ -23,6 +23,7 @@ modules = Frex
         , Frexlet.Monoid.Theory
         , Frexlet.Monoid.Frex
         , Frexlet.Monoid.Frex.Structure
+        , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Nat
         , Frexlet.Monoid.Notation
         , Frexlet.Monoid.Commutative
