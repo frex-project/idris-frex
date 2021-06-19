@@ -51,9 +51,13 @@ namespace Ult
 %name UltList is,js,ks,ells
 
 public export
+(.mult) : (a : Monoid) -> U a -> UltList pen (U a) -> UltList pen (U a)
+a.mult i (Ultimate j) = Ultimate (a.sem Product i j)
+a.mult i0 (ConsUlt i1 x is) = (a.sem Product i0 i1, x) :: is
+
+public export
 (++)  : {a : Monoid} -> UltList pen (U a) -> UltList pen (U a) -> UltList pen (U a)
-(++) (Ultimate i) (Ultimate y) = Ultimate (a.sem Product i y)
-(++) (Ultimate i) (ConsUlt j y js) = (a.sem Product i j, y) :: js
+(++) (Ultimate i) js = a.mult i js
 (++) (ConsUlt i x is) js = (i , x) :: is ++ js
 
 namespace Equality
@@ -129,20 +133,34 @@ UltListSetoid pen ult = MkSetoid (UltList (U pen) (U ult)) $ MkEquivalence
   }
 
 public export
+MultHomomorphism : (a : Monoid) -> (s : Setoid) ->
+  SetoidHomomorphism
+    (cast a `Pair` UltListSetoid s (cast a))
+    (UltListSetoid s (cast a))
+    (Prelude.uncurry a.mult)
+MultHomomorphism a s (i, Ultimate i1) (j, Ultimate j1) 
+  (MkAnd i_eq_j $ Ultimate i1_eq_i2) 
+  = Ultimate $ a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i_eq_j, i1_eq_i2]
+MultHomomorphism a s (i, ConsUlt i1 x is) (j,ConsUlt j1 y js) 
+  (MkAnd i_eq_j $ ConsUlt i1_eq_i2 x_eq_y is_eq_js) 
+  = ( a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i_eq_j, i1_eq_i2]
+    , x_eq_y 
+    ) :: is_eq_js
+MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) (MkAnd _ _) impossible
+MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) (MkAnd _ _) impossible
+
+public export
 AppendHomomorphism : (a : Monoid) -> (x : Setoid) -> 
   SetoidHomomorphism 
     (UltListSetoid x (cast a) `Pair`
      UltListSetoid x (cast a))
     (UltListSetoid x (cast a))
     (Prelude.uncurry ((++) {a}))
-AppendHomomorphism a s (Ultimate i0,Ultimate i1) (Ultimate j0, Ultimate j1) 
-  (MkAnd (Ultimate i0_eq_j0) (Ultimate i1_eq_j1)) = 
-  Ultimate $ a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i0_eq_j0, i1_eq_j1]
-AppendHomomorphism a s (Ultimate i0, ConsUlt i1 x is) (Ultimate j0, ConsUlt j1 y js) 
-  (MkAnd (Ultimate i0_eq_j0) (ConsUlt i1_eq_j1 x_eq_y is_eq_js)) = 
-  ( a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i0_eq_j0, i1_eq_j1] 
-  , x_eq_y 
-  ) :: is_eq_js
+
+
+AppendHomomorphism a s (Ultimate i0,is) (Ultimate j0, js) 
+  (MkAnd (Ultimate i0_eq_j0) is_eq_js) = 
+  MultHomomorphism a s (i0, is) (j0, js) (MkAnd i0_eq_j0 is_eq_js)
 AppendHomomorphism a s (ConsUlt i0 x is0,is1) (ConsUlt j0 y js0, js1) 
   (MkAnd (ConsUlt i0_eq_j0 x_eq_y is0_eq_js0) is1_eq_js1) = 
   ( i0_eq_j0 
@@ -182,5 +200,4 @@ FrexStructure a x = MkSetoidAlgebra
         MkOp Product => \ [is1,js1],[is2,js2],prf => 
           AppendHomomorphism a x (is1,js1) (is2,js2) (MkAnd (prf 0) (prf 1))
     }
-
 
