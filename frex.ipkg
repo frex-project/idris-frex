@@ -36,6 +36,11 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Frex
         -- Should move to contrib
         , Data.Setoid
+        , Data.Setoid.Definition
+        , Data.Setoid.Either
+        , Data.Setoid.Pair
+        , Data.Setoid.Vect
+        , Data.Setoid.List
         , Data.Vect.Extra1
         
 
