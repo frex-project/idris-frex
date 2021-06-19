@@ -31,6 +31,12 @@ public export
 (.Multiplicative3) : (monoid : Monoid) -> Multiplicative3 (U monoid)
 monoid.Multiplicative3 = MkMultiplicative3 (monoid.sem Neutral) (monoid.sem Product)
 
+
+public export
+notationSyntax : Multiplicative1 (Term Signature x)
+notationSyntax = MkMultiplicative1 
+              (call {sig = Signature} Neutral) 
+              (call {sig = Signature} Product)
 %hint 
 public export
 notation1 : Multiplicative1 (Term Signature (a `Either` (Fin n)))

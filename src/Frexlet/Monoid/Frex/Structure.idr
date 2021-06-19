@@ -175,13 +175,13 @@ FrexCarrier a x = UltList (U x) (U a)
 ||| Embedding of concrete elements in the frex by identifying
 ||| i with the singleton i
 public export
-(.sta) : (a : Monoid) -> U a -> FrexCarrier a x
+(.sta) : (a : Monoid) -> U a -> UltList x (U a)
 (.sta) a = Ultimate 
 
 ||| Embedding variables in the frex by identifying
 ||| x with 1 * x * 1
 public export
-(.dyn) : (a : Monoid) -> U x -> FrexCarrier a x
+(.dyn) : (a : Monoid) -> x -> UltList x (U a)
 (.dyn) a v = (a.sem Neutral , v) :: a.sta (a.sem Neutral)
 
 public export 

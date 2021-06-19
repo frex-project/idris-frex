@@ -104,3 +104,17 @@ appendAssociative a s (ConsUlt i x is) js ks =
   , s.equivalence.reflexive _
   ) :: appendAssociative a s is js ks
 
+-----------------------------------------------------------------
+
+public export
+FrexValidatesAxioms : (a : Monoid) -> (s : Setoid) -> Validates MonoidTheory (FrexStructure a s)
+FrexValidatesAxioms a s LftNeutrality env = appendUnitLftNeutral a s (env 0)
+FrexValidatesAxioms a s RgtNeutrality env = appendUnitRgtNeutral a s (env 0)
+FrexValidatesAxioms a s Associativity env = appendAssociative    a s (env 0) (env 1) (env 2)
+
+public export
+FrexMonoid : (a : Monoid) -> (s : Setoid) -> Monoid
+FrexMonoid a s = MkModel 
+  { Algebra = FrexStructure a s
+  , Validate = FrexValidatesAxioms a s
+  }

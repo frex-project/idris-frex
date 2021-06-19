@@ -2,3 +2,4 @@
 module Frexlet.Monoid.Frex
 
 import public Frexlet.Monoid.Frex.Structure
+import public Frexlet.Monoid.Frex.Properties
