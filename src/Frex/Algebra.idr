@@ -261,7 +261,7 @@ namespace Setoid
 
   public export
   id : (a : SetoidAlgebra sig) -> a ~> a
-  id a = MkSetoidHomomorphism (Setoid.id $ cast a) 
+  id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a) 
           \f,xs => CalcWith @{cast a} $
           |~ a.Sem f xs
           ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))

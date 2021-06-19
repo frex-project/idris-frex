@@ -44,9 +44,9 @@ frexify frex env eq =
       h : frex.Data ~> Other
       h = frex.UP.Exists Other
       
-      env' : Setoid.Either (cast a) (cast $ Fin n) ~> cast a
+      env' : Either (cast a) (cast $ Fin n) ~> cast {to = Setoid} a
       env' = either (id $ cast a) (mate $ flip Vect.index env)
-      extensionLemma : ((Setoid.Either (cast a) (cast $ Fin n)) ~~> 
+      extensionLemma : (Either (cast {to = Setoid} a) (cast $ Fin n) ~~> 
                          (cast (Other).Model)).equivalence.relation
               (h.H.H . (frexEnv frex))
               env'

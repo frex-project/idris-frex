@@ -170,7 +170,7 @@ public export
 FreeExtenderSetoidHomomorphism : ExtenderSetoidHomomorphism (FreeCommutativeMonoidOver n)
 FreeExtenderSetoidHomomorphism other = MkSetoidHomomorphism
   { H = FreeExtenderFunction other
-  , homomorphic = \xs,ys,prf => Setoid.reflect (cast other.Model) 
+  , homomorphic = \xs,ys,prf => Data.Setoid.Definition.reflect (cast other.Model) 
                               $ cong (FreeExtenderFunction other) 
                               $ vectorExtensionality xs ys prf
   }
@@ -240,9 +240,9 @@ extenderPreservesPlus other [xs,ys] =
      other.Model.sum (tabulate \i => (index i ys) *. other.Env.H i) 
                    ...(sumCommutative other.Model _ _)
   <~ h xs .+. h ys ...(other.Model.cong 2 (Dyn 0 .+. Dyn 1) [_,_] [_,_]
-                       [ Setoid.reflect (cast other.Model) $ sym $
+                       [ Data.Setoid.Definition.reflect (cast other.Model) $ sym $
                          cong other.Model.sum $ mapWithPosAsTabulate _ _
-                       , Setoid.reflect (cast other.Model) $ sym $
+                       , Data.Setoid.Definition.reflect (cast other.Model) $ sym $
                          cong other.Model.sum $ mapWithPosAsTabulate _ _
                        ])
 
