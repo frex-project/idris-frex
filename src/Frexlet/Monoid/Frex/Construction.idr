@@ -18,6 +18,8 @@ import Data.Setoid.Pair
 
 import Syntax.PreorderReasoning.Generic
 
+%default total
+
 public export
 reify : (a : Monoid) -> (s : Setoid) -> FrexCarrier a s -> Term Signature (U a `Either` U s)
 reify a s (Ultimate i    ) = Done (Left i)
@@ -157,6 +159,50 @@ ExtenderPreservesMult a s other i (ConsUlt j y js) =
               [other.Model.validate Associativity [_,_,_]])
   ~~ other.Embed.H.H i .*. h ((j , y) :: js) ...(Refl)
 
+
+public export
+ExtenderPreservesProd : (a : Monoid) -> (s : Setoid) -> 
+  (other : Extension a s) ->
+  (is,js : FrexCarrier a s) ->
+  let %hint
+      notation : Multiplicative1 (U other.Model)
+      notation = other.Model.Multiplicative1
+      %hint
+      notation' : MAction1 (U a) (FrexCarrier a s)
+      notation' = cast $ MonAction a s
+      %hint
+      notation'' : Multiplicative1 (U a)
+      notation'' = a.Multiplicative1
+      h : U (FrexMonoid a s) -> U other.Model
+      h = ExtenderFunction a s other
+  in other.Model.rel
+    (h (is .*. js) )
+    (h is .*. h js)
+ExtenderPreservesProd a s other (Ultimate i) js =
+  ExtenderPreservesMult a s other i js
+ExtenderPreservesProd a s other (ConsUlt i x is) js =
+  let %hint
+      notation : Multiplicative1 (U other.Model)
+      notation = other.Model.Multiplicative1
+      %hint
+      notation' : MAction1 (U a) (FrexCarrier a s)
+      notation' = cast $ MonAction a s
+      %hint
+      notation'' : Multiplicative1 (U a)
+      notation'' = a.Multiplicative1
+      h : U (FrexMonoid a s) -> U other.Model
+      h = ExtenderFunction a s other
+  in CalcWith @{cast other.Model} $
+  |~ h ((i, x) :: is .*. js)
+  ~~ other.Embed.H.H i .*. other.Var.H x .*. h(is .*. js) ...(Refl)
+  <~ other.Embed.H.H i .*. other.Var.H x .*.(h is .*. h js) 
+    ...(other.Model.cong 1 (Sta (other.Embed.H.H i .*. other.Var.H x) .*. Dyn 0) [_] [_]
+        [ExtenderPreservesProd a s other is js])
+  <~ (other.Embed.H.H i .*. other.Var.H x .*. h is) .*. h js
+    ...(other.Model.validate Associativity [_,_,_])
+  ~~ h ((i, x) :: is) .*. h js ...(Refl)
+
+
 public export
 ExtenderIsHomomorphism : (a : Monoid) -> (s : Setoid) -> 
   ExtenderIsHomomorphism (Extension a s) (ExtenderFunction a s)
@@ -174,27 +220,6 @@ ExtenderIsHomomorphism a s other (MkOp Neutral) []      =
   |~ other.Embed.H.H I1
   <~ I1 ...(other.Embed.preserves Unit []
   )
-ExtenderIsHomomorphism a s other (MkOp Product) [Ultimate i,js] =
-  ExtenderPreservesMult a s other i js
 
-ExtenderIsHomomorphism a s other (MkOp Product) [ConsUlt i x is,js] =
-  let %hint
-      notation : Multiplicative1 (U other.Model)
-      notation = other.Model.Multiplicative1
-      %hint
-      notation' : MAction1 (U a) (FrexCarrier a s)
-      notation' = cast $ MonAction a s
-      %hint
-      notation'' : Multiplicative1 (U a)
-      notation'' = a.Multiplicative1
-      h : U (FrexMonoid a s) -> U other.Model
-      h = ExtenderFunction a s other
-  in CalcWith @{cast other.Model} $
-  |~ h ((i, x) :: is .*. js)
-  ~~ other.Embed.H.H i .*. other.Var.H x .*. h(is .*. js) ...(Refl)
-  <~ other.Embed.H.H i .*. other.Var.H x .*.(h is .*. h js) 
-    ...(other.Model.cong 1 (Sta (other.Embed.H.H i .*. other.Var.H x) .*. Dyn 0) [_] [_]
-        [ExtenderIsHomomorphism a s other Prod [is, js]])
-  <~ (other.Embed.H.H i .*. other.Var.H x .*. h is) .*. h js
-    ...(other.Model.validate Associativity [_,_,_])
-  ~~ h ((i, x) :: is) .*. h js ...(Refl)
+ExtenderIsHomomorphism a s other (MkOp Product) [is,js] = 
+  ExtenderPreservesProd a s other is js

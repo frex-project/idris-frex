@@ -25,6 +25,8 @@ import Data.List.Elem
 
 import Data.Setoid.Pair
 
+%default total
+
 ||| A list of elements alternating between two types starting and
 ||| ending with an `ult`imate.
 public export
@@ -149,24 +151,38 @@ MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) (MkAnd _ _) impossible
 MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) (MkAnd _ _) impossible
 
 public export
+AppendHomomorphismProperty : (a : Monoid) -> (x : Setoid) -> 
+  (is1, is2, js1, js2 : UltList (U x) (U a)) ->
+  (UltListSetoid x (cast a)).equivalence.relation
+    is1
+    is2 ->
+  (UltListSetoid x (cast a)).equivalence.relation
+    js1
+    js2 ->
+  (UltListSetoid x (cast a)).equivalence.relation
+    ((++) {a} is1 js1)
+    ((++) {a} is2 js2)
+
+AppendHomomorphismProperty a s (Ultimate i0     ) (Ultimate j0     ) is  js 
+  (Ultimate i0_eq_j0) is_eq_js 
+  =  MultHomomorphism a s (i0, is) (j0, js) (MkAnd i0_eq_j0 is_eq_js)
+AppendHomomorphismProperty a s (ConsUlt i0 x is0) (ConsUlt j0 y js0) is1 js1
+  (ConsUlt i0_eq_j0 x_eq_y is0_eq_js0) is1_eq_js1 = 
+  ( i0_eq_j0 
+  , x_eq_y
+  ) :: AppendHomomorphismProperty a s is0 js0 is1 js1 is0_eq_js0 is1_eq_js1
+
+public export
 AppendHomomorphism : (a : Monoid) -> (x : Setoid) -> 
   SetoidHomomorphism 
     (UltListSetoid x (cast a) `Pair`
      UltListSetoid x (cast a))
     (UltListSetoid x (cast a))
     (Prelude.uncurry ((++) {a}))
+AppendHomomorphism a x (is1,js1) (is2,js2) (MkAnd is1_eq_is2 js1_eq_js2) 
+  = AppendHomomorphismProperty a x is1 is2 js1 js2 is1_eq_is2 js1_eq_js2
 
 
-AppendHomomorphism a s (Ultimate i0,is) (Ultimate j0, js) 
-  (MkAnd (Ultimate i0_eq_j0) is_eq_js) = 
-  MultHomomorphism a s (i0, is) (j0, js) (MkAnd i0_eq_j0 is_eq_js)
-AppendHomomorphism a s (ConsUlt i0 x is0,is1) (ConsUlt j0 y js0, js1) 
-  (MkAnd (ConsUlt i0_eq_j0 x_eq_y is0_eq_js0) is1_eq_js1) = 
-  ( i0_eq_j0 
-  , x_eq_y
-  ) :: AppendHomomorphism a s (is0, is1) (js0, js1) (MkAnd is0_eq_js0 is1_eq_js1)
-AppendHomomorphism _ _ (Ultimate _, _) (ConsUlt _ _ _, _) (MkAnd _ _) impossible
-AppendHomomorphism _ _ (ConsUlt _ _ _, _) (Ultimate _, _) (MkAnd _ _) impossible
 
 public export 0
 FrexCarrier : (a : Monoid) -> (x : Setoid) -> Type

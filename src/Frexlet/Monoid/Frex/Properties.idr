@@ -15,6 +15,7 @@ import Data.List.Elem
 
 import Data.Setoid.Pair
 
+%default total
 ----------------------------- .mult properties
 public export
 multUnitNeutral : (a : Monoid) -> (s : Setoid) -> (is : FrexCarrier a s) ->
