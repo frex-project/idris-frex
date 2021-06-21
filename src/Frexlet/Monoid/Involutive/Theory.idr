@@ -26,6 +26,7 @@ namespace Axiom
     | Involutivity
     | Antidistributivity
 
+public export
 InvolutiveMonoidTheory : Presentation
 InvolutiveMonoidTheory = MkPresentation Involutive.Theory.Signature Involutive.Theory.Axiom.Axiom 
   \case

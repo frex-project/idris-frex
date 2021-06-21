@@ -40,6 +40,9 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Frex
         , Frexlet.Monoid.Involutive
         , Frexlet.Monoid.Involutive.Theory
+        , Frexlet.Monoid.Involutive.Notation
+        , Frexlet.Monoid.Involutive.Properties
+        , Frexlet.Monoid.Involutive.Involution
         -- Should move to contrib
         , Data.Setoid
         , Data.Setoid.Definition

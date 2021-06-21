@@ -7,3 +7,4 @@
 module Frexlet.Monoid.Involutive
 
 import public Frexlet.Monoid.Involutive.Theory
+import public Frexlet.Monoid.Involutive.Properties
