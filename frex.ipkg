@@ -38,6 +38,8 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Free
         , Frexlet.Monoid.Commutative.Coproduct
         , Frexlet.Monoid.Commutative.Frex
+        , Frexlet.Monoid.Involutive
+        , Frexlet.Monoid.Involutive.Theory
         -- Should move to contrib
         , Data.Setoid
         , Data.Setoid.Definition

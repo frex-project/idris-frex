@@ -20,3 +20,14 @@ record Presentation where
 public export %hint
 projectSignature : Presentation -> Signature
 projectSignature pres = pres.signature
+
+%hint
+public export
+castEqHint : {auto castOp : sig1 ~> sig2} ->
+   Cast (Equation sig1) (Equation sig2)
+castEqHint {castOp} = MkCast \eq => 
+  MkEq 
+  { Var = eq.Var 
+  , lhs = cast eq.lhs
+  , rhs = cast eq.rhs
+  }

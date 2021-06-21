@@ -114,8 +114,8 @@ a ^ x = MkPower
              in CalcWith @{cast a} $
              |~ OtoA .H.H (other.Model.Sem op env)
              <~ a.Sem op (map (OtoA .H.H) env) ...(OtoA .preserves op env)
-                                                  -- vv too disgusting...
-             ~~ a.Sem op (map (\phi => phi.H i) (map _ env))
+                                                                  -- vv too disgusting...
+             ~~ a.Sem op (map (\phi : (x ~> cast a) => phi.H i) (map _ env))
                               ...(cong (a.Sem op)
                                  $ sym $ mapFusion _ _ env))
         \u,i => (cast a).equivalence.reflexive _

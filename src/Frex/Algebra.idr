@@ -42,6 +42,12 @@ uncurry : {n : Nat} -> (f : n `ary` a) -> a ^ n -> a
 uncurry {n = 0  } f xs = f
 uncurry {n = S n} f xs = Algebra.uncurry (f $ head xs) (tail xs)
 
+export
+uncurryCurryId : {n : Nat} -> (f : a ^ n -> a) -> (xs : a ^ n) -> 
+  (Algebra.uncurry (Algebra.curry f)) xs = f xs
+uncurryCurryId f    []     = Refl
+uncurryCurryId f (x :: xs) = uncurryCurryId (\xs => f (x :: xs)) xs
+
 ||| States: each operation has an interpretation
 public export
 algebraOver : (sig : Signature) -> (a : Type) -> Type
@@ -471,4 +477,32 @@ callEqSem a op xs = Calc $
   ~~ a.Sem op (tabulate (\i => index i xs)) 
        ...(cong (a.Sem op) $ sym $ mapTabulate _ _)
   ~~ a.Sem op xs ...(cong (a.Sem op) $ vectorExtensionality _ _ $ indexTabulate _)
+
+namespace Signature
+  public export
+  record (~>) (sig1, sig2 : Signature) where
+    constructor MkSignatureMorphism
+    H : {n : Nat} -> sig1.OpWithArity n -> Term sig2 (Fin n)
+
+  public export
+  OpTranslation : (castOp : {n : Nat} -> sig1.OpWithArity n -> sig2.OpWithArity n) -> sig1 ~> sig2
+  OpTranslation castOp = 
+     MkSignatureMorphism \op => 
+       Call (MkOp $ castOp op) 
+            (map Done Fin.range)
+
+
+  public export
+  cast : {auto castOp : sig1 ~> sig2} ->
+     (Term sig1 a) -> (Term sig2 a)
+  
+  public export
+  castTerms : (castOp : sig1 ~> sig2) ->
+     (Vect k (Term sig1 a)) -> (Vect k (Term sig2 a))
+  castTerms castOp [] = []
+  castTerms castOp (t :: ts) = (cast {castOp} t) :: castTerms castOp ts
+  
+  cast (Done x   ) = Done x
+  cast (Call f ts) = (Free sig2 _).Sem (castOp.H f.snd) 
+                   $ Signature.cast . flip index ts
 
