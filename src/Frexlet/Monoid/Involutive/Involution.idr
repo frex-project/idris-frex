@@ -21,6 +21,7 @@ import Frexlet.Monoid.Theory
 
 import Frexlet.Monoid.Involutive.Theory
 import Frexlet.Monoid.Involutive.Notation
+import Frexlet.Monoid.Involutive.Properties
 
 namespace Algebra
   ||| Same monoid structure with the order of multiplication reversed:
@@ -95,3 +96,52 @@ public export
     (cast {to = a ~> a.rev.rev} a.revInvolution).rev
     (cast {to = a.rev ~> a.rev.rev.rev} a.rev.revInvolution)
 a.revInvolutionAxiom = a.equivalence.reflexive
+
+-- The next two definitions and the two constructions following it are
+-- the main point of this module:
+
+||| Characterises the involution axiom abstractly.
+public export 0
+(.Involution) : (a : Monoid) -> (h : a ~> a.rev) -> Type
+a.Involution h = 
+  (a ~~> a.rev.rev).equivalence.relation 
+    (h.rev . h)
+    (cast a.revInvolution)
+
+
+||| A characterisation of the structure and properties of an
+||| involution over a monoid.
+public export
+record Involution (a : Monoid) where
+  constructor MkInvolution
+  H : a ~> a.rev
+  involutive : a.Involution H
+
+||| Repackage the data and properties in an involutive monoid abstractly
+public export
+InvolutiveMonoidToInvolution : (a : InvolutiveMonoid) -> Involution (cast a)
+InvolutiveMonoidToInvolution a = MkInvolution
+  { H = MkSetoidHomomorphism 
+    { H = MkSetoidHomomorphism
+      { H = a.sem Involution
+      , homomorphic = \x,y,prf => a.Algebra.congruence Involute [x] [y] (\case {0 => prf})
+      }
+    , preserves = \case
+        MkOp Neutral => \[] => invNeutral a
+        MkOp Product => \[x,y] => a.validate Antidistributivity [_,_]
+    }
+  , involutive = \x => a.validate Involutivity [x]
+  }
+
+public export
+InvolutionToInvolutiveMonoid : (a : Monoid) -> Involution (cast a) -> InvolutiveMonoid
+InvolutionToInvolutiveMonoid a involution = 
+  let %hint
+      notation : Multiplicative1 (U a)
+      notation = a.Multiplicative1
+  in MkInvolutiveMonoid 
+     a
+     involution.H.H
+     (\env => involution.involutive (env 0))
+     (\env => involution.H.preserves Prod [_,_])
+

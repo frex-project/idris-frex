@@ -2,6 +2,7 @@
 module Frexlet.Monoid.Involutive.Notation
 
 import Frex
+import Frex.Free.Construction
 
 import Frexlet.Monoid.Theory
 import Frexlet.Monoid.Involutive.Theory
@@ -18,6 +19,15 @@ public export
 (.Involutive) : (monoid : InvolutiveMonoid) -> Involutive (U monoid)
 monoid.Involutive = MkInvolutive (monoid.sem Involution)
 
+%hint
+public export
+fstInvulotive : (Involutive a, _) -> Involutive a
+fstInvulotive = fst
+
+%hint
+public export
+sndInvolutive : (_, Involutive a) -> Involutive a
+sndInvolutive = snd
 
 public export
 InvMult1 : (a : Type) -> Type
@@ -48,12 +58,10 @@ notationSyntax : Involutive (Term (InvolutiveMonoidTheory).signature x)
 notationSyntax = MkInvolutive
   (call {sig = (InvolutiveMonoidTheory).signature} Involution) 
 
-
 %hint 
 public export
-notation1 : Involutive (Term (InvolutiveMonoidTheory).signature (a `Either` (Fin n)))
-notation1 = notationSyntax
-
-
-
+notation1 : InvMult1 (Term (InvolutiveMonoidTheory).signature (a `Either` (Fin n)))
+notation1 = (notationSyntax, MkMultiplicative1 
+              (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Neutral) 
+              (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Product))
 
