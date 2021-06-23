@@ -56,7 +56,7 @@ data (|-)
 
   ||| Instances of axioms are theorems
   ByAxiom : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
-    (eq : Axiom pres) -> (env : (pres.axiom eq).Var -> U a) ->
+    (eq : Axiom pres) -> (env : Fin (pres.axiom eq).support -> U a) ->
     (|-) {pres} a (bindTerm {a = a.algebra} (pres.axiom eq).lhs env)
                   (bindTerm {a = a.algebra} (pres.axiom eq).rhs env)
 

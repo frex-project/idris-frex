@@ -21,7 +21,7 @@ t =-= s = (t, s)
 ||| Smart constructor for equations over finitely many variables
 public export
 MkEquation : (n : Nat) -> (eq : (Term sig (Fin n), Term sig (Fin n))) -> Equation sig
-MkEquation n (t,s) = MkEq (Fin n) t s
+MkEquation n (t,s) = MkEq n t s
 
 ||| Auxiliary: extract additive notation for two given operations
 public export
@@ -66,4 +66,3 @@ commutativity : {sig : Signature} -> EqSpec sig [2]
 commutativity product =
   let (+) = call product in
   MkEquation 2 $ X 0 + X 1 =-= X 1 + X 0
-
