@@ -13,6 +13,7 @@ import public Data.Vect
 import public Data.Vect.Elem
 import public Data.Vect.Properties
 import public Data.Rel
+import Data.String
 
 import Control.WellFounded
 
@@ -82,6 +83,24 @@ data Term : (0 sig : Signature) -> Type -> Type where
   ||| An operator, applied to a vector of sub-terms
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
          -> Term sig a
+
+export
+(Show a, Show (Op sig), HasPrecedence sig) => Show (Term sig a) where
+  showPrec _ (Done v) = show v
+  showPrec c (Call f args) with (arity f) proof eq
+    showPrec c (Call f args) | Z = show f
+    showPrec c (Call f args) | (S _)
+      = let catchall : Lazy String
+              := unwords (show f :: map (showPrec App) (toList args))
+        in case precedence f of
+             Nothing  => showParens True catchall
+             Just lvl => let d = User (level lvl) in
+               showParens (c > d) $ case args of
+                 [x]   => unwords [show f, showPrec d x]
+                 [x,y] => case lvl of
+                   InfixL _ => unwords [showPrec d x, show f, showPrec App y]
+                   InfixR _ => unwords [showPrec App x, show f, showPrec d y]
+                 _ => catchall
 
 ------------------ Functor, Applicative, Monad -------------------------------------------
 

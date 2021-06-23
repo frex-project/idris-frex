@@ -7,16 +7,16 @@ public export
 data Operation : Nat -> Type where
   Neutral : Operation 0
   Product : Operation 2
-                 
+
 public export
 Signature : Signature
 Signature = MkSignature Operation
 
 public export
-data Axiom 
- = LftNeutrality 
+data Axiom
+ = LftNeutrality
  | RgtNeutrality
- | Associativity 
+ | Associativity
 
 public export
 MonoidTheory : Presentation
@@ -40,3 +40,12 @@ Unit = MkOp Neutral
 public export
 Prod : Op Signature
 Prod = MkOp Product
+
+export
+HasPrecedence Signature where
+ OpPrecedence Product = Just (InfixR 0)
+
+export
+Show (Op Signature) where
+  show (MkOp Neutral) = "ϵ"
+  show (MkOp Product) = "•"
