@@ -7,7 +7,6 @@ record Signature where
   constructor MkSignature
   OpWithArity : Nat -> Type
 
-
 public export
 record Op (Sig : Signature) where
   constructor MkOp

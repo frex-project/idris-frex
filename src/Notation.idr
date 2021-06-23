@@ -14,4 +14,3 @@ namespace MultiSorted
   ary : List Type -> (a : Type) -> Type
   ary [] a = a
   ary (ty :: tys) a = ty -> ary tys a
-  

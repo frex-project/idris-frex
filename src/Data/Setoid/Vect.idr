@@ -7,12 +7,11 @@ import Data.Vect
 import Data.HVect
 import Data.Vect.Properties
 
-  
 public export
 VectSetoid : (n : Nat) -> (a : Setoid) -> Setoid
-VectSetoid n a = MkSetoid (Vect n (U a)) 
+VectSetoid n a = MkSetoid (Vect n (U a))
   -- need a local definition, see #1435
-  let 0 Relation : (xs, ys : Vect n (U a)) -> Type
+  let 0 Relation : Rel (Vect n (U a))
       Relation xs ys = (i : Fin n) -> a.equivalence.relation (index i xs) (index i ys)
   in MkEquivalence
   { relation   = Relation
@@ -24,9 +23,9 @@ VectSetoid n a = MkSetoid (Vect n (U a))
 
 public export
 VectMap : {a, b : Setoid} -> (a ~~> b) ~> ((VectSetoid n a) ~~> (VectSetoid n b))
-VectMap = MkSetoidHomomorphism 
-  (\f => MkSetoidHomomorphism 
-            (\xs => map f.H xs) 
+VectMap = MkSetoidHomomorphism
+  (\f => MkSetoidHomomorphism
+            (\xs => map f.H xs)
             \xs, ys, prf, i  => CalcWith @{cast b} $
               |~ index i (map f.H xs)
               ~~ f.H (index i xs)     ...(indexNaturality _ _ _)
