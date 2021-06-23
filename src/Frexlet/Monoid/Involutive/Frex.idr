@@ -42,9 +42,9 @@ FrexInvMonoid a s = FrexMonoid (cast a) (cast Bool `Pair` s)
 ||| a.rev --> (FrexInvMonoid a s).rev <--- (Bool, s)
 |||     sta.rev                        dyn
 public export
-FrexInvolutionExtension : (a : InvolutiveMonoid) -> (s : Setoid) -> 
+FrexInvolutionExtension : (a : InvolutiveMonoid) -> (s : Setoid) ->
   Extension (cast {to=Monoid} a) (cast Bool `Pair` s)
-FrexInvolutionExtension a s = 
+FrexInvolutionExtension a s =
   let %hint
       notation : InvMult1 (U a)
       notation = a.Notation1
@@ -64,19 +64,18 @@ FrexInvolutionExtension a s =
 ||| a.rev --> (FrexInvMonoid a s).rev <--- (Bool, s)
 |||     sta.rev                        dyn
 public export
-FrexInvolutionExtensionMorphism : (a : InvolutiveMonoid) -> (s : Setoid) -> 
+FrexInvolutionExtensionMorphism : (a : InvolutiveMonoid) -> (s : Setoid) ->
   (AuxFrex a s).Data ~> FrexInvolutionExtension a s
-  --FrexInvMonoid a s ~> (FrexInvMonoid a s).rev
 FrexInvolutionExtensionMorphism a s = (AuxFrex a s).UP.Exists (FrexInvolutionExtension a s)
 
 ||| The involution homomorphism for the frex
 public export
-FrexInvolution : (a : InvolutiveMonoid) -> (s : Setoid) -> 
+FrexInvolution : (a : InvolutiveMonoid) -> (s : Setoid) ->
   FrexInvMonoid a s ~> (FrexInvMonoid a s).rev
 FrexInvolution a s = (FrexInvolutionExtensionMorphism a s).H
 
 ||| The involution axiom boils down to this equation:
-||| 
+|||
 |||  FrexInvMonoid a s  ---------------------
 |||         |                               |
 |||         | FrexInvolution a s            | cast (cast a).revInvolution
@@ -87,7 +86,7 @@ FrexInvolution a s = (FrexInvolutionExtensionMorphism a s).H
 public export
 FrexInvolutionIsInvolution : (a : InvolutiveMonoid) -> (s : Setoid) ->
   (FrexInvMonoid a s).Involution (FrexInvolution a s)
-FrexInvolutionIsInvolution a s = 
+FrexInvolutionIsInvolution a s =
   let %hint
       notation : InvMult1 (U a)
       notation = a.Notation1
@@ -102,26 +101,26 @@ FrexInvolutionIsInvolution a s =
       j : frex.Model.Algebra <~> frex.Model.Algebra.rev.rev
       j = frex.Model.revInvolution
       ||| We'll use frex's universal property with respect to this extension:
-      |||      
+      |||
       |||   a                                         (Bool, s)
-      |||   | inv                                         |  bimap not id   
-      |||   v                                             v     
+      |||   | inv                                         |  bimap not id
+      |||   v                                             v
       |||   a.rev                                     (Bool, s)
       |||   | inv.rev                                     |  bimap not id
-      |||   v                                             v           
+      |||   v                                             v
       |||   a.rev.rev ---> frex.Model.rev.rev <------ (Bool, s)
       |||          frex.Embed.rev.rev          frex.Var
       doubleInvExtension : Extension (cast {to = Monoid}  a) (cast Bool `Pair` s)
       doubleInvExtension = MkExtension
         { Model = frex.Model.rev.rev
         , Embed = frex.Embed.rev.rev . inv.rev . inv
-        , Var   = frex.Var   . bid . bid 
+        , Var   = frex.Var   . bid . bid
         }
       -- and we'll construct two extension morphisms from frex.Model into it.
       ||| The first extension morphism:
       |||      frex.Embed                frex.Var
       |||   a -----------> frex.Model <-------------- (Bool, s)
-      |||   | inv    = (def)      |inv       = (def)      |  bimap not id   
+      |||   | inv    = (def)      |inv       = (def)      |  bimap not id
       |||   v     ditto.rev       v        frex.Var       v
       |||   a.rev -------> frex.Model.rev <---------  (Bool, s)
       |||   | inv.rev = (functor) |inv.rev   = (def)      |  bimap not id
@@ -136,20 +135,20 @@ FrexInvolutionIsInvolution a s =
           <~ (frexInv.rev.H.H $ frex.Embed.rev.H.H $ inv.H.H i)
             ...(frexInv.rev.H.homomorphic _ _ $
                 (FrexInvolutionExtensionMorphism a s).PreserveEmbed _)
-          <~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H  $ inv.H.H i) 
+          <~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H  $ inv.H.H i)
             ...((FrexInvolutionExtensionMorphism a s).PreserveEmbed _)
         , PreserveVar   = \x => CalcWith @{cast $ frex.Model.rev.rev} $
           |~ (frexInv.rev.H.H $ frexInv.H.H $ frex.Var.H x)
-          <~ (frexInv.rev.H.H $ frex.Var.H $ bid.H x) 
+          <~ (frexInv.rev.H.H $ frex.Var.H $ bid.H x)
             ...(frexInv.rev.H.homomorphic _ _ $
                 (FrexInvolutionExtensionMorphism a s).PreserveVar _)
-          <~ (frex.Var.H $ bid.H $ bid.H x) 
+          <~ (frex.Var.H $ bid.H $ bid.H x)
             ...((FrexInvolutionExtensionMorphism a s).PreserveVar (bid.H x))
         }
       ||| The second extension morphism:
       |||      frex.Embed                frex.Var
       |||   a -----------> frex.Model <-------------- (Bool, s)
-      |||   | inv \  = (j nat)  |   = ( not . not = id)   |  bimap not id   
+      |||   | inv \  = (j nat)  |   = ( not . not = id)   |  bimap not id
       |||   v      \            |                         v
       |||   a.rev   \ cast j    | cast j              (Bool, s)
       |||   | inv.rev\          |                         |  bimap not id
