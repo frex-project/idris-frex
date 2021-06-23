@@ -31,7 +31,7 @@ models a eq env = a.equivalence.relation
 ||| Like `models`, but the arguments are reversed and packed slightly
 ||| more compactly, makes nice syntax sometimes
 public export 0
-(=|) : {sig : Signature} -> (eq : Equation sig) -> 
+(=|) : {sig : Signature} -> (eq : Equation sig) ->
   (a : SetoidAlgebra sig ** eq.Var -> U a.algebra) -> Type
 eq =| (a ** env) = models a eq env
 
@@ -51,28 +51,28 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   ||| Isomorphisms let us replace the semantics of one algebra with another
   public export
   semPreservation : (t : Term sig x) -> (env : x -> U b) ->
-    b.equivalence.relation 
+    b.equivalence.relation
       (bindTerm {a = b.algebra} t env)
       (iso.Iso.Fwd.H $ a.Sem t (iso.Iso.Bwd.H . env))
   semPreservation {x} t env = CalcWith @{cast b} $
     let id_b' : cast b ~> cast b
         id_b' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
-    in 
+    in
     |~ b.Sem t env
     <~ b.Sem t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
-             ...((eval {a = b, x = cast x} t).homomorphic 
-                   (mate env) 
+             ...((eval {a = b, x = cast x} t).homomorphic
+                   (mate env)
                    (iso.Iso.Fwd . (iso.Iso.Bwd . mate env))
-                \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H 
-                         iso.Iso.Iso.FwdBwdId  
+                \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H
+                         iso.Iso.Iso.FwdBwdId
                          (env i))
-    <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env)) 
-             ...(b.equivalence.symmetric _ _ $ 
+    <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env))
+             ...(b.equivalence.symmetric _ _ $
                    homoPreservesSem (cast {to = a ~> b} iso) t (iso.Iso.Bwd.H . env))
 
   ||| Isomorphisms preserve all equations
   public export
-  isoPreservesEq : (eq : Equation sig) -> 
+  isoPreservesEq : (eq : Equation sig) ->
     (env : eq.Var -> U b)  -> eq =| (a ** iso.Iso.Bwd.H . env) -> eq =| (b ** env)
   isoPreservesEq eq env prf = CalcWith @{cast b} $
     let env' : eq.Var -> U a
@@ -101,21 +101,21 @@ record Model (Pres : Presentation) where
 
 {-
   So the next few lines are a bit... silly. Here's what's happening.
-  
+
   What we want to write is this:
 
   Semantic (Model pres) (Op pres.signature) where
     (.SemType) a = a.Algebra.SemType
     (.Sem)     a = a.Algebra.Sem
-  
-  
+
+
   However, that's not going to work in practice.
-  
+
   In this implementation above, we have a metavariable `pres`.  Idris2
   currently refuses to solve any metavariables as part of interface
   resolution. As a consequence, even if unification works out that
   `a ~ Model pres0`, it won't propagate that to solve `pres ~ pres0`.
-  
+
   To get around that, we use a forded auto-implicit:
 -}
 
@@ -174,7 +174,7 @@ public export
 (~~>) a b = a.Algebra ~~> b.Algebra
 
 public export
-transport : {pres : Presentation} -> (a : Model pres) -> 
+transport : {pres : Presentation} -> (a : Model pres) ->
   {b : SetoidAlgebra (pres.signature)} ->
   (a.Algebra <~> b) ->
    Model pres
@@ -186,34 +186,34 @@ transport a iso = MkModel b $
 public export
 (.cong) : {0 pres : Presentation} -> (a : Model pres) -> (0 n : Nat)
   -> (t : Term pres.signature (U a `Either` Fin n))
-  -> (lhs, rhs : Vect n (U a)) 
-  -> HVect (tabulate \i => (cast a).equivalence.relation 
-       (index i lhs) 
+  -> (lhs, rhs : Vect n (U a))
+  -> HVect (tabulate \i => (cast a).equivalence.relation
+       (index i lhs)
        (index i rhs))
-  -> (cast a).equivalence.relation 
+  -> (cast a).equivalence.relation
        (a.Sem t $ either Prelude.id $ flip index lhs)
        (a.Sem t $ either Prelude.id $ flip index rhs)
-(.cong) a n t lhs rhs prfs 
-  = (Setoid.eval {x = cast $ U a `Either` Fin n} t).homomorphic 
+(.cong) a n t lhs rhs prfs
+  = (Setoid.eval {x = cast $ U a `Either` Fin n} t).homomorphic
       (mate $ either Prelude.id $ flip index lhs)
       (mate $ either Prelude.id $ flip index rhs)
       \case
         Left  x => (cast a).equivalence.reflexive x
-        Right i => replace {p = id} 
+        Right i => replace {p = id}
               (indexTabulate _ _)
               (index i prfs)
-%unbound_implicits on    
+%unbound_implicits on
 
-public export                        
+public export
 Dyn : (i : Fin n) -> Term sig (a `Either` Fin n)
 Dyn i = Done (Right i)
-              
-public export                        
+
+public export
 Sta : (x : a) -> Term sig (a `Either` Fin n)
 Sta x = Done (Left x)
 
 public export
-(.validate) : {0 n : Nat} -> (a : Model pres) -> (ax : Axiom pres) -> 
+(.validate) : {0 n : Nat} -> (a : Model pres) -> (ax : Axiom pres) ->
   {auto 0 ford : Fin n = (pres.axiom ax).Var} -> (env : Vect n (U a)) ->
   (pres.axiom ax) =| (a.Algebra ** replace {p = \i => i -> U a} ford (flip Vect.index env))
 a.validate ax env = a.Validate ax \i => index (replace {p = id} (sym ford) i) env

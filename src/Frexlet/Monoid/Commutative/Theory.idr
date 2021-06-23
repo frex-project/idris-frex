@@ -6,7 +6,7 @@ import Frex
 import public Frexlet.Monoid
 
 public export
-data Axiom 
+data Axiom
   = Mon Monoid.Theory.Axiom
   | Commutativity
 
@@ -22,22 +22,22 @@ CommutativeMonoid = Model CommutativeMonoidTheory
 
 ||| Smart constructor for commutative monoids
 public export
-MkCommutativeMonoid 
-  : (monoid : Monoid) -> 
-    (commutativity : ValidatesEquation 
+MkCommutativeMonoid
+  : (monoid : Monoid) ->
+    (commutativity : ValidatesEquation
                        (Axiom.commutativity {sig = Theory.Signature} Product)
                        (monoid.Algebra)) ->
     CommutativeMonoid
-MkCommutativeMonoid monoid commutativity = MkModel 
+MkCommutativeMonoid monoid commutativity = MkModel
   { Algebra = monoid.Algebra
   , Validate = \case
-      Mon ax        => monoid.Validate ax 
+      Mon ax        => monoid.Validate ax
       Commutativity => commutativity
   }
 
 public export
 Cast CommutativeMonoid Monoid where
-  cast cmonoid = MkModel 
+  cast cmonoid = MkModel
     { Algebra  = cmonoid.Algebra
     , Validate = \ax => cmonoid.Validate (Mon ax)
     }

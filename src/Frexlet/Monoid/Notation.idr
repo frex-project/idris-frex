@@ -34,27 +34,27 @@ monoid.Multiplicative3 = MkMultiplicative3 (monoid.sem Neutral) (monoid.sem Prod
 
 public export
 notationSyntax : Multiplicative1 (Term Signature x)
-notationSyntax = MkMultiplicative1 
-              (call {sig = Signature} Neutral) 
+notationSyntax = MkMultiplicative1
+              (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
-%hint 
+%hint
 public export
 notation1 : Multiplicative1 (Term Signature (a `Either` (Fin n)))
-notation1 = MkMultiplicative1 
-              (call {sig = Signature} Neutral) 
+notation1 = MkMultiplicative1
+              (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 
-%hint 
+%hint
 public export
 notation2 : Multiplicative2 (Term Signature (a `Either` (Fin n)))
 notation2 = MkMultiplicative2
-              (call {sig = Signature} Neutral) 
+              (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 
-%hint 
+%hint
 public export
 notation3 : Multiplicative3 (Term Signature (a `Either` (Fin n)))
 notation3 = MkMultiplicative3
-              (call {sig = Signature} Neutral) 
+              (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 

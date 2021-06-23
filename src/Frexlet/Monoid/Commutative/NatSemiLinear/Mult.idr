@@ -21,9 +21,9 @@ import Frexlet.Monoid.Commutative.NatSemiLinear.Sum
 
 -- ----------------------------------------------------------------- --- [Mult]
 public export
-multIsHomomorphism : (a : CommutativeMonoid) -> (n : Nat) -> 
+multIsHomomorphism : (a : CommutativeMonoid) -> (n : Nat) ->
   SetoidHomomorphism (cast a) (cast a) (mult a n)
-multIsHomomorphism a 0 x y prf = a.equivalence.reflexive _ 
+multIsHomomorphism a 0 x y prf = a.equivalence.reflexive _
 multIsHomomorphism a (S k) x y prf = a.cong 2 (Dyn 0 .+. Dyn 1) [_,_] [_,_]
   [ prf
   , multIsHomomorphism a k x y prf]
@@ -36,44 +36,44 @@ multSetoidHomomorphism a n = MkSetoidHomomorphism
   }
 
 public export
-multUnit : (a : CommutativeMonoid) -> 
-  let %hint 
+multUnit : (a : CommutativeMonoid) ->
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in  (x : U a) -> a.rel (the Nat 1 *. x)
                                        x
-multUnit a x = 
-  let %hint 
+multUnit a x =
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in CalcWith @{cast a} $
   |~ the Nat 1 *. x
   ~~ x .+. O1  ...(Refl)
   <~ x         ...(a.Validate (Mon RgtNeutrality) (flip index [_]))
-  
+
 public export
 multDistributesOverPlusLeft : (a : CommutativeMonoid) ->
-  let %hint 
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in (n, m : Nat) -> (x : U a) ->
       a.rel
         ((n + m) *. x)
         (n *. x .+. m *. x)
-multDistributesOverPlusLeft a 0     m x = 
-  let %hint 
+multDistributesOverPlusLeft a 0     m x =
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in CalcWith @{cast a} $
   |~ (0 + m) *. x
   ~~      m  *. x          ...(Refl)
-  <~ (Z *. x) .+. (m *. x) ...( a.equivalence.symmetric _ _ 
+  <~ (Z *. x) .+. (m *. x) ...( a.equivalence.symmetric _ _
                               $ a.validate (Mon LftNeutrality) [_])
-  
-multDistributesOverPlusLeft a (S n) m x = 
-  let %hint 
+
+multDistributesOverPlusLeft a (S n) m x =
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in CalcWith @{cast a} $
   |~ (1 + (n + m)) *. x
   ~~ x .+.(n + m) *. x        ...(Refl)
@@ -86,22 +86,22 @@ multDistributesOverPlusLeft a (S n) m x =
 
 public export
 multDistributesOverPlusRight : (a : CommutativeMonoid) ->
-  let %hint 
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in (n : Nat) -> (x,y : U a) ->
       a.rel
         (n *. (x .+. y))
         (n *. x .+. n *. y)
-  
+
 multDistributesOverPlusRight a 0 x y = a.equivalence.symmetric _ _ $
                                        a.validate (Mon LftNeutrality) [_]
-multDistributesOverPlusRight a (S n) x y = 
-  let %hint 
+multDistributesOverPlusRight a (S n) x y =
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in CalcWith @{cast a} $
-  |~ (1 + n) *. (x .+. y) 
+  |~ (1 + n) *. (x .+. y)
   ~~ (x .+. y) .+. n *. (x .+. y)          ...(Refl)
   <~ (x .+. y) .+. ((n *. x) .+. (n *. y)) ...(a.cong 1 (Sta _ .+. Dyn 0) [_] [_]
                                                [multDistributesOverPlusRight a n x y])
@@ -112,9 +112,9 @@ multDistributesOverPlusRight a (S n) x y =
 ||| homomorphism between them as algebras alone.
 public export
 multPreservation : (a, b : CommutativeMonoid) ->
-  let %hint 
+  let %hint
       notationA : Action1 Nat (U a)
-      notationA = NatAction1 a 
+      notationA = NatAction1 a
       %hint
       notationB : Action1 Nat (U b)
       notationB = NatAction1 b
@@ -122,10 +122,10 @@ multPreservation : (a, b : CommutativeMonoid) ->
   b.rel (h.H.H (n *. x))
         (n *. h.H.H x)
 multPreservation a b h  0    x = h.preserves Zero []
-multPreservation a b h (S n) x = 
-  let %hint 
+multPreservation a b h (S n) x =
+  let %hint
       notationA : Action1 Nat (U a)
-      notationA = NatAction1 a 
+      notationA = NatAction1 a
       %hint
       notationB : Action1 Nat (U b)
       notationB = NatAction1 b

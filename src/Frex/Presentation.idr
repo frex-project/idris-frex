@@ -15,7 +15,7 @@ record Presentation where
   constructor MkPresentation
   signature : Signature
   0 Axiom   : Type
-  axiom     : (ax : Axiom) -> Equation signature 
+  axiom     : (ax : Axiom) -> Equation signature
 
 public export %hint
 projectSignature : Presentation -> Signature
