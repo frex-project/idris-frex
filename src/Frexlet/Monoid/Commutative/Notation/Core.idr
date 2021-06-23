@@ -46,12 +46,12 @@ public export
 NatAction2 : (a : CommutativeMonoid) -> Action2 Nat (U a)
 NatAction2 a = cast (NatActionData a)
 
-%hint 
+%hint
 public export
 notation2 : Action2 Nat (Term Signature (a `Either` (Fin n)))
 notation2 = NatAction2 (F _ (irrelevantCast (a `Either` (Fin n))))
 
-%hint 
+%hint
 public export
 notation1 : Action1 Nat (Term Signature (a `Either` (Fin n)))
 notation1 = NatAction1 (F _ (irrelevantCast (a `Either` (Fin n))))

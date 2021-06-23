@@ -30,12 +30,12 @@ reify a s (ConsUlt i x is) =
   in Done (Left i) .*. Done (Right x) .*. reify a s is
 
 public export
-normalForm : (a : Monoid) -> (s : Setoid) -> (is : FrexCarrier a s) -> 
+normalForm : (a : Monoid) -> (s : Setoid) -> (is : FrexCarrier a s) ->
   (FrexMonoid a s).rel
     ((FrexMonoid a s).Sem (reify a s is) (either a.sta a.dyn))
     is
 normalForm a s (Ultimate i) = (FrexSetoid a s).equivalence.reflexive _
-normalForm a s (ConsUlt i x is) = 
+normalForm a s (ConsUlt i x is) =
   let %hint
       notation : Multiplicative1 (Term Signature (U a `Either` U s))
       notation = notationSyntax
@@ -49,10 +49,10 @@ normalForm a s (ConsUlt i x is) =
       env = either a.sta a.dyn
   in CalcWith @{cast $ FrexMonoid a s} $
   |~ a.sta i .*. a.dyn x .*. (FrexMonoid a s).Sem (reify a s is) env
-  ~~ (i .*. I1 , x) :: the (U a) I1 *. ((FrexMonoid a s).Sem (reify a s is) env)  
+  ~~ (i .*. I1 , x) :: the (U a) I1 *. ((FrexMonoid a s).Sem (reify a s is) env)
                   ...(Refl)
-  <~ (i , x) :: (FrexMonoid a s).Sem (reify a s is) env 
-                  ...(( a.validate RgtNeutrality [_] , s.equivalence.reflexive _)  
+  <~ (i , x) :: (FrexMonoid a s).Sem (reify a s is) env
+                  ...(( a.validate RgtNeutrality [_] , s.equivalence.reflexive _)
                      :: multUnitNeutral a s _)
   <~ (i, x) :: is ...(((cast a).equivalence.reflexive _
                       ,s.equivalence.reflexive _
@@ -77,18 +77,18 @@ public export
 dynHomo : (a : Monoid) -> (s : Setoid) -> (s ~> FrexSetoid a s)
 dynHomo a s = MkSetoidHomomorphism
   { H = a.dyn
-  , homomorphic = \x,y,prf => (a.equivalence.reflexive _ , prf) 
+  , homomorphic = \x,y,prf => (a.equivalence.reflexive _ , prf)
                               :: (FrexSetoid a s).equivalence.reflexive _
   }
 
 
 public export
 Extension : (a : Monoid) -> (s : Setoid) -> Extension a s
-Extension a s = MkExtension 
+Extension a s = MkExtension
   { Model = FrexMonoid a s
   , Embed = staHomo a s
   , Var   = dynHomo a s
-  } 
+  }
 
 public export
 ExtenderFunction : (a : Monoid) -> (s : Setoid) -> Frex.ExtenderFunction (Extension a s)
@@ -102,7 +102,7 @@ ExtenderFunction a s other (ConsUlt i x is) =
      ExtenderFunction a s other is
 
 public export
-ExtenderPreservesMult : (a : Monoid) -> (s : Setoid) -> 
+ExtenderPreservesMult : (a : Monoid) -> (s : Setoid) ->
   (other : Extension a s) ->
   (i : U a) -> (is : FrexCarrier a s) ->
   let %hint
@@ -114,7 +114,7 @@ ExtenderPreservesMult : (a : Monoid) -> (s : Setoid) ->
   in other.Model.rel
     (ExtenderFunction a s other (i *. is))
     (other.Embed.H.H i .*. ExtenderFunction a s other is)
-ExtenderPreservesMult a s other i (Ultimate j) = 
+ExtenderPreservesMult a s other i (Ultimate j) =
   let %hint
       notation : Multiplicative1 (U other.Model)
       notation = other.Model.Multiplicative1
@@ -126,10 +126,10 @@ ExtenderPreservesMult a s other i (Ultimate j) =
       notation'' = a.Multiplicative1
   in CalcWith @{cast other.Model} $
   |~ other.Embed.H.H (i .*. j)
-  <~ other.Embed.H.H i .*. other.Embed.H.H j 
+  <~ other.Embed.H.H i .*. other.Embed.H.H j
     ...(other.Embed.preserves Prod [i, j])
-  
-ExtenderPreservesMult a s other i (ConsUlt j y js) = 
+
+ExtenderPreservesMult a s other i (ConsUlt j y js) =
   let %hint
       notation : Multiplicative1 (U other.Model)
       notation = other.Model.Multiplicative1
@@ -143,9 +143,9 @@ ExtenderPreservesMult a s other i (ConsUlt j y js) =
       h = ExtenderFunction a s other
   in CalcWith @{cast other.Model} $
   |~ h ((i .*. j , y) :: js)
-  ~~ other.Embed.H.H (i .*. j) .*. other.Var.H y .*. h js 
+  ~~ other.Embed.H.H (i .*. j) .*. other.Var.H y .*. h js
           ...(Refl)
-  <~ other.Embed.H.H i .*. other.Embed.H.H j .*. other.Var.H y .*. h js 
+  <~ other.Embed.H.H i .*. other.Embed.H.H j .*. other.Var.H y .*. h js
           ...(other.Model.cong 1 (Dyn 0 .*. Sta (other.Var.H y) .*. Sta (h js)) [_] [_]
              [other.Embed.preserves Prod [i,j]])
   <~ (other.Embed.H.H i .*. other.Embed.H.H j) .*. (other.Var.H y .*. h js)
@@ -162,7 +162,7 @@ ExtenderPreservesMult a s other i (ConsUlt j y js) =
 -- Need to do this as a separate function so that the termination
 -- checker can easily see the arguments decreasing.
 public export
-ExtenderPreservesProd : (a : Monoid) -> (s : Setoid) -> 
+ExtenderPreservesProd : (a : Monoid) -> (s : Setoid) ->
   (other : Extension a s) ->
   (is,js : FrexCarrier a s) ->
   let %hint
@@ -196,7 +196,7 @@ ExtenderPreservesProd a s other (ConsUlt i x is) js =
   in CalcWith @{cast other.Model} $
   |~ h ((i, x) :: is .*. js)
   ~~ other.Embed.H.H i .*. other.Var.H x .*. h(is .*. js) ...(Refl)
-  <~ other.Embed.H.H i .*. other.Var.H x .*.(h is .*. h js) 
+  <~ other.Embed.H.H i .*. other.Var.H x .*.(h is .*. h js)
     ...(other.Model.cong 1 (Sta (other.Embed.H.H i .*. other.Var.H x) .*. Dyn 0) [_] [_]
         [ExtenderPreservesProd a s other is js])
   <~ (other.Embed.H.H i .*. other.Var.H x .*. h is) .*. h js
@@ -205,9 +205,9 @@ ExtenderPreservesProd a s other (ConsUlt i x is) js =
 
 
 public export
-ExtenderIsHomomorphism : (a : Monoid) -> (s : Setoid) -> 
+ExtenderIsHomomorphism : (a : Monoid) -> (s : Setoid) ->
   ExtenderIsHomomorphism (Extension a s) (ExtenderFunction a s)
-ExtenderIsHomomorphism a s other (MkOp Neutral) []      = 
+ExtenderIsHomomorphism a s other (MkOp Neutral) []      =
   let %hint
       notation : Multiplicative1 (U other.Model)
       notation = other.Model.Multiplicative1
@@ -222,45 +222,45 @@ ExtenderIsHomomorphism a s other (MkOp Neutral) []      =
   <~ I1 ...(other.Embed.preserves Unit []
   )
 
-ExtenderIsHomomorphism a s other (MkOp Product) [is,js] = 
+ExtenderIsHomomorphism a s other (MkOp Product) [is,js] =
   ExtenderPreservesProd a s other is js
 
 public export
 ExtenderIsSetoidHomomorphism : (a : Monoid) -> (s : Setoid) -> (other : Extension a s) ->
   (is,js : FrexCarrier a s) ->
-  (prf : (FrexMonoid a s).rel is js) -> 
+  (prf : (FrexMonoid a s).rel is js) ->
   other.Model.rel
     (ExtenderFunction a s other is)
     (ExtenderFunction a s other js)
-ExtenderIsSetoidHomomorphism a s other (Ultimate i) (Ultimate j) 
+ExtenderIsSetoidHomomorphism a s other (Ultimate i) (Ultimate j)
   (Ultimate i_eq_j) = other.Embed.H.homomorphic i j i_eq_j
-ExtenderIsSetoidHomomorphism a s other (ConsUlt i x is) (ConsUlt j y js) 
-  (ConsUlt i_eq_j x_eq_y is_eq_js) = 
+ExtenderIsSetoidHomomorphism a s other (ConsUlt i x is) (ConsUlt j y js)
+  (ConsUlt i_eq_j x_eq_y is_eq_js) =
   other.Model.cong 3 (Dyn 0 .*. Dyn 1 .*. Dyn 2) [_,_,_] [_,_,_]
     [ other.Embed.H.homomorphic              i  j   i_eq_j
     , other.Var.homomorphic                  x  y   x_eq_y
     , ExtenderIsSetoidHomomorphism a s other is js is_eq_js
     ]
- 
+
 public export
 ExtenderHomomorphism : (a : Monoid) -> (s : Setoid) -> Frex.Frex.ExtenderHomomorphism (Extension a s)
-ExtenderHomomorphism a s other = MkSetoidHomomorphism 
-  { H = MkSetoidHomomorphism 
+ExtenderHomomorphism a s other = MkSetoidHomomorphism
+  { H = MkSetoidHomomorphism
       { H = ExtenderFunction a s other
       , homomorphic = ExtenderIsSetoidHomomorphism a s other
       }
   , preserves = ExtenderIsHomomorphism a s other
   }
-  
+
 public export
-ExtenderPreservesEmbedding : (a : Monoid) -> (s : Setoid) -> 
+ExtenderPreservesEmbedding : (a : Monoid) -> (s : Setoid) ->
   ExtenderPreservesEmbedding (Extension a s) (ExtenderHomomorphism a s)
 ExtenderPreservesEmbedding a s other i = other.Model.equivalence.reflexive _
 
 public export
-ExtenderPreservesVars : (a : Monoid) -> (s : Setoid) -> 
+ExtenderPreservesVars : (a : Monoid) -> (s : Setoid) ->
   ExtenderPreservesVars (Extension a s) (ExtenderHomomorphism a s)
-ExtenderPreservesVars a s other x = 
+ExtenderPreservesVars a s other x =
   let %hint
       notation : Multiplicative1 (U other.Model)
       notation = other.Model.Multiplicative1
@@ -283,29 +283,29 @@ ExtenderPreservesVars a s other x =
          [other.Embed.preserves Unit []])
   <~ I1 .*. other.Var.H x ...(other.Model.validate RgtNeutrality [_])
   <~        other.Var.H x ...(other.Model.validate LftNeutrality [_])
-  
+
 public export
 Extender : (a : Monoid) -> (s : Setoid) -> Extender (Extension a s)
-Extender a s other = MkExtensionMorphism 
+Extender a s other = MkExtensionMorphism
   { H             = ExtenderHomomorphism       a s other
   , PreserveEmbed = ExtenderPreservesEmbedding a s other
   , PreserveVar   = ExtenderPreservesVars      a s other
   }
 
 public export
-Uniqueness : (a : Monoid) -> (s : Setoid) -> Uniqueness (Extension a s) 
-Uniqueness a s other extend1 extend2 is = 
+Uniqueness : (a : Monoid) -> (s : Setoid) -> Uniqueness (Extension a s)
+Uniqueness a s other extend1 extend2 is =
   let frex : Extension a s
       frex = Extension a s
-      lemma1 : (extend : frex ~> other) -> (is : U frex.Model) -> 
-        other.Model.rel 
+      lemma1 : (extend : frex ~> other) -> (is : U frex.Model) ->
+        other.Model.rel
           (extend.H.H.H is)
           (other.Model.Sem (reify a s is) (extend.H.H.H . (either a.sta a.dyn)))
       lemma1 extend is = CalcWith @{cast other.Model} $
         |~ extend.H.H.H is
         <~ extend.H.H.H (frex.Sem (reify a s is) (either a.sta a.dyn))
-             ...( other.Model.equivalence.symmetric _ _ 
-                $ extend.H.H.homomorphic _ _ 
+             ...( other.Model.equivalence.symmetric _ _
+                $ extend.H.H.homomorphic _ _
                 $ normalForm a s is)
         <~ other.Model.Sem (reify a s is) (extend.H.H.H . (either a.sta a.dyn))
              ...(homoPreservesSem extend.H _ _)
@@ -318,7 +318,7 @@ Uniqueness a s other extend1 extend2 is =
         <~ other.Embed.H.H i                 ...(extend1.PreserveEmbed i)
         <~ extend2.H.H.H (frex.Embed.H.H i)  ...(other.Model.equivalence.symmetric _ _ $
                                                  extend2.PreserveEmbed i)
-        ~~ extend2.H.H.H (either frex.Embed.H.H frex.Var.H (Left i)) 
+        ~~ extend2.H.H.H (either frex.Embed.H.H frex.Var.H (Left i))
                                              ...(Refl)
       lemma2 (Right x) = CalcWith @{cast other.Model} $
         |~ extend1.H.H.H (either frex.Embed.H.H frex.Var.H (Right x))
@@ -326,14 +326,14 @@ Uniqueness a s other extend1 extend2 is =
         <~ other.Var.H x                ...(extend1.PreserveVar x)
         <~ extend2.H.H.H (frex.Var.H x) ...(other.Model.equivalence.symmetric _ _ $
                                             extend2.PreserveVar x)
-        ~~ extend2.H.H.H (either frex.Embed.H.H frex.Var.H (Right x)) 
+        ~~ extend2.H.H.H (either frex.Embed.H.H frex.Var.H (Right x))
                                         ...(Refl)
   in CalcWith @{cast other.Model} $
-  |~ extend1.H.H.H is 
+  |~ extend1.H.H.H is
   <~ other.Model.Sem (reify a s is) (extend1.H.H.H . (either a.sta a.dyn))
        ...(lemma1 extend1 is)
   <~ other.Model.Sem (reify a s is) (extend2.H.H.H . (either a.sta a.dyn))
-       ...((eval (reify a s is)).homomorphic 
+       ...((eval (reify a s is)).homomorphic
              (extend1.H.H . (either frex.Embed.H frex.Var))
              (extend2.H.H . (either frex.Embed.H frex.Var))
              $ lemma2)
@@ -341,9 +341,9 @@ Uniqueness a s other extend1 extend2 is =
 
 public export
 MonoidFrex : (a : Monoid) -> (s : Setoid) -> Frex a s
-MonoidFrex a s = MkFrex 
+MonoidFrex a s = MkFrex
   { Data = Extension a s
-  , UP   = IsUniversal 
+  , UP   = IsUniversal
      { Exists = Extender a s
      , Unique = Uniqueness a s
      }

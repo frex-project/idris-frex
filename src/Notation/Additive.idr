@@ -61,7 +61,7 @@ Cast (HVect [0 `ary` a, 2 `ary` a]) (Additive1 a) where
 
 public export
 Cast (HVect [0 `ary` a, 2 `ary` a]) (Additive2 a) where
-  cast = uncurry MkAdditive2 
+  cast = uncurry MkAdditive2
 
 public export
 Cast (HVect [0 `ary` a, 2 `ary` a]) (Additive3 a) where

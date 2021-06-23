@@ -11,18 +11,18 @@ import Syntax.PreorderReasoning
 
 export
 mapWithPosTabulate : {n : Nat} -> (f : Fin n -> a -> b) -> (x : a) ->
-  mapWithPos f (replicate n x) = tabulate (flip f x) 
+  mapWithPos f (replicate n x) = tabulate (flip f x)
 mapWithPosTabulate {n = 0  } f x = Refl
 mapWithPosTabulate {n = S n} f x = Calc $
   |~ mapWithPos f (replicate (1 + n) x)
   ~~ f FZ x :: mapWithPos (\i => f (FS i)) (replicate n x) ...(Refl)
-  ~~ flip f x FZ :: tabulate (flip (\i => f (FS i)) x)     ...(cong (flip f x FZ ::) $ 
-                                                               mapWithPosTabulate {n} 
+  ~~ flip f x FZ :: tabulate (flip (\i => f (FS i)) x)     ...(cong (flip f x FZ ::) $
+                                                               mapWithPosTabulate {n}
                                                                (\ i => f (FS i)) x)
   ~~ tabulate (flip f x) ...(Refl)
 
 export
-mapWithPosAsTabulate : {n : Nat} -> (f : Fin n -> a -> b) -> (xs : Vect n a) -> 
+mapWithPosAsTabulate : {n : Nat} -> (f : Fin n -> a -> b) -> (xs : Vect n a) ->
   mapWithPos f xs = tabulate \i => f i (index i xs)
 mapWithPosAsTabulate f xs = vectorExtensionality _ _ $ \i => Calc $
   |~ index i (mapWithPos f xs)
@@ -38,7 +38,7 @@ mapWithPosIrrelevant f (x :: xs) = f 0 x :: mapWithPosIrrelevant (\i => f (FS i)
 
 export
 mapWithPosFusion : forall n, a, b, c. (f : Fin n -> b -> c) -> (g : a -> b) -> (xs : Vect n a) ->
-  mapWithPos f (map g xs) = mapWithPos (\i => f i . g) xs                                        
+  mapWithPos f (map g xs) = mapWithPos (\i => f i . g) xs
 mapWithPosFusion f g    []     = Refl
 mapWithPosFusion f g (x :: xs) = Calc $
   |~ mapWithPos f (map g (x :: xs))

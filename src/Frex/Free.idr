@@ -1,6 +1,6 @@
 ||| Definitions and constructions involving free models
 module Frex.Free
-  
+
 import Data.Setoid
 import Frex.Signature
 import Frex.Presentation
@@ -14,7 +14,7 @@ import Frex.Model
 ||| choices of a free model over each set(oid).
 public export
 record ModelOver (Pres : Presentation) (X : Setoid) where
-  constructor MkModelOver  
+  constructor MkModelOver
   Model : Model Pres
   Env : X ~> cast Model
 
@@ -27,7 +27,7 @@ public export
 (ford : pres.signature = sig) => Semantic (ModelOver pres x) (Term sig y) where
   (.SemType) a = a.Model.SemType
   (.Sem)     a = a.Model.Sem
-  
+
 parameters {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X)
   ||| States: Homomorphism between the models over X.
   public export 0
@@ -48,26 +48,25 @@ parameters {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X)
   public export 0
   Extender : Type
   Extender = (other : Pres `ModelOver` X) -> FX ~> other
-  
-  
+
   -- The following boilerplate lets us define a concrete `Extender` in stages.
   -- Were we to have co-pattern matching, we wouldn't need this boilerplate since we
   -- could define the various fields of Extender in stages
-  
+
   public export 0
   ExtenderFunction : Type
   ExtenderFunction = ((other : Pres `ModelOver` X) -> (U $ FX .Model) -> (U other.Model))
-  
-  public export 0 
+
+  public export 0
   ExtenderSetoidHomomorphism : Type
   ExtenderSetoidHomomorphism = ((other : Pres `ModelOver` X) -> 
     (cast {to = Setoid} $ FX .Model) ~> (cast other.Model))
-  
+
   public export 0
   ExtenderAlgebraHomomorphism : Type
   ExtenderAlgebraHomomorphism = ((other : Pres `ModelOver` X) -> 
     (FX .Model) ~> (other.Model))
-  
+
   ||| There's at most one homomorphism of models over X from FX
   public export 0
   Uniqueness : Type
@@ -75,13 +74,13 @@ parameters {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X)
     (FX .Model ~~> other.Model).equivalence.relation
       extend1.H
       extend2.H
-            
+
 public export
 record Freeness {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X) where
   constructor IsFree
   Exists : Extender FX
   Unique : Uniqueness FX
-  
+
 public export
 record Free (Pres : Presentation) (X : Setoid) where
   constructor MkFree
