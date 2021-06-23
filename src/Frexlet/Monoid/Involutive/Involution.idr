@@ -145,3 +145,20 @@ InvolutionToInvolutiveMonoid a involution =
      (\env => involution.involutive (env 0))
      (\env => involution.H.preserves Prod [_,_])
 
+-------- functoriality of (.ev) : (a ~> b) -> a.rev ~> b.rev  -------
+
+||| Composition is preserved by (.ev) : (a ~> b) -> a.rev ~> b.rev 
+public export
+revFunctorialityCompose : {a,b,c : MonoidStructure} -> (f : b ~> c) -> (g : a ~> b) ->
+  ((a.rev) ~~> (c.rev)).equivalence.relation
+    ((f . g).rev)
+    (f.rev . g.rev)
+revFunctorialityCompose f g x = (c.rev).equivalence.reflexive _
+||| Identities are preserved by (.ev) : (a ~> b) -> a.rev ~> b.rev
+public export
+revFunctorialityId : {a : MonoidStructure} ->
+  ((a.rev) ~~> (a.rev)).equivalence.relation
+    ((id a).rev)
+    (id (a.rev))
+revFunctorialityId x = (a.rev).equivalence.reflexive _
+

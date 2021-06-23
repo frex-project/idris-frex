@@ -54,3 +54,9 @@ tuple f g = MkSetoidHomomorphism
       (f.homomorphic z1 z2 prf)
       (g.homomorphic z1 z2 prf)
   }
+  
+||| Setoid homomorphism constructor
+public export
+bimap : {a,b,c,d : Setoid} -> c ~> a -> d ~> b -> Pair c d ~> Pair a b
+bimap f g = tuple (f . (.fst)) (g . (.snd))
+

@@ -19,10 +19,6 @@ import Notation.Additive
 import Frex.Axiom
 
 public export
-FrexInvMonoid : (a : InvolutiveMonoid) -> (s : Setoid) -> Monoid
-FrexInvMonoid a s = FrexMonoid (cast a) (cast Bool `Pair` s)
-
-public export
 invNeutral : (a : InvolutiveMonoid) ->
   let %hint
       notation : InvMult1 (U a)
