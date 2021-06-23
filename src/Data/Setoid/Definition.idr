@@ -10,11 +10,11 @@ public export
 record Equivalence (A : Type) where
   constructor MkEquivalence
   0 relation  : (x,y : A) -> Type
-  reflexive : (x : A) 
+  reflexive : (x : A)
               ----------------
-           -> relation x x 
-  symmetric : (x : A) -> (y : A) 
-              -> relation x y 
+           -> relation x x
+  symmetric : (x : A) -> (y : A)
+              -> relation x y
               --------------------
               -> relation y x
   transitive: (x : A) -> (y : A) -> (z : A)
@@ -53,7 +53,7 @@ reflect : (a : Setoid) -> {x, y : U a} -> x = y -> a.equivalence.relation x y
 reflect a Refl = a.equivalence.reflexive _
 
 public export
-MkPreorder : {0 a : Type} -> {0 rel : a -> a -> Type} 
+MkPreorder : {0 a : Type} -> {0 rel : a -> a -> Type}
   -> (reflexive : (x : a) -> rel x x)
   -> (transitive : (x,y,z : a) -> rel x y -> rel y z -> rel x z)
   -> Preorder a rel
@@ -65,17 +65,17 @@ cast a = MkPreorder a.equivalence.reflexive a.equivalence.transitive
 
 namespace ToSetoid
   public export
-  irrelevantCast : (0 a : Type) -> Setoid 
+  irrelevantCast : (0 a : Type) -> Setoid
   irrelevantCast a = MkSetoid a (EqualEquivalence a)
-  
+
 public export
 Cast Type Setoid where
   cast a = irrelevantCast a
 
 public export 0
 SetoidHomomorphism : (a,b : Setoid) -> (f : U a -> U b) -> Type
-SetoidHomomorphism a b f 
-  = (x,y : U a) -> a.equivalence.relation x y 
+SetoidHomomorphism a b f
+  = (x,y : U a) -> a.equivalence.relation x y
   -> b.equivalence.relation (f x) (f y)
 
 public export
@@ -88,20 +88,20 @@ public export
 mate : {b : Setoid} -> (a -> U b) -> (cast a ~> b)
 mate f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
 
-||| Identity Setoid homomorphism  
+||| Identity Setoid homomorphism
 public export
 id : (a : Setoid) -> a ~> a
 id a = MkSetoidHomomorphism Prelude.id \x, y, prf => prf
 
 ||| Composition of Setoid homomorphisms
 public export
-(.) : {a,b,c : Setoid} -> b ~> c -> a ~> b -> a ~> c 
+(.) : {a,b,c : Setoid} -> b ~> c -> a ~> b -> a ~> c
 g . f = MkSetoidHomomorphism (H g . H f) \x,y,prf => g.homomorphic _ _ (f.homomorphic _ _ prf)
 
 public export
 (~~>) : (a,b : Setoid) -> Setoid
 %unbound_implicits off
-(~~>) a b = MkSetoid (a ~> b) 
+(~~>) a b = MkSetoid (a ~> b)
   let 0 relation : (f, g : a ~> b) -> Type
       relation f g = (x : U a) -> b.equivalence.relation (f.H x) (g.H x)
   in MkEquivalence
@@ -128,8 +128,8 @@ record (<~>) (a, b : Setoid) where
   Fwd : a ~> b
   Bwd : b ~> a
 
-  Iso : Isomorphism Fwd Bwd  
-  
+  Iso : Isomorphism Fwd Bwd
+
 
 ||| Reverse an isomorphism
 public export
@@ -141,12 +141,12 @@ sym iso = MkIsomorphism iso.Bwd iso.Fwd (IsIsomorphism iso.Iso.FwdBwdId iso.Iso.
 ||| Instance of the more general coequaliser of two setoid morphisms.
 public export
 Quotient : (0 a : Type) -> {b : Setoid} -> (a -> U b) -> Setoid
-Quotient a {b} q = MkSetoid a 
+Quotient a {b} q = MkSetoid a
   let 0 Relation : a -> a -> Type
       Relation x y = b.equivalence.relation
         (q x)
         (q y)
-  in MkEquivalence 
+  in MkEquivalence
     { relation = Relation
     , reflexive = \x => b.equivalence.reflexive (q x)
     , symmetric =  \x,y=> b.equivalence.symmetric (q x) (q y)

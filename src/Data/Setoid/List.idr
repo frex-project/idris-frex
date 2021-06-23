@@ -7,7 +7,7 @@ namespace Relation
   public export
   data (.ListEquality) : (a : Setoid) -> (xs, ys : List $ U a) -> Type where
     Nil : a.ListEquality [] []
-    (::) : (hdEq : a.equivalence.relation x y) -> (tlEq : a.ListEquality xs ys) -> 
+    (::) : (hdEq : a.equivalence.relation x y) -> (tlEq : a.ListEquality xs ys) ->
           a.ListEquality (x :: xs) (y :: ys)
 
 public export
@@ -19,16 +19,16 @@ public export
 (.ListEqualitySymmetric) : (a : Setoid) -> (xs,ys : List $ U a) -> (prf : a.ListEquality xs ys) ->
   a.ListEquality ys xs
 a.ListEqualitySymmetric [] [] [] = ?ListEqualitySymmetric_rhs_1
-a.ListEqualitySymmetric (x :: xs) (y :: ys) (hdEq :: tlEq) 
+a.ListEqualitySymmetric (x :: xs) (y :: ys) (hdEq :: tlEq)
   = a.equivalence.symmetric x y hdEq :: a.ListEqualitySymmetric xs ys tlEq
 
 public export
-(.ListEqualityTransitive) : (a : Setoid) -> (xs,ys,zs : List $ U a) -> 
+(.ListEqualityTransitive) : (a : Setoid) -> (xs,ys,zs : List $ U a) ->
   (prf1 : a.ListEquality xs ys) -> (prf2 : a.ListEquality ys zs) ->
   a.ListEquality xs zs
 a.ListEqualityTransitive [] [] [] [] [] = []
-a.ListEqualityTransitive (x :: xs) (y :: ys) (z :: zs) (hdEq1 :: tlEq1) (hdEq2 :: tlEq2) 
-  = a.equivalence.transitive x  y  z  hdEq1 hdEq2 :: 
+a.ListEqualityTransitive (x :: xs) (y :: ys) (z :: zs) (hdEq1 :: tlEq1) (hdEq2 :: tlEq2)
+  = a.equivalence.transitive x  y  z  hdEq1 hdEq2 ::
     a.ListEqualityTransitive xs ys zs tlEq1 tlEq2
 
 public export
@@ -42,10 +42,10 @@ ListSetoid a = MkSetoid (List $ U a)
   }
 
 public export
-ListMapFunctionHomomorphism : (f : a ~> b) -> 
+ListMapFunctionHomomorphism : (f : a ~> b) ->
   SetoidHomomorphism (ListSetoid a) (ListSetoid b) (map f.H)
 ListMapFunctionHomomorphism f [] [] [] = []
-ListMapFunctionHomomorphism f (x :: xs) (y :: ys) (hdEq :: tlEq) = 
+ListMapFunctionHomomorphism f (x :: xs) (y :: ys) (hdEq :: tlEq) =
   f.homomorphic x y hdEq :: ListMapFunctionHomomorphism f xs ys tlEq
 
 public export
@@ -53,14 +53,14 @@ ListMapHomomorphism : (f : a ~> b) -> (ListSetoid a ~> ListSetoid b)
 ListMapHomomorphism f = MkSetoidHomomorphism (map f.H) (ListMapFunctionHomomorphism f)
 
 public export
-ListMapIsHomomorphism : SetoidHomomorphism (a ~~> b) (ListSetoid a ~~> ListSetoid b) 
-  ListMapHomomorphism 
+ListMapIsHomomorphism : SetoidHomomorphism (a ~~> b) (ListSetoid a ~~> ListSetoid b)
+  ListMapHomomorphism
 ListMapIsHomomorphism f g f_eq_g [] = []
 ListMapIsHomomorphism f g f_eq_g (x :: xs) = f_eq_g x :: ListMapIsHomomorphism f g f_eq_g xs
 
 public export
 ListMap : {a, b : Setoid} -> (a ~~> b) ~> (ListSetoid a ~~> ListSetoid b)
-ListMap = MkSetoidHomomorphism 
+ListMap = MkSetoidHomomorphism
   { H           = ListMapHomomorphism
   , homomorphic = ListMapIsHomomorphism
   }
