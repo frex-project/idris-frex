@@ -1,4 +1,4 @@
-||| Definitions and constructions for free extensions 
+||| Definitions and constructions for free extensions
 module Frex.Frex
 
 import Data.Setoid
@@ -28,17 +28,17 @@ public export
 (ford : pres.signature = sig) => Semantic (Extension {Pres = pres} a x) (Term sig y) where
   (.SemType) c = c.Model.SemType
   (.Sem)     c = c.Model.Sem
-      
+
 public export
-record (~>) {Pres : Presentation} {A : Model Pres} {X : Setoid} 
+record (~>) {Pres : Presentation} {A : Model Pres} {X : Setoid}
             (Extension1, Extension2 : Extension A X) where
   constructor MkExtensionMorphism
   H : (Extension1).Model ~> (Extension2).Model
-  PreserveEmbed : (cast A ~~> (Extension2).Model).equivalence.relation 
-                     (H . (Extension1).Embed)  
+  PreserveEmbed : (cast A ~~> (Extension2).Model).equivalence.relation
+                     (H . (Extension1).Embed)
                           (Extension2).Embed
-  PreserveVar   : (X ~~> cast (Extension2).Model).equivalence.relation 
-                     ((H).H . (Extension1).Var)  
+  PreserveVar   : (X ~~> cast (Extension2).Model).equivalence.relation
+                     ((H).H . (Extension1).Var)
                               (Extension2).Var
 
 public export
@@ -56,13 +56,13 @@ ExtenderFunction frex = (other : Extension a x) -> U frex.Model -> U other.Model
 public export 0
 ExtenderIsHomomorphism : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
   (frex : Extension a x) -> (extender : ExtenderFunction frex) -> Type
-ExtenderIsHomomorphism frex extender = (other : Extension a x) -> 
+ExtenderIsHomomorphism frex extender = (other : Extension a x) ->
   Homomorphism frex.Model.Algebra other.Model.Algebra (extender other)
 
 public export 0
 ExtenderIsAlgebraHomomorphism : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
   (frex : Extension a x) -> (extender : ExtenderFunction frex) -> Type
-ExtenderIsAlgebraHomomorphism frex extender = (other : Extension a x) -> 
+ExtenderIsAlgebraHomomorphism frex extender = (other : Extension a x) ->
   (f : Op pres.signature) -> CongruenceWRT (cast frex.Model) (frex.Model.Sem f)
 
 public export 0
@@ -73,16 +73,16 @@ ExtenderHomomorphism frex = (other : Extension a x) -> frex.Model ~> other.Model
 public export 0
 ExtenderPreservesEmbedding :  {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
   (frex : Extension a x) -> (extender : ExtenderHomomorphism frex) -> Type
-ExtenderPreservesEmbedding frex extender = (other : Extension a x) -> 
-  (a ~~> other.Model).equivalence.relation 
-    ((extender other) . frex.Embed)  
+ExtenderPreservesEmbedding frex extender = (other : Extension a x) ->
+  (a ~~> other.Model).equivalence.relation
+    ((extender other) . frex.Embed)
                        other.Embed
 public export 0
 ExtenderPreservesVars :  {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
   (frex : Extension a x) -> (extender : ExtenderHomomorphism frex) -> Type
 ExtenderPreservesVars frex extender = (other : Extension a x) ->
-  (x ~~> cast other.Model).equivalence.relation 
-    ((extender other).H . frex.Var)  
+  (x ~~> cast other.Model).equivalence.relation
+    ((extender other).H . frex.Var)
                          other.Var
 
 public export 0
@@ -113,12 +113,11 @@ SinceExtenderIsUnique frex extender prf other extend1 extend2
                             prf other extend2)
 
 public export
-record Universality {Pres : Presentation} {A : Model Pres} {X : Setoid} 
+record Universality {Pres : Presentation} {A : Model Pres} {X : Setoid}
             (Frex : Extension A X) where
   constructor IsUniversal
   Exists : Extender Frex
   Unique : Uniqueness Frex
-  
 
 public export
 record Frex {Pres : Presentation} (A : Model Pres) (X : Setoid) where
@@ -141,7 +140,7 @@ CoproductAlgebraWithFree : {pres : Presentation} -> {a : Model pres} -> {x : Set
   (free : Free pres x) ->
   (coprod : Coproduct a free.Data.Model) ->
   Frex a x
-CoproductAlgebraWithFree free coprod = 
+CoproductAlgebraWithFree free coprod =
   let Fx : pres `ModelOver` x
       Fx = free.Data
       Tx : Model pres
@@ -167,7 +166,7 @@ CoproductAlgebraWithFree free coprod =
       extenderCospan : (other : Extension a x) -> aPlusFx ~> other.Cospan
       extenderCospan other = coprod.UP.Exists other.Cospan
       extenderHomomorphism : ExtenderHomomorphism frex
-      extenderHomomorphism other = (extenderCospan other).H 
+      extenderHomomorphism other = (extenderCospan other).H
       extenderPreservesEmbed : ExtenderPreservesEmbedding frex extenderHomomorphism
       extenderPreservesEmbed other = (extenderCospan other).preserve.Lft
       extenderPreservesVar : ExtenderPreservesVars frex extenderHomomorphism
@@ -182,27 +181,27 @@ CoproductAlgebraWithFree free coprod =
         , PreserveEmbed = extenderPreservesEmbed other
         , PreserveVar   = extenderPreservesVar   other
         }
-      (.cospanMorphism) : {other : Extension a x} -> (extend : frex ~> other) -> 
+      (.cospanMorphism) : {other : Extension a x} -> (extend : frex ~> other) ->
         aPlusFx ~> other.Cospan
       (.cospanMorphism) extend = MkCospanMorphism
         { H = extend.H
         , preserve = IsPreserving
           { Lft = extend.PreserveEmbed
-          , Rgt = free.UP.Unique other.Over 
-                                (MkHomomorphism 
+          , Rgt = free.UP.Unique other.Over
+                                (MkHomomorphism
                                   { H = extend.H . aPlusFx.Rgt
                                   , preserves = extend.PreserveVar
                                  })
-                                other.rgtOver 
+                                other.rgtOver
           }
         }
       uniqueness : Uniqueness frex
-      uniqueness other extend1 extend2 = 
-        coprod.UP.Unique 
-          other.Cospan 
+      uniqueness other extend1 extend2 =
+        coprod.UP.Unique
+          other.Cospan
           extend1.cospanMorphism
-          extend2.cospanMorphism 
-  in MkFrex 
+          extend2.cospanMorphism
+  in MkFrex
     { Data = frex
     , UP = IsUniversal
       { Exists = extender
@@ -211,8 +210,8 @@ CoproductAlgebraWithFree free coprod =
     }
 
 public export
-CoproductsAndFreeFrex : {pres : Presentation} -> 
+CoproductsAndFreeFrex : {pres : Presentation} ->
   (hasCoproducts : (a,b : Model pres) -> Coproduct a b) -> {x : Setoid} ->
   (free : Free pres x) -> (a : Model pres) -> Frex a x
-CoproductsAndFreeFrex hasCoproducts free a = 
+CoproductsAndFreeFrex hasCoproducts free a =
   CoproductAlgebraWithFree free (hasCoproducts a free.Data.Model)

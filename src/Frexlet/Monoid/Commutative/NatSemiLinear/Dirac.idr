@@ -37,7 +37,7 @@ dirac : {0 n : Nat} -> (i, j : Fin n) -> Nat
 dirac i j = case (decEq i j) of
   Yes _ => 1
   No  _ => 0
-  
+
 export
 diracOnDiagonal : (i : Fin n) -> dirac i i = 1
 diracOnDiagonal i = Calc $
@@ -52,19 +52,19 @@ diracOffDiagonal  i j neq with (decEq i j)
 
 public export
 convolveDirac : (a : CommutativeMonoid) -> {n : Nat} ->
-  let %hint 
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
   in (f : Fin n -> U a) -> (i : Fin n) ->
    a.rel (a.sum $ tabulate \j => (dirac i j ) *. f j)
          (f i)
-convolveDirac a f i = 
-  let %hint 
+convolveDirac a f i =
+  let %hint
       notation : Action1 Nat (U a)
-      notation = NatAction1 a 
+      notation = NatAction1 a
       xs : Vect n (U a)
       xs = tabulate \j => (dirac i j) *. f j
-      pointMass : (j : Fin n) -> 
+      pointMass : (j : Fin n) ->
         (i = j) `Either` (a.rel (index j xs)
                                 O1)
       pointMass  j with (decEq i j)

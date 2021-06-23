@@ -6,16 +6,16 @@ import Data.Setoid.Definition
 ||| Binary relation conjunction
 public export
 record And {A,B : Type} (p : A -> A -> Type) (q : B -> B -> Type) (xy1, xy2 : (A, B)) where
-  constructor MkAnd 
+  constructor MkAnd
   fst : p (fst xy1) (fst xy2)
   snd : q (snd xy1) (snd xy2)
 
 ||| Product of setoids
 public export
 Pair : (a,b : Setoid) -> Setoid
-Pair a b = MkSetoid 
+Pair a b = MkSetoid
   { U = (U a, U b)
-  , equivalence = MkEquivalence 
+  , equivalence = MkEquivalence
     { relation = a.equivalence.relation `And` b.equivalence.relation
     , reflexive = \xy => MkAnd
         (a.equivalence.reflexive $ fst xy)
