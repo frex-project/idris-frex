@@ -43,6 +43,7 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Notation
         , Frexlet.Monoid.Involutive.Properties
         , Frexlet.Monoid.Involutive.Involution
+        , Frexlet.Monoid.Involutive.Frex
         -- Should move to contrib
         , Data.Setoid
         , Data.Setoid.Definition
@@ -51,7 +52,7 @@ modules = Frex
         , Data.Setoid.Vect
         , Data.Setoid.List
         , Data.Vect.Extra1
-        
+
 
 depends = contrib
 sourcedir = "src"

@@ -27,13 +27,13 @@ invNeutral : (a : InvolutiveMonoid) ->
     (I1).inv
     I1
 
-invNeutral a = 
+invNeutral a =
   let %hint
       notation : InvMult1 (U a)
       notation = a.Notation1
   in CalcWith @{cast a} $
   |~ (I1).inv
-  <~ (I1).inv .*.  I1          ...(a.equivalence.symmetric _ _ $ 
+  <~ (I1).inv .*.  I1          ...(a.equivalence.symmetric _ _ $
                                    a.validate (Mon RgtNeutrality) [_])
   <~ (I1).inv .*. (I1).inv.inv ...(a.equivalence.symmetric _ _ $
                                    a.cong 1 (Sta (I1).inv .*. Dyn 0) [_] [_]

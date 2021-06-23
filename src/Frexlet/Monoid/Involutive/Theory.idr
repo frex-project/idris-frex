@@ -21,14 +21,14 @@ castOp = OpTranslation Mono
 
 namespace Axiom
   public export
-  data Axiom 
+  data Axiom
     = Mon Monoid.Theory.Axiom
     | Involutivity
     | Antidistributivity
 
 public export
 InvolutiveMonoidTheory : Presentation
-InvolutiveMonoidTheory = MkPresentation Involutive.Theory.Signature Involutive.Theory.Axiom.Axiom 
+InvolutiveMonoidTheory = MkPresentation Involutive.Theory.Signature Involutive.Theory.Axiom.Axiom
   \case
     Mon ax => cast ((MonoidTheory).axiom ax)
     Involutivity       => involutivity       Involution
@@ -41,11 +41,11 @@ InvolutiveMonoid          = Model          InvolutiveMonoidTheory
 
 ||| Smart constructor for involutive monoid structures
 public export
-MkInvolutiveMonoidStructure : (monoid : MonoidStructure) -> 
+MkInvolutiveMonoidStructure : (monoid : MonoidStructure) ->
     (involution : cast monoid ~> cast monoid) ->
     InvolutiveMonoidStructure
 MkInvolutiveMonoidStructure monoid involution = MkSetoidAlgebra
-  { algebra = MakeAlgebra 
+  { algebra = MakeAlgebra
       { U   = U monoid
       , Semantics = \case
           (MkOp (Mono op )) => monoid.algebra.Semantics (MkOp op)
@@ -54,15 +54,15 @@ MkInvolutiveMonoidStructure monoid involution = MkSetoidAlgebra
           Involution => involution.H-}
       }
   , equivalence = monoid.equivalence
-  , congruence = \case 
+  , congruence = \case
       MkOp (Mono op)  => monoid.congruence (MkOp op)
       MkOp Involution => \ [x],[y],prf => involution.homomorphic x y (prf 0)
   }
 
 ||| Smart constructor for involutive monoids
 public export
-MkInvolutiveMonoid 
-  : (monoid : Monoid) -> 
+MkInvolutiveMonoid
+  : (monoid : Monoid) ->
     (involution : cast monoid ~> cast monoid) ->
     let invMonoid = (MkInvolutiveMonoidStructure monoid.Algebra involution) in
     (involutivity        : ValidatesEquation
@@ -75,11 +75,11 @@ MkInvolutiveMonoid
 
 public export
 Cast InvolutiveMonoid Monoid where
-  cast invMonoid = MkModel 
-    { Algebra  = MkSetoidAlgebra 
+  cast invMonoid = MkModel
+    { Algebra  = MkSetoidAlgebra
       { algebra = MakeAlgebra
           { U = U invMonoid
-          , Semantics = \f => invMonoid.Algebra.algebra.Semantics (MkOp $ Mono f.snd) 
+          , Semantics = \f => invMonoid.Algebra.algebra.Semantics (MkOp $ Mono f.snd)
           }
       , equivalence = invMonoid.Algebra.equivalence
       , congruence  = \(MkOp op),xs,ys,prf => invMonoid.Algebra.congruence (MkOp (Mono op)) xs ys prf
