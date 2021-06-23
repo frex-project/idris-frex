@@ -162,3 +162,51 @@ revFunctorialityId : {a : MonoidStructure} ->
     (id (a.rev))
 revFunctorialityId x = (a.rev).equivalence.reflexive _
 
+-- No idea why the corresponding record doesn't work
+||| a setoid homomorphism `H : (Bool, s) ~> U a` satisfying:
+|||          H
+|||   U a <---- (Bool, s)
+|||    | inv       | bimap not id
+|||    v           v
+|||   U a <---- (Bool, s)
+|||          H
+public export
+data Env : (s : Setoid) -> (a : Monoid) -> (inv : Involution a) -> Type where
+  MkEnv : {0 s : Setoid} -> {0 a : Monoid} -> {0 inv : Involution a} ->
+    (H : ((cast Bool) `Pair` s) ~> cast a) ->
+     (compatibility : (((cast Bool) `Pair` s) ~~> cast {to = Setoid} a).equivalence.relation
+        ((inv).H.H . H)
+        (H . (bimap (mate {b = cast Bool} Prelude.not) (id s))))
+    -> Env s a inv
+
+public export
+(.H) : Env s a inv -> ((cast Bool) `Pair` s) ~> cast a
+(.H) (MkEnv h _) = h
+
+public export
+(.compatibility) : (env : Env s a inv) ->
+   (((cast Bool) `Pair` s) ~~> cast a).equivalence.relation
+      ((inv).H.H . env.H)
+      ( env.H . (bimap (mate {b = cast Bool} Prelude.not) (id s)))
+(.compatibility) (MkEnv _ c) = c
+
+
+-- The point is that having a function `f : s -> U b` for some
+-- involutive monoid is the same thing as having an `Env`.
+
+namespace To
+  public export
+  cast : {s : Setoid} -> {c : InvolutiveMonoid} -> (f : s ~> cast c) ->
+    Env s (cast c) (InvolutiveMonoidToInvolution c)
+  cast f = MkEnv
+    { H = (either f ((InvolutiveMonoidToInvolution c).H.H . f)) . distribute
+    , compatibility = \case
+        (False, x) => c.equivalence.reflexive _
+        (True , x) => c.validate Involutivity [_]
+    }
+
+namespace Back
+  public export
+  cast : {s : Setoid} -> {c : Monoid} -> {inv : Involution c} -> Env s c inv -> (s ~> cast c)
+  cast env = env.H . (tuple (const {b = cast Bool} False) (id s))
+

@@ -176,3 +176,11 @@ FrexInvolutionIsInvolution a s =
         }
   in (AuxFrex a s).UP.Unique doubleInvExtension invInvMorphism jMorphism
 
+public export
+FrexInvolutiveMonoid : (a : InvolutiveMonoid) -> (s : Setoid) -> InvolutiveMonoid
+FrexInvolutiveMonoid a s =
+  InvolutionToInvolutiveMonoid (FrexInvMonoid a s) $ MkInvolution
+    { H = FrexInvolution a s
+    , involutive = FrexInvolutionIsInvolution a s
+    }
+

@@ -2,6 +2,7 @@
 module Data.Setoid.Pair
 
 import Data.Setoid.Definition
+import Data.Setoid.Either
 
 ||| Binary relation conjunction
 public export
@@ -54,9 +55,53 @@ tuple f g = MkSetoidHomomorphism
       (f.homomorphic z1 z2 prf)
       (g.homomorphic z1 z2 prf)
   }
-  
+
+||| Unique value of type unit
+public export
+unitVal : (x,y : Unit) -> x = y
+unitVal () () = Refl
+
+||| The unique setoid map into the terminal type
+public export
+unit : {a : Setoid} -> a ~> cast Unit
+unit = MkSetoidHomomorphism
+  { H = const ()
+  , homomorphic = \_,_,_ => unitVal _ _
+  }
+
+||| The constant function as a setoid morphism
+public export
+const : {a,b : Setoid} -> (x : U b) -> a ~> b
+const x = mate (Prelude.const x) . unit
+
 ||| Setoid homomorphism constructor
 public export
 bimap : {a,b,c,d : Setoid} -> c ~> a -> d ~> b -> Pair c d ~> Pair a b
 bimap f g = tuple (f . (.fst)) (g . (.snd))
 
+-- Distribution of products over sums, degenerate case:
+
+||| Function underlying the bijection 2 x s <~> s + s
+public export
+distributeFunction : {s : Setoid} -> (Bool, U s) -> (U s `Either` U s)
+distributeFunction (False, x) = Left  x
+distributeFunction (True , x) = Right x
+
+||| States: the function underlying the bijection 2 x s <~> s + s is a setoid homomorphism
+public export
+distributeHomomorphism : {s : Setoid} ->
+  SetoidHomomorphism ((cast Bool) `Pair` s) (s `Either` s)
+    (distributeFunction {s})
+distributeHomomorphism (b1,x1) (b2,x2) prf =
+  case prf.fst of
+    Refl => case b2 of
+      False => Left  prf.snd
+      True  => Right prf.snd
+
+||| Setoid homomorphism involved in the bijection 2 x s <~> s + s
+public export
+distribute : {s : Setoid} -> ((cast Bool) `Pair` s) ~> (s `Either` s)
+distribute = MkSetoidHomomorphism
+  { H = distributeFunction
+  , homomorphic = distributeHomomorphism
+  }
