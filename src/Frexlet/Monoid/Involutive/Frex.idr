@@ -17,6 +17,8 @@ import Frexlet.Monoid.Involutive.Notation
 import Frexlet.Monoid.Involutive.Properties
 import Frexlet.Monoid.Involutive.Involution
 
+import Data.Bool
+
 -- Our construction uses an auxiliary frex for the underlying monoid
 
 ||| Type of auxiliary monoid frex used to construct the involutive monoid frex
@@ -100,6 +102,8 @@ FrexInvolutionIsInvolution a s =
       frexInv = FrexInvolution a s
       j : frex.Model.Algebra <~> frex.Model.Algebra.rev.rev
       j = frex.Model.revInvolution
+      jHomo : frex.Model ~> frex.Model.rev.rev
+      jHomo = cast j
       ||| We'll use frex's universal property with respect to this extension:
       |||
       |||   a                                         (Bool, s)
@@ -157,9 +161,18 @@ FrexInvolutionIsInvolution a s =
       |||          frex.Embed.rev.rev          frex.Var
       jMorphism : frex ~> doubleInvExtension
       jMorphism = MkExtensionMorphism
-        { H = cast j
-        , PreserveEmbed = ?h2
-        , PreserveVar   = ?h1
+        { H = jHomo
+        , PreserveEmbed = \i => CalcWith @{cast $ frex.Model.rev.rev} $
+          |~ (jHomo.H.H $ frex.Embed.H.H i)
+          <~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H $ inv.H.H i)
+             ...( frex.Embed.H.homomorphic _ _
+                $ a.equivalence.symmetric  _ _
+                $ a.validate Involutivity [_])
+        , PreserveVar   = \(b, x) => CalcWith @{cast $ frex.Model.rev.rev} $
+          |~ (jHomo.H.H $ frex.Var.H (b, x))
+          ~~ (frex.Var.H $ bid.H $ bid.H (b, x))
+             ...( cong (\u => frex.Var.H (u, x))
+                $ sym $ notInvolutive b)
         }
-  in ?FrexInvolutionIsInvolution_rhs
+  in (AuxFrex a s).UP.Unique doubleInvExtension invInvMorphism jMorphism
 
