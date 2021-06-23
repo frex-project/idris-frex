@@ -18,7 +18,7 @@ a.ListEqualityReflexive (x :: xs) = a.equivalence.reflexive x :: a.ListEqualityR
 public export
 (.ListEqualitySymmetric) : (a : Setoid) -> (xs,ys : List $ U a) -> (prf : a.ListEquality xs ys) ->
   a.ListEquality ys xs
-a.ListEqualitySymmetric [] [] [] = ?ListEqualitySymmetric_rhs_1
+a.ListEqualitySymmetric [] [] [] = []
 a.ListEqualitySymmetric (x :: xs) (y :: ys) (hdEq :: tlEq)
   = a.equivalence.symmetric x y hdEq :: a.ListEqualitySymmetric xs ys tlEq
 

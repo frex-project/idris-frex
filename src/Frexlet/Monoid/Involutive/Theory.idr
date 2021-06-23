@@ -72,6 +72,14 @@ MkInvolutiveMonoid
        (Axiom.antidistributivity {sig = Involutive.Theory.Signature} Involution (Mono Product))
        invMonoid) ->
     InvolutiveMonoid
+MkInvolutiveMonoid monoid involution involutivity antidistributivity
+  = MkModel (MkInvolutiveMonoidStructure (monoid .Algebra) involution)
+  $ \case
+     (Mon LftNeutrality) => monoid .Validate LftNeutrality
+     (Mon RgtNeutrality) => monoid .Validate RgtNeutrality
+     (Mon Associativity) => monoid .Validate Associativity
+     Involutivity        => involutivity
+     Antidistributivity  => antidistributivity
 
 public export
 Cast InvolutiveMonoid Monoid where
