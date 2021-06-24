@@ -66,3 +66,45 @@ commutativity : {sig : Signature} -> EqSpec sig [2]
 commutativity product =
   let (+) = call product in
   MkEquation 2 $ X 0 + X 1 =-= X 1 + X 0
+
+||| x + - x = 0
+public export
+rgtInverse : {sig : Signature} -> EqSpec sig [0,1,2]
+rgtInverse neutral inverse product =
+  let (+) = call product; inv = call inverse in
+  MkEquation 1 $ X 0 + inv (X 0) =-= call neutral
+
+||| - x + x = 0
+public export
+lftInverse : {sig : Signature} -> EqSpec sig [0,1,2]
+lftInverse neutral inverse product =
+  let (+) = call product; inv = call inverse in
+  MkEquation 1 $ inv (X 0) + X 0 =-= call neutral
+
+||| 0 * x = 0
+public export
+lftAnnihilation : {sig : Signature} -> EqSpec sig [0,2]
+lftAnnihilation neutral product =
+  let (*) = call product; zero = call neutral in
+  MkEquation 1 $ zero * X 0 =-= zero
+
+||| x * 0 = 0
+public export
+rgtAnnihilation : {sig : Signature} -> EqSpec sig [0,2]
+rgtAnnihilation neutral product =
+  let (*) = call product; zero = call neutral in
+  MkEquation 1 $ X 0 * zero =-= zero
+
+||| x * (y + z) = x * y + x * z
+public export
+lftDistributivity : {sig : Signature} -> EqSpec sig [2,2]
+lftDistributivity sum product =
+  let (+) = call sum; (*) = call product in
+  MkEquation 3 $ X 0 * (X 1 + X 2) =-= (X 0 * X 1) + (X 0 * X 2)
+
+||| (x + y) * z = x * z + y * z
+public export
+rgtDistributivity : {sig : Signature} -> EqSpec sig [2,2]
+rgtDistributivity sum product =
+  let (+) = call sum; (*) = call product in
+  MkEquation 3 $ (X 0 + X 1) * X 2 =-= (X 0 * X 2) + (X 1 * X 2)

@@ -32,8 +32,8 @@ namespace Equation
 
   export
   display : (Show (Op sig), HasPrecedence sig) =>
-            Equation sig -> Doc ()
-  display (MkEq supp lhs rhs)
+            Bool -> Equation sig -> Doc ()
+  display b (MkEq supp lhs rhs)
     = with Prelude.(::) concat [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
@@ -46,7 +46,7 @@ namespace Equation
       prettyName = map (\ k => index (cast k) names)
 
       scoped : {n : Nat} -> Term sig (Fin n) -> Doc ()
-      scoped = display True . prettyName
+      scoped = display b . prettyName
 
 namespace Presentation
 
@@ -68,4 +68,4 @@ namespace Presentation
 
     showAxiom : p .Axiom -> Doc ()
     showAxiom ax = concat {t = List}
-                 [pretty (show ax), ": ", display (p.axiom ax)]
+                 [pretty (show ax), ": ", display True (p.axiom ax)]

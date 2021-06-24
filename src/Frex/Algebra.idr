@@ -103,12 +103,13 @@ namespace Term
                 := hsep (op :: map (go b App) (toList args))
           in case precedence f of
                Nothing  => parens catchall
-               Just lvl => let d = User (level lvl) in
+               Just lvl =>
+                 let n = level lvl; d = User n; d' = User (S n) in
                  parenthesise (b' || c > d) $ case args of
                    [x]   => hsep [op, go b d x]
                    [x,y] => case lvl of
-                     InfixL _ => hsep [go b d x, op, go b App y]
-                     InfixR _ => hsep [go b App x, op, go b d y]
+                     InfixL _ => hsep [go b d x, op, go b d' y]
+                     InfixR _ => hsep [go b d' x, op, go b d y]
                    _ => catchall
 
 export

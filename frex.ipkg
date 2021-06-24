@@ -38,6 +38,7 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Free
         , Frexlet.Monoid.Commutative.Coproduct
         , Frexlet.Monoid.Commutative.Frex
+        , Frexlet.Ring.Theory
         -- Should move to contrib
         , Data.Finite
         , Data.Name
