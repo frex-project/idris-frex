@@ -2,6 +2,7 @@
 module Frex.Presentation
 
 import Data.Fin
+import Data.Finite
 import Data.Name
 import Data.String
 import Data.Stream
@@ -45,18 +46,19 @@ export
 
 
 
-public export
-interface Finite (0 a : Type) where
-  enumerate : List a
-
 export
 display : (p : Presentation) ->
           Finite (p .Axiom) =>
           Show (p .Axiom) =>
+          Finite (Op p.signature) =>
           Show (Op p.signature) =>
           HasPrecedence p.signature =>
           String
-display p = unlines $ map showAxiom enumerate where
+display p = unlines
+          $ display p.signature
+          :: map showAxiom enumerate
 
-  showAxiom : p .Axiom -> String
-  showAxiom ax = concat $ with Prelude.(::) [ show ax, ": ", show (p.axiom ax)]
+  where
+
+    showAxiom : p .Axiom -> String
+    showAxiom ax = concat $ with Prelude.(::) [ show ax, ": ", show (p.axiom ax)]

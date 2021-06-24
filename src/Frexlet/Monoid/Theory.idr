@@ -51,6 +51,10 @@ Show (Op Signature) where
   show (MkOp Product) = "•"
 
 export
+Finite (Op Signature) where
+  enumerate = [Unit, Prod]
+
+export
 Finite Axiom where
   enumerate = [ LftNeutrality
               , RgtNeutrality

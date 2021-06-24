@@ -39,6 +39,8 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Coproduct
         , Frexlet.Monoid.Commutative.Frex
         -- Should move to contrib
+        , Data.Finite
+        , Data.Name
         , Data.Setoid
         , Data.Setoid.Definition
         , Data.Setoid.Either

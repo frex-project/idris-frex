@@ -6,6 +6,8 @@ module Frex
 
 import public Data.Setoid
 
+import public Data.Finite
+
 import public Frex.Signature
 import public Frex.Algebra
 import public Frex.Presentation
@@ -78,5 +80,3 @@ frexify frex env eq =
        ...(h.H.H.homomorphic _ _ prf)
   <~ bindTerm {a = a.Algebra.algebra} (snd eq) env'.H
        ...((Other).Model.equivalence.symmetric _ _ $ lemma (snd eq))
-
-
