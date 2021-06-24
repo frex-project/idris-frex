@@ -2,14 +2,17 @@
 module Frex.Presentation
 
 import Data.Fin
+import Data.Name
 import Data.String
+import Data.Stream
+import Data.Vect
 import Frex.Signature
 import Frex.Algebra
 
 public export
 record Equation (Sig : Signature) where
   constructor MkEq
-  0 support : Nat
+  support : Nat
   lhs, rhs : Term Sig (Fin support)
 
 public export
@@ -25,4 +28,35 @@ projectSignature pres = pres.signature
 
 export
 (Show (Op sig), HasPrecedence sig) => Show (Equation sig) where
-  show (MkEq _ lhs rhs) = unwords [show lhs, "=", show rhs]
+  show (MkEq supp lhs rhs)
+    = with Prelude.(::) concat [ tele supp, scoped lhs, " ≡ ", scoped rhs]
+
+    where
+
+      tele : Nat -> String
+      tele Z = ""
+      tele n = "∀ " ++ unwords (map show (take n names)) ++ ". "
+
+      prettyName : {n : Nat} -> Term sig (Fin n) -> Term sig Name
+      prettyName = map (\ k => index (cast k) names)
+
+      scoped : {n : Nat} -> Term sig (Fin n) -> String
+      scoped = display True . prettyName
+
+
+
+public export
+interface Finite (0 a : Type) where
+  enumerate : List a
+
+export
+display : (p : Presentation) ->
+          Finite (p .Axiom) =>
+          Show (p .Axiom) =>
+          Show (Op p.signature) =>
+          HasPrecedence p.signature =>
+          String
+display p = unlines $ map showAxiom enumerate where
+
+  showAxiom : p .Axiom -> String
+  showAxiom ax = concat $ with Prelude.(::) [ show ax, ": ", show (p.axiom ax)]

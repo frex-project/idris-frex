@@ -47,5 +47,19 @@ HasPrecedence Signature where
 
 export
 Show (Op Signature) where
-  show (MkOp Neutral) = "ϵ"
+  show (MkOp Neutral) = "ε"
   show (MkOp Product) = "•"
+
+export
+Finite Axiom where
+  enumerate = [ LftNeutrality
+              , RgtNeutrality
+              , Associativity
+              ]
+
+export
+Show Axiom where
+  show = \case
+    LftNeutrality => "Left neutrality"
+    RgtNeutrality => "Right neutrality"
+    Associativity => "Associativity"
