@@ -21,6 +21,8 @@ import Syntax.PreorderReasoning
 import Decidable.Order
 import Syntax.PreorderReasoning.Generic
 
+import Text.PrettyPrint.Prettyprinter
+
 import Data.Vect.Extra
 
 infix 10 ^
@@ -84,31 +86,34 @@ data Term : (0 sig : Signature) -> Type -> Type where
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
          -> Term sig a
 
-export
-display : (Show a, Show (Op sig), HasPrecedence sig) =>
-          (b : Bool) -> Term sig a -> String
-display b = go False Open where
+namespace Term
 
-  go : Bool -> Prec -> Term sig a -> String
-  go _ _ (Done v) = show v
-  go b' c (Call f args) with (arity f) proof eq
-    go b' c (Call f args) | Z = show f
-    go b' c (Call f args) | (S _)
-      = let catchall : Lazy String
-              := unwords (show f :: map (go b App) (toList args))
-        in case precedence f of
-             Nothing  => showParens True catchall
-             Just lvl => let d = User (level lvl) in
-               showParens (b' || c > d) $ case args of
-                 [x]   => unwords [show f, go b d x]
-                 [x,y] => case lvl of
-                   InfixL _ => unwords [go b d x, show f, go b App y]
-                   InfixR _ => unwords [go b App x, show f, go b d y]
-                 _ => catchall
+  export
+  display : (Show a, Show (Op sig), HasPrecedence sig) =>
+            (b : Bool) -> Term sig a -> Doc ()
+  display b = go False Open where
+
+    go : Bool -> Prec -> Term sig a -> Doc ()
+    go _ _ (Done v) = pretty (show v)
+    go b' c (Call f args) with (arity f) proof eq
+      go b' c (Call f args) | Z = pretty (show f)
+      go b' c (Call f args) | (S _)
+        = let op := pretty (show f)
+              catchall : Lazy (Doc ())
+                := hsep (op :: map (go b App) (toList args))
+          in case precedence f of
+               Nothing  => parens catchall
+               Just lvl => let d = User (level lvl) in
+                 parenthesise (b' || c > d) $ case args of
+                   [x]   => hsep [op, go b d x]
+                   [x,y] => case lvl of
+                     InfixL _ => hsep [go b d x, op, go b App y]
+                     InfixR _ => hsep [go b App x, op, go b d y]
+                   _ => catchall
 
 export
 (Show a, Show (Op sig), HasPrecedence sig) => Show (Term sig a) where
-  show = display False
+  show = show . display False
 
 ------------------ Functor, Applicative, Monad -------------------------------------------
 

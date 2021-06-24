@@ -3,6 +3,7 @@ module Frex.Signature
 
 import Data.Finite
 import Data.String
+import Text.PrettyPrint.Prettyprinter
 
 ||| A single-sorted finitary signature
 public export
@@ -53,17 +54,18 @@ export
 display :
   (sig : Signature) ->
   (Finite (Op sig), HasPrecedence sig, Show (Op sig)) =>
-  String
-display sig = unlines $ map showOp enumerate where
+  Doc ()
+display sig = vcat $ map showOp enumerate where
 
   nary : Nat -> List String
   nary Z = ["a"]
   nary (S n) = "a" :: "->" :: nary n
 
-  showOp : Op sig -> String
-  showOp op@(MkOp {fst = 0} _) = unwords [show op, ": a"]
+  showOp : Op sig -> Doc ()
+  showOp op@(MkOp {fst = 0} _) = hsep [pretty (show op), ": a"]
   showOp op@(MkOp {fst = n@(S _)} _) =
-    let base = [showParens (n == 2) (show op), ":", unwords (nary n)] in
-    case precedence op of
-      Nothing   => unwords base
-      Just prec => unwords (base ++ [showParens True (show prec)])
+    let base = [ parenthesise (n == 2) (pretty $ show op)
+               , ":", pretty (unwords (nary n))]
+    in case precedence op of
+      Nothing   => hsep base
+      Just prec => hsep (base ++ [parens (pretty $ show prec)])

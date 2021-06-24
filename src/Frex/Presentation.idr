@@ -4,8 +4,9 @@ module Frex.Presentation
 import Data.Fin
 import Data.Finite
 import Data.Name
-import Data.String
+import Text.PrettyPrint.Prettyprinter
 import Data.Stream
+import Data.String
 import Data.Vect
 import Frex.Signature
 import Frex.Algebra
@@ -27,38 +28,44 @@ public export %hint
 projectSignature : Presentation -> Signature
 projectSignature pres = pres.signature
 
-export
-(Show (Op sig), HasPrecedence sig) => Show (Equation sig) where
-  show (MkEq supp lhs rhs)
-    = with Prelude.(::) concat [ tele supp, scoped lhs, " ≡ ", scoped rhs]
+namespace Equation
+
+  export
+  display : (Show (Op sig), HasPrecedence sig) =>
+            Equation sig -> Doc ()
+  display (MkEq supp lhs rhs)
+    = with Prelude.(::) concat [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
 
-      tele : Nat -> String
+      tele : Nat -> Doc ()
       tele Z = ""
-      tele n = "∀ " ++ unwords (map show (take n names)) ++ ". "
+      tele n = "∀" <++> hsep (map (pretty . show) (take n names)) <+> ". "
 
       prettyName : {n : Nat} -> Term sig (Fin n) -> Term sig Name
       prettyName = map (\ k => index (cast k) names)
 
-      scoped : {n : Nat} -> Term sig (Fin n) -> String
+      scoped : {n : Nat} -> Term sig (Fin n) -> Doc ()
       scoped = display True . prettyName
 
+namespace Presentation
 
+  export
+  display : (p : Presentation) ->
+            Finite (p .Axiom) =>
+            Show (p .Axiom) =>
+            Finite (Op p.signature) =>
+            Show (Op p.signature) =>
+            HasPrecedence p.signature =>
+            Doc ()
+  display p = vcat
+            $ "Operations:"
+            :: indent 2 (display p.signature)
+            :: "Axioms:"
+            :: map (indent 2 . showAxiom) enumerate
 
-export
-display : (p : Presentation) ->
-          Finite (p .Axiom) =>
-          Show (p .Axiom) =>
-          Finite (Op p.signature) =>
-          Show (Op p.signature) =>
-          HasPrecedence p.signature =>
-          String
-display p = unlines
-          $ display p.signature
-          :: map showAxiom enumerate
+    where
 
-  where
-
-    showAxiom : p .Axiom -> String
-    showAxiom ax = concat $ with Prelude.(::) [ show ax, ": ", show (p.axiom ax)]
+    showAxiom : p .Axiom -> Doc ()
+    showAxiom ax = concat {t = List}
+                 [pretty (show ax), ": ", display (p.axiom ax)]
