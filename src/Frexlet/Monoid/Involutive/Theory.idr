@@ -82,20 +82,33 @@ MkInvolutiveMonoid monoid involution involutivity antidistributivity
      Antidistributivity  => antidistributivity
 
 public export
+Cast InvolutiveMonoidStructure MonoidStructure where
+  cast invMonoid = MkSetoidAlgebra
+    { algebra = MakeAlgebra
+        { U = U invMonoid
+        , Semantics = \f => invMonoid.algebra.Semantics (MkOp $ Mono f.snd)
+        }
+    , equivalence = invMonoid.equivalence
+    , congruence  = \(MkOp op),xs,ys,prf => invMonoid.congruence (MkOp (Mono op)) xs ys prf
+    }
+
+public export
 Cast InvolutiveMonoid Monoid where
   cast invMonoid = MkModel
-    { Algebra  = MkSetoidAlgebra
-      { algebra = MakeAlgebra
-          { U = U invMonoid
-          , Semantics = \f => invMonoid.Algebra.algebra.Semantics (MkOp $ Mono f.snd)
-          }
-      , equivalence = invMonoid.Algebra.equivalence
-      , congruence  = \(MkOp op),xs,ys,prf => invMonoid.Algebra.congruence (MkOp (Mono op)) xs ys prf
-      }
+    { Algebra  = cast invMonoid.Algebra
     , Validate = \case
         LftNeutrality => invMonoid.Validate (Mon LftNeutrality)
         RgtNeutrality => invMonoid.Validate (Mon RgtNeutrality)
         Associativity => invMonoid.Validate (Mon Associativity)
+    }
+
+namespace Homomorphism
+  public export
+  cast : {a, b : InvolutiveMonoidStructure} -> a ~> b -> cast {to = MonoidStructure} a ~> cast b
+  cast h = MkSetoidHomomorphism
+    { H = h.H
+    , preserves = \case
+        MkOp op => h.preserves (MkOp $ Mono op)
     }
 
 public export

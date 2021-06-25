@@ -17,7 +17,8 @@ import Frex
 import Notation
 import Notation.Multiplicative
 import Frexlet.Monoid.Notation
-import Frexlet.Monoid.Theory
+import public Frexlet.Monoid.Theory
+import public Frexlet.Monoid.Frex
 
 import Frexlet.Monoid.Involutive.Theory
 import Frexlet.Monoid.Involutive.Notation
@@ -93,7 +94,7 @@ public export
 public export
 (.revInvolutionAxiom) : (a : Monoid) ->
   (a.Algebra.rev ~~> a.Algebra.rev.rev.rev).equivalence.relation
-    (cast {to = a ~> a.rev.rev} a.revInvolution).rev
+    (Prelude.cast {to = a ~> a.rev.rev} a.revInvolution).rev
     (cast {to = a.rev ~> a.rev.rev.rev} a.rev.revInvolution)
 a.revInvolutionAxiom = a.equivalence.reflexive
 
