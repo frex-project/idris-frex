@@ -7,7 +7,6 @@ import Data.Name
 import Text.PrettyPrint.Prettyprinter
 import Data.Stream
 import Data.String
-import Data.Vect
 import Frex.Signature
 import Frex.Algebra
 

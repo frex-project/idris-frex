@@ -3,10 +3,7 @@ module Data.Setoid.Definition
 
 import public Syntax.PreorderReasoning.Generic
 import public Decidable.Order
-
-public export
-0 Rel : Type -> Type
-Rel a = a -> a -> Type
+import public Data.Relation
 
 infix 5 ~>, ~~>, <~>
 

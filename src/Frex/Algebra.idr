@@ -23,6 +23,8 @@ import Syntax.PreorderReasoning.Generic
 
 import Text.PrettyPrint.Prettyprinter
 
+import Data.Stream
+import Data.Name
 import Data.Vect.Extra
 
 infix 10 ^
@@ -112,10 +114,6 @@ namespace Term
                      InfixR _ => hsep [go b d' x, op, go b d y]
                    _ => catchall
 
-export
-(Show a, Show (Op sig), HasPrecedence sig) => Show (Term sig a) where
-  show = show . display False
-
 ------------------ Functor, Applicative, Monad -------------------------------------------
 
 public export total
@@ -178,6 +176,10 @@ Applicative (Term sig) where
 public export
 Monad (Term sig) where
   (>>=) = (Free sig _).Sem
+
+export
+(Show (Op sig), HasPrecedence sig) => Show (Term sig (Fin n)) where
+  show = show . display False . map (\ k => index (cast k) names)
 
 ||| Free `sig`-algebra over `n`-variables.
 public export

@@ -42,6 +42,9 @@ modules = Frex
         -- Should move to contrib
         , Data.Finite
         , Data.Name
+        , Data.Relation
+        , Data.Relation.Closure.ReflexiveTransitive
+        , Data.Relation.Closure.Symmetric
         , Data.Setoid
         , Data.Setoid.Definition
         , Data.Setoid.Either
