@@ -34,7 +34,7 @@ namespace Equation
   display : (Show (Op sig), HasPrecedence sig) =>
             Bool -> Equation sig -> Doc ()
   display b (MkEq supp lhs rhs)
-    = with Prelude.(::) concat [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
+    = concat {t = List} [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
 
@@ -42,10 +42,10 @@ namespace Equation
       tele Z = ""
       tele n = "∀" <++> hsep (map (pretty . show) (take n names)) <+> ". "
 
-      prettyName : {n : Nat} -> Term sig (Fin n) -> Term sig Name
+      prettyName : Term sig (Fin supp) -> Term sig Name
       prettyName = map (\ k => index (cast k) names)
 
-      scoped : {n : Nat} -> Term sig (Fin n) -> Doc ()
+      scoped : Term sig (Fin supp) -> Doc ()
       scoped = display b . prettyName
 
 namespace Presentation
