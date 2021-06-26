@@ -84,6 +84,16 @@ data Locate : (sig : Signature) ->
          {lhs, rhs : U a} -> r lhs rhs ->
          Locate sig a r (plug a t lhs) (plug a t rhs)
 
+public export 0
+Derivation : (pres : Presentation) ->
+             (a : PresetoidAlgebra pres.signature) ->
+             Rel (U a)
+Derivation pres a
+  = RTList                          -- Reflexive, Transitive
+  $ Symmetrise                      -- Symmetric
+  $ Locate pres.signature a.algebra -- Congruence
+  $ Step pres a                     -- Closure
+
 export
 join : Locate sig alg (Locate sig alg r) ~> Locate sig alg r
 join (Here p) = p
@@ -96,6 +106,14 @@ join (Cong t (Cong u {lhs} {rhs} p))
     {p = Locate sig alg r (plug alg (t :.: u) lhs)}
     (sym $ plugFusion t u rhs)
   $ Cong (t :.: u) p
+
+export
+locate :
+  {a : PresetoidAlgebra pres.signature} ->
+  Locate pres.signature a.algebra (Derivation pres a) ~> Derivation pres a
+locate (Here p) = p
+locate (Cong t p)
+  = gmap (plug a.algebra t) (gmap (plug a.algebra t) (join . Cong t)) p
 
 -- TODO: move to base
 fromLeft : (b -> a) -> Either a b -> a
@@ -241,16 +259,6 @@ cong t eq
     (bindTermMapFusion Right t (fromLeft rhs))
   $ cong' n (map Right t) eq
 
-public export 0
-Derivation : (pres : Presentation) ->
-             (a : PresetoidAlgebra pres.signature) ->
-             Rel (U a)
-Derivation pres a
-  = RTList                          -- Reflexive, Transitive
-  $ Symmetrise                      -- Symmetric
-  $ Locate pres.signature a.algebra -- Congruence
-  $ Step pres a                     -- Closure
-
 linearise : {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             (|-) {pres} a ~> Derivation pres a
@@ -259,7 +267,12 @@ linearise (Refl x) = []
 linearise (Sym p) = reverse sym (linearise p)
 linearise (Transitive p q) = linearise p ++ linearise q
 linearise (ByAxiom eq env) = [Fwd (Here (ByAxiom eq env))]
-linearise (Congruence t eqForEq) = ?a_
+linearise (Congruence t eq)
+  = concat
+  $ map locate
+  $ cong {sig = pres.signature} {r = Derivation pres a} t
+  $ \ v => linearise (eq v)
+
 
 {-
 export

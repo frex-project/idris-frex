@@ -67,9 +67,12 @@ data (|-)
                   (bindTerm {a = a.algebra} (pres.axiom eq).rhs env)
 
   ||| Theorems are congruences w.r.t. algebraic terms
-  Congruence : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
-    (t : Term pres.signature vars) -> {lhs, rhs : vars -> U a} ->
-    (eqForEq : (x : vars) -> (|-) {pres} a (lhs x) (rhs x)) ->
+  Congruence :
+    {0 pres : Presentation} ->
+    {0 a : PresetoidAlgebra pres.signature} ->
+    {n : Nat} -> (t : Term pres.signature (Fin n)) ->
+    {lhs, rhs : Fin n -> U a} ->
+    (eqForEq : (x : Fin n) -> (|-) {pres} a (lhs x) (rhs x)) ->
     (|-) {pres} a (bindTerm {a = a.algebra} t lhs)
                   (bindTerm {a = a.algebra} t rhs)
 
@@ -183,9 +186,9 @@ FreeUPExistsHHHomomorphic pres x other _ _ (ByAxiom eq env)
                                                                 bindAssociative
                                                                   {a = other.Model.Algebra.algebra}
                                                                   _ _ _)
-FreeUPExistsHHHomomorphic pres x other _ _ (Congruence {vars, lhs, rhs} u eqForEq) =
+FreeUPExistsHHHomomorphic pres x other _ _ (Congruence {n, lhs, rhs} u eqForEq) =
   let q = \i => FreeUPExistsHHHomomorphic pres x other _ _ (eqForEq i)
-      lhs',rhs' : cast vars ~> cast other.Model
+      lhs',rhs' : cast (Fin n) ~> cast other.Model
       lhs' = mate (FreeUPExistsHHH pres x other . lhs)
       rhs' = mate (FreeUPExistsHHH pres x other . rhs)
   in CalcWith @{cast other.Model} $
@@ -193,14 +196,14 @@ FreeUPExistsHHHomomorphic pres x other _ _ (Congruence {vars, lhs, rhs} u eqForE
          (bindTerm {a = Free _ _ } u lhs)
          other.Env.H
     ~~ bindTerm {a = other.Model.Algebra.algebra } u
-         (\i : vars =>
+         (\i : Fin n =>
            bindTerm {a = other.Model.Algebra.algebra}
              (lhs i)
              other.Env.H)                             ...(bindAssociative
                                                             {a = other.Model.Algebra.algebra}
                                                              _ _ _)
     <~ bindTerm {a = other.Model.Algebra.algebra } u
-         (\i : vars =>
+         (\i : Fin n =>
            bindTerm {a = other.Model.Algebra.algebra}
              (rhs i)
              other.Env.H)                             ...((Setoid.eval u).homomorphic lhs' rhs' q)
