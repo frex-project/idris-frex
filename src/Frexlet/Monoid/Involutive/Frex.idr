@@ -306,8 +306,108 @@ InvMonoidExtension a s = InvolutiveExtensionToExtension $
   }
 
 public export
-Cast (InvolutiveExtension a s) (Env s (cast a) (InvolutiveMonoidToInvolution a)) where
-  cast ext = MkEnv
+(.Env) : (ext : InvolutiveExtension a s) ->
+  Env s ext.MonoidExtension.Model
+    ext.ModelInvolution
+(.Env) ext = MkEnv
     { H = ext.MonoidExtension.Var
-    , compatibility = let u = ext.VarCompatibility in ?h1
+    , compatibility = ext.VarCompatibility
     }
+
+public export
+ExtenderHomomorphism : (a : InvolutiveMonoid) -> (s : Setoid) ->
+  ExtenderHomomorphism (InvMonoidExtension a s)
+ExtenderHomomorphism a s other =
+  let otherIExt : InvolutiveExtension a s
+      otherIExt = ExtensionToInvolutiveExtension other
+      aInvolution : Involution (cast a)
+      aInvolution = InvolutiveMonoidToInvolution a
+      h : AuxFrexExtension a s ~> otherIExt.MonoidExtension
+      h = (AuxFrex a s).UP.Exists otherIExt.MonoidExtension
+      %hint frexNotation : InvMult1 (U $ FrexInvolutiveMonoid a s)
+      frexNotation = (FrexInvolutiveMonoid a s).Notation1
+      %hint aNotation : InvMult1 (U a)
+      aNotation = a.Notation1
+      %hint otherNotation : InvMult1 (U $ other.Model)
+      otherNotation = other.Model.Notation1
+      bid : ((cast Bool) `Pair` s) ~> ((cast Bool) `Pair` s)
+      bid = bimap (mate {b = cast Bool} not) (id s)
+      {- The main proof obligation is that `h` preserves the involution.
+         We appeal to the universal property of AuxFrex a s:
+         for the following extension:
+
+            inv      Embed.rev                Var         bimap not id
+         a ----> a.rev ---> other.Model.rev <---- (Bool, s) <--- (Bool, s)
+      -}
+      presExt : AuxExtensionType a s
+      presExt = MkExtension
+        { Model = otherIExt.MonoidExtension.Model.rev
+        , Embed = otherIExt.MonoidExtension.Embed.rev . aInvolution.H
+        , Var   = otherIExt.MonoidExtension.Var .
+                  bid
+        }
+      {- So the lef and right halves of the next two diagram give us
+         extension morphism: AuxFrexExtension a s ~> presExt
+
+                                  h.H
+          AuxFrexExtension a s -------------------------> other.Model
+                 |      ^       = (h.PreserveEmbed)      ^      |
+                 |      \   Embed          Embed        /       |
+                 |  =    ------------- a ---------------        |
+            inv  | (Embed.H.preserves) |inv              =      | inv
+                 |                     |(other.Embed.preserves) |
+                 |          Embed.rev  v      Embed.rev         |
+                 |      /------------  a.rev -----------\       |
+                 |     |      (h.PreseveEmbed).rev      |       |
+                 v     v               =                v       v
+         (AuxFrexExtension a s).rev ------------------> (other.Model).rev
+                                        h.H.rev
+                                   h.H
+          AuxFrexExtension a s -------------------------> other.Model
+                 |      ^       = (h.PreserveVar)        ^      |
+                 |      \   Var          Var            /       |
+                 |  =    -------- (Bool, s) ------------        |
+            inv  |    (PreserveVar)    |bimap not id     =      | inv
+                 |                     |(IExt.VarCompatibility) |
+                 |          Var        v      Var               |
+                 |      /-------- (Bool, s) ------------\       |
+                 |     |      (h.PreseveVar)            |       |
+                 v     v               =                v       v
+         (AuxFrexExtension a s) ---------------------> (other.Model).rev
+                                   h.H.H
+      -}
+      extendLHS,extendRHS : AuxFrexExtension a s ~> presExt
+      extendLHS = MkExtensionMorphism
+        { H =  h.H.rev . FrexInvolution a s
+        , PreserveEmbed = \i => other.Model.equivalence.reflexive _
+        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
+            |~ h.H.H.H ((AuxFrexExtension a s).Var.H bx).inv
+            <~ h.H.H.H ((AuxFrexExtension a s).Var.H $ bid.H bx)
+               ...(h.H.H.homomorphic _ _ $
+                   (FrexInvolutionExtensionMorphism a s).PreserveVar _)
+            <~ otherIExt.MonoidExtension.Var.H (bid.H bx)
+               ...(h.PreserveVar _)
+         }
+      extendRHS = MkExtensionMorphism
+        { H = otherIExt.ModelInvolution.H . h.H
+        , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+          |~ (h.H.H.H $ (AuxFrexExtension a s).Embed.H.H i ).inv
+          <~ (otherIExt.MonoidExtension.Embed.H.H i).inv
+             ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveEmbed i])
+          <~ (otherIExt.MonoidExtension.Embed.H.H i.inv)
+            ...( other.Model.equivalence.symmetric _ _
+               $ other.Embed.preserves Involute [_])
+        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
+          |~ (h.H.H.H $ (AuxFrexExtension a s).Var.H bx).inv
+          <~ (otherIExt.MonoidExtension.Var.H bx).inv
+             ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveVar bx])
+          <~ (otherIExt.MonoidExtension.Var.H $ bid.H bx)
+             ...(otherIExt.VarCompatibility _)
+        }
+  in MkSetoidHomomorphism
+  { H = h.H.H
+  , preserves = \case
+      MkOp (Mono op)  => h.H.preserves (MkOp op)
+      MkOp Involution => \ [i] =>
+        (AuxFrex a s).UP.Unique presExt extendLHS extendRHS i
+  }
