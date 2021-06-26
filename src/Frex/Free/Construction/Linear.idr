@@ -38,7 +38,7 @@ data Locate : (sig : Signature) ->
          Locate sig alg r (bindTerm {a = alg} t (fromMaybe lhs))
                           (bindTerm {a = alg} t (fromMaybe rhs))
 
-
+-- TODO: move to base
 fromLeft : (b -> a) -> Either a b -> a
 fromLeft f (Left a) = a
 fromLeft f (Right b) = f b
