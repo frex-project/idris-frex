@@ -5,6 +5,7 @@ import Frex.Algebra
 import Frex.Presentation
 import Frex.Free.Construction
 
+import Data.Setoid
 import Data.String
 import Data.Relation
 import Data.Relation.Closure.Symmetric
@@ -36,6 +37,174 @@ data Locate : (sig : Signature) ->
          (lhs, rhs : U alg) -> r lhs rhs ->
          Locate sig alg r (bindTerm {a = alg} t (fromMaybe lhs))
                           (bindTerm {a = alg} t (fromMaybe rhs))
+
+
+fromLeft : (b -> a) -> Either a b -> a
+fromLeft f (Left a) = a
+fromLeft f (Right b) = f b
+
+bindTermExtensional :
+  {alg : Algebra sig} ->
+  (t : Term sig vars) -> {lhs, rhs : vars -> U alg} ->
+  (eq : (v : vars) -> lhs v === rhs v) ->
+  bindTerm t lhs === bindTerm t rhs
+bindTermsExtensional :
+  {alg : Algebra sig} ->
+  (ts : Vect n (Term sig vars)) -> {lhs, rhs : vars -> U alg} ->
+  (eq : (v : vars) -> lhs v === rhs v) ->
+  bindTerms ts lhs === bindTerms ts rhs
+
+bindTermExtensional (Done v) eq = eq v
+bindTermExtensional (Call f ts) eq
+  = cong (alg .Semantics f) (bindTermsExtensional ts eq)
+
+bindTermsExtensional [] eq = Refl
+bindTermsExtensional (t :: ts) eq
+  = cong2 (::) (bindTermExtensional t eq)
+               (bindTermsExtensional ts eq)
+
+keep : (env : Fin (S n) -> a) ->
+       (Either a (Fin (S n))) -> Either a (Fin n)
+keep env (Left t) = Left t
+keep env (Right FZ) = Left (env FZ)
+keep env (Right (FS k)) = Right k
+
+keepFusion :
+  (env : Fin (S n) -> a) ->
+  (v : Either a (Fin (S n))) ->
+  fromLeft env v === fromLeft (env . FS) (keep env v)
+keepFusion env (Left t) = Refl
+keepFusion env (Right FZ) = Refl
+keepFusion env (Right (FS k)) = Refl
+
+focus : (env : Fin (S n) -> a) ->
+        (Either a (Fin (S n)) -> Maybe a)
+focus env (Left t) = Just t
+focus env (Right FZ) = Nothing
+focus env (Right (FS k)) = Just (env (FS k))
+
+focusFusion :
+  (env : Fin (S n) -> a) ->
+  (v : Either a (Fin (S n))) ->
+  fromMaybe (env FZ) (focus env v) === fromLeft env v
+focusFusion env (Left t) = Refl
+focusFusion env (Right FZ) = Refl
+focusFusion env (Right (FS k)) = Refl
+
+keepFocus :
+  (lhs, rhs : Fin (S n) -> a) ->
+  (v : Either a (Fin (S n))) ->
+  fromMaybe (rhs FZ) (focus lhs v) === fromLeft (lhs . FS) (keep rhs v)
+keepFocus lhs rhs (Left t) = Refl
+keepFocus lhs rhs (Right FZ) = Refl
+keepFocus lhs rhs (Right (FS k)) = Refl
+
+bindTermMapFusion :
+  {alg : Algebra sig} ->
+  (ren : a -> vars) -> (t : Term sig a) -> (env : vars -> U alg) ->
+  bindTerm (map ren t) env === bindTerm t (env . ren)
+bindTermsMapFusion :
+  {alg : Algebra sig} ->
+  (ren : a -> vars) -> (ts : Vect n (Term sig a)) -> (env : vars -> U alg) ->
+  bindTerms (bindTerms {a = Free _ _} ts (Done . ren)) env === bindTerms ts (env . ren)
+
+bindTermMapFusion ren (Done v)    env = Refl
+bindTermMapFusion ren (Call f ts) env
+  = cong (alg .Semantics f) (bindTermsMapFusion ren ts env)
+
+bindTermsMapFusion ren [] env = Refl
+bindTermsMapFusion ren (t :: ts) env
+  = cong2 (::) (bindTermMapFusion ren t env)
+               (bindTermsMapFusion ren ts env)
+
+focusEq :
+  {a : Algebra sig} ->
+  (t : Term sig (Either (U a) (Fin (S n)))) ->
+  (env : Fin (S n) -> U a) ->
+  bindTerm t (fromLeft env)
+  === bindTerm (map (focus env) t) (fromMaybe (env FZ))
+focusEq t env = trans
+  (bindTermExtensional t (\ v => sym $ focusFusion env v))
+  (sym $ bindTermMapFusion (focus env) t (fromMaybe (env FZ)))
+
+focusKeepEq :
+  {a : Algebra sig} ->
+  (t : Term sig (Either (U a) (Fin (S n)))) ->
+  (lhs, rhs : Fin (S n) -> U a) ->
+  bindTerm (map (focus lhs) t) (fromMaybe (rhs FZ))
+  === bindTerm (map (keep rhs) t) (fromLeft (lhs . FS))
+focusKeepEq t lhs rhs
+  = trans (bindTermMapFusion (focus lhs) t (fromMaybe (rhs FZ)))
+  $ trans (bindTermExtensional t (keepFocus lhs rhs))
+  $ sym   (bindTermMapFusion (keep rhs) t (fromLeft (lhs . FS)))
+
+keepEq :
+  {a : Algebra sig} ->
+  (t : Term sig (Either (U a) (Fin (S n)))) ->
+  (env : Fin (S n) -> U a) ->
+  bindTerm t (fromLeft env)
+  === bindTerm (map (keep env) t) (fromLeft (env . FS))
+keepEq t env = trans
+  (bindTermExtensional t (keepFusion env))
+  (sym $ bindTermMapFusion (keep env) t (fromLeft (env . FS)))
+
+
+cong' : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
+        {0 r : Rel (U a)} ->
+        (n : Nat) ->
+        (t : Term pres.signature (Either (U a) (Fin n))) ->
+        {lhs, rhs : Fin n -> U a} ->
+        (eq : (x : Fin n) -> r (lhs x) (rhs x)) ->
+        RTList (Locate pres.signature a.algebra r)
+               (bindTerm {a = a.algebra} t (fromLeft lhs))
+               (bindTerm {a = a.algebra} t (fromLeft rhs))
+
+cong' 0 t eq
+  = reflexive $ bindTermExtensional t $ \case
+      Left _ => Refl
+      Right k => absurd k
+
+cong' (S k) t eq =
+  let mid1 : U a
+      mid1 = bindTerm {a = a.algebra} (map (focus lhs) t) (fromMaybe (rhs FZ))
+
+      mid2 : U a
+      mid2 = bindTerm {a = a.algebra} (map (keep rhs) t) (fromLeft (lhs . FS))
+
+      end : U a
+      end = bindTerm {a = a.algebra} t (fromLeft rhs)
+
+  in replace
+    {p = \ x => Locate pres.signature a.algebra r x mid1}
+    (sym $ focusEq t lhs)
+    (Cong (map (focus lhs) t) (lhs FZ) (rhs FZ) (eq FZ))
+  :: (replace
+    {p = \ x => RTList (Locate pres.signature a.algebra r) x end}
+    (sym $ focusKeepEq t lhs rhs)
+  $ replace
+    {p = RTList (Locate pres.signature a.algebra r) mid2}
+    (sym $ keepEq t rhs)
+  $ cong' k (map (keep rhs) t) (\ k => eq (FS k)))
+
+cong : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
+       {0 r : Rel (U a)} ->
+       {n : Nat} ->
+       (t : Term pres.signature (Fin n)) ->
+       {lhs, rhs : Fin n -> U a} ->
+       (eq : (x : Fin n) -> r (lhs x) (rhs x)) ->
+       RTList (Locate pres.signature a.algebra r)
+              (bindTerm {a = a.algebra} t lhs)
+              (bindTerm {a = a.algebra} t rhs)
+cong t eq =
+  let 0 R : Rel (U a)
+      R = RTList (Locate pres.signature a.algebra r)
+  in replace
+    {p = \ x => R x (bindTerm {a = a.algebra} t rhs)}
+    (bindTermMapFusion Right t (fromLeft lhs))
+  $ replace
+    {p = R (bindTerm {a = a.algebra} (map Right t) (fromLeft lhs))}
+      (bindTermMapFusion Right t (fromLeft rhs))
+  $ cong' n (map Right t) eq
 
 public export 0
 Derivation : (pres : Presentation) ->

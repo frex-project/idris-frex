@@ -8,9 +8,18 @@ data RTList : Rel a -> Rel a where
   (::) : {0 r : Rel a} -> {y : a} -> r x y -> RTList r y z -> RTList r x z
 
 export
+reflexive : x === y -> RTList r x y
+reflexive Refl = []
+
+export
 (++) : RTList r x y -> RTList r y z -> RTList r x z
 [] ++ ys = ys
 (x :: xs) ++ ys = x :: xs ++ ys
+
+export
+concat : RTList (RTList r) x y -> RTList r x y
+concat [] = []
+concat (xs :: xss) = xs ++ concat xss
 
 export
 map : (p ~> q) -> RTList p ~> RTList q
