@@ -149,15 +149,15 @@ keepEq t env = trans
   (sym $ bindTermMapFusion (keep env) t (fromLeft (env . FS)))
 
 
-cong' : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
+cong' : {sig : Signature} -> {a : Algebra sig} ->
         {0 r : Rel (U a)} ->
         (n : Nat) ->
-        (t : Term pres.signature (Either (U a) (Fin n))) ->
+        (t : Term sig (Either (U a) (Fin n))) ->
         {lhs, rhs : Fin n -> U a} ->
         (eq : (x : Fin n) -> r (lhs x) (rhs x)) ->
-        RTList (Locate pres.signature a.algebra r)
-               (bindTerm {a = a.algebra} t (fromLeft lhs))
-               (bindTerm {a = a.algebra} t (fromLeft rhs))
+        RTList (Locate sig a r)
+               (bindTerm t (fromLeft lhs))
+               (bindTerm t (fromLeft rhs))
 
 cong' 0 t eq
   = reflexive $ bindTermExtensional t $ \case
@@ -166,44 +166,40 @@ cong' 0 t eq
 
 cong' (S k) t eq =
   let mid1 : U a
-      mid1 = bindTerm {a = a.algebra} (map (focus lhs) t) (fromMaybe (rhs FZ))
+      mid1 = bindTerm (map (focus lhs) t) (fromMaybe (rhs FZ))
 
       mid2 : U a
-      mid2 = bindTerm {a = a.algebra} (map (keep rhs) t) (fromLeft (lhs . FS))
+      mid2 = bindTerm (map (keep rhs) t) (fromLeft (lhs . FS))
 
       end : U a
-      end = bindTerm {a = a.algebra} t (fromLeft rhs)
+      end = bindTerm t (fromLeft rhs)
 
   in replace
-    {p = \ x => Locate pres.signature a.algebra r x mid1}
+    {p = \ x => Locate sig a r x mid1}
     (sym $ focusEq t lhs)
     (Cong (map (focus lhs) t) (lhs FZ) (rhs FZ) (eq FZ))
   :: (replace
-    {p = \ x => RTList (Locate pres.signature a.algebra r) x end}
+    {p = \ x => RTList (Locate sig a r) x end}
     (sym $ focusKeepEq t lhs rhs)
   $ replace
-    {p = RTList (Locate pres.signature a.algebra r) mid2}
+    {p = RTList (Locate sig a r) mid2}
     (sym $ keepEq t rhs)
   $ cong' k (map (keep rhs) t) (\ k => eq (FS k)))
 
-cong : {pres : Presentation} -> {a : PresetoidAlgebra pres.signature} ->
+cong : {sig : Signature} -> {a : Algebra sig} ->
        {0 r : Rel (U a)} ->
        {n : Nat} ->
-       (t : Term pres.signature (Fin n)) ->
+       (t : Term sig (Fin n)) ->
        {lhs, rhs : Fin n -> U a} ->
        (eq : (x : Fin n) -> r (lhs x) (rhs x)) ->
-       RTList (Locate pres.signature a.algebra r)
-              (bindTerm {a = a.algebra} t lhs)
-              (bindTerm {a = a.algebra} t rhs)
-cong t eq =
-  let 0 R : Rel (U a)
-      R = RTList (Locate pres.signature a.algebra r)
-  in replace
-    {p = \ x => R x (bindTerm {a = a.algebra} t rhs)}
+       RTList (Locate sig a r) (bindTerm t lhs) (bindTerm t rhs)
+cong t eq
+  = replace
+    {p = \ x => RTList (Locate sig a r) x (bindTerm t rhs)}
     (bindTermMapFusion Right t (fromLeft lhs))
   $ replace
-    {p = R (bindTerm {a = a.algebra} (map Right t) (fromLeft lhs))}
-      (bindTermMapFusion Right t (fromLeft rhs))
+    {p = RTList (Locate sig a r) (bindTerm (map Right t) (fromLeft lhs))}
+    (bindTermMapFusion Right t (fromLeft rhs))
   $ cong' n (map Right t) eq
 
 public export 0
