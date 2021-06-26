@@ -23,25 +23,18 @@ data Step : (pres : Presentation) ->
                         (bindTerm {a = a.algebra} (pres.axiom eq).rhs env)
 
 public export
-data Locate : (sig : Signature) ->
-              (alg : Algebra sig) ->
-              Rel (U alg) -> Rel (U alg) where
+plug : (a : Algebra sig) ->
+       (ctx : Term sig (Maybe (U a))) ->
+       (t : U a) -> U a
+plug a t u = bindTerm t (fromMaybe u)
 
-  ||| We prove the equality by invoking a rule at the toplevel
-  Here : {0 r : Relation.Rel (U alg)} -> r x y -> Locate sig alg r x y
-
-  ||| We focus on a subterm (that may appear in multiple places)
-  ||| and rewrite it using a specific rule.
-  Cong : {0 r : Relation.Rel (U alg)} ->
-         (t : Term sig (Maybe (U alg))) ->
-         (lhs, rhs : U alg) -> r lhs rhs ->
-         Locate sig alg r (bindTerm {a = alg} t (fromMaybe lhs))
-                          (bindTerm {a = alg} t (fromMaybe rhs))
-
--- TODO: move to base
-fromLeft : (b -> a) -> Either a b -> a
-fromLeft f (Left a) = a
-fromLeft f (Right b) = f b
+infixr 0 :.:
+public export
+(:.:) : {0 sig : Signature} ->
+        Term sig (Maybe a) ->
+        Term sig (Maybe a) ->
+        Term sig (Maybe a)
+g :.: f = bindTerm {a = Free _ _} g (maybe f (Done . Just))
 
 bindTermExtensional :
   {alg : Algebra sig} ->
@@ -62,6 +55,52 @@ bindTermsExtensional [] eq = Refl
 bindTermsExtensional (t :: ts) eq
   = cong2 (::) (bindTermExtensional t eq)
                (bindTermsExtensional ts eq)
+
+export
+plugFusion :
+  {0 sig : Signature} -> {a : Algebra sig} ->
+  (ctx2, ctx1 : Term sig (Maybe (U a))) ->
+  (t : U a) ->
+  plug a ctx2 (plug a ctx1 t)
+  === plug a (ctx2 :.: ctx1) t
+plugFusion ctx2 ctx1 t
+  = sym $ trans (bindAssociative ctx2 (maybe ctx1 (Done . Just)) (fromMaybe t))
+  $ bindTermExtensional ctx2 $ \case
+      Nothing => Refl
+      Just v => Refl
+
+public export
+data Locate : (sig : Signature) ->
+              (a : Algebra sig) ->
+              Rel (U a) -> Rel (U a) where
+
+  ||| We prove the equality by invoking a rule at the toplevel
+  Here : {0 r : Relation.Rel (U a)} -> r x y -> Locate sig a r x y
+
+  ||| We focus on a subterm (that may appear in multiple places)
+  ||| and rewrite it using a specific rule.
+  Cong : {0 r : Relation.Rel (U a)} ->
+         (t : Term sig (Maybe (U a))) ->
+         {lhs, rhs : U a} -> r lhs rhs ->
+         Locate sig a r (plug a t lhs) (plug a t rhs)
+
+export
+join : Locate sig alg (Locate sig alg r) ~> Locate sig alg r
+join (Here p) = p
+join (Cong t (Here p)) = Cong t p
+join (Cong t (Cong u {lhs} {rhs} p))
+  = replace
+    {p = \ x => Locate sig alg r x (plug alg t (plug alg u rhs))}
+    (sym $ plugFusion t u lhs)
+  $ replace
+    {p = Locate sig alg r (plug alg (t :.: u) lhs)}
+    (sym $ plugFusion t u rhs)
+  $ Cong (t :.: u) p
+
+-- TODO: move to base
+fromLeft : (b -> a) -> Either a b -> a
+fromLeft f (Left a) = a
+fromLeft f (Right b) = f b
 
 keep : (env : Fin (S n) -> a) ->
        (Either a (Fin (S n))) -> Either a (Fin n)
@@ -177,7 +216,7 @@ cong' (S k) t eq =
   in replace
     {p = \ x => Locate sig a r x mid1}
     (sym $ focusEq t lhs)
-    (Cong (map (focus lhs) t) (lhs FZ) (rhs FZ) (eq FZ))
+    (Cong (map (focus lhs) t) (eq FZ))
   :: (replace
     {p = \ x => RTList (Locate sig a r) x end}
     (sym $ focusKeepEq t lhs rhs)
