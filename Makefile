@@ -9,4 +9,7 @@ install:
 doc:
 	idris2 --mkdoc frex.ipkg
 
-.PHONY: all build install doc
+test:
+	@${MAKE} -C tests build run
+
+.PHONY: all build install doc test

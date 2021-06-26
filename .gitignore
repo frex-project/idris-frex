@@ -8,6 +8,9 @@
 *.dylib
 
 /build
+/tests/build
+
+/tests/failures
 
 idris2docs_venv
 /docs/build
