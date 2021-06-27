@@ -22,6 +22,17 @@ data Step : (pres : Presentation) ->
             Step pres a (bindTerm {a = a.algebra} (pres.axiom eq).lhs env)
                         (bindTerm {a = a.algebra} (pres.axiom eq).rhs env)
 
+namespace Step
+
+  export
+  display : {pres : Presentation} ->
+            {a : PresetoidAlgebra pres.signature} ->
+            ({x, y : U a} -> Show (a.relation x y)) =>
+            Show (pres .Axiom) =>
+            {0 x, y : U a} -> Step pres a x y -> Doc ()
+  display @{showR} (Include p) = pretty (show @{showR} p)
+  display (ByAxiom eq env) = pretty (show eq)
+
 public export
 plug : (a : Algebra sig) ->
        (ctx : Term sig (Maybe (U a))) ->
@@ -85,14 +96,22 @@ data Locate : (sig : Signature) ->
          Locate sig a r (plug a t lhs) (plug a t rhs)
 
 public export 0
+Closure : (pres : Presentation) ->
+          (a : PresetoidAlgebra pres.signature) ->
+          Rel (U a)
+Closure pres a
+  = Symmetrise                      -- Symmetric
+  $ Locate pres.signature a.algebra -- Congruence
+  $ Step pres a
+
+
+public export 0
 Derivation : (pres : Presentation) ->
              (a : PresetoidAlgebra pres.signature) ->
              Rel (U a)
 Derivation pres a
-  = RTList                          -- Reflexive, Transitive
-  $ Symmetrise                      -- Symmetric
-  $ Locate pres.signature a.algebra -- Congruence
-  $ Step pres a                     -- Closure
+  = RTList          -- Reflexive, Transitive
+  $ Closure pres a
 
 export
 join : Locate sig alg (Locate sig alg r) ~> Locate sig alg r
@@ -273,6 +292,75 @@ linearise (Congruence t eq)
   $ cong {sig = pres.signature} {r = Derivation pres a} t
   $ \ v => linearise (eq v)
 
+public export
+record Focus (sig : Signature) (a : Algebra sig) where
+  constructor MkFocus
+  context : Term sig (Maybe (U a))
+  content : U a
+
+namespace Focus
+
+  data Raw = MkRaw String
+  Show Raw where show (MkRaw str) = str
+
+  export
+  display : (Show (U a), Show (Op sig), HasPrecedence sig) =>
+            Focus sig a -> Doc ()
+  display (MkFocus ctx t) =
+    let focus = "[" ++ show t ++ "]" in
+    Term.display False (map (MkRaw . maybe focus show) ctx)
+
+namespace Derivation
+
+  export
+  display : {pres : Presentation} ->
+            {a : PresetoidAlgebra pres.signature} ->
+            ({x, y : U a} -> Show (a.relation x y)) =>
+            Show (pres .Axiom) =>
+            Show (U a) =>
+            Show (Op pres.signature) =>
+            HasPrecedence pres.signature =>
+            {x, y : U a} -> Derivation pres a x y -> Doc ()
+  display @{showR} prf = vcat [vcat (steps prf), pretty (show y)] where
+
+    byProof : Bool -> Doc () -> Doc ()
+    byProof False d = indent 2 $ "≡[" <++> d <++> "⟩"
+    byProof True  d = indent 2 $ "≡⟨" <++> d <++> "]"
+
+    base : Bool ->
+           Either (U a) (Focus pres.signature a.algebra) ->
+           Doc () -> List (Doc ())
+    base b ctx p =
+      [ either (pretty . show) Focus.display ctx
+      , byProof b p]
+
+    cong : {begin : U a} -> Bool ->
+           Locate pres.signature a.algebra (Step pres a) begin end ->
+           List (Doc ())
+    cong b (Here p) = base b (Left begin) (display @{showR} p)
+    cong b (Cong t {lhs} p) =
+      base b (Right (MkFocus t lhs)) (display @{showR} p)
+
+    step : {begin, end : U a} -> Closure pres a begin end -> List (Doc ())
+    step (Fwd p) = cong False p
+    step (Bwd p) = cong True p
+
+    steps  : {begin : U a} -> Derivation pres a begin end -> List (Doc ())
+    steps [] = []
+    steps (r :: rs) = step r ++ steps rs
+
+namespace Proof
+
+  export
+  display : {pres : Presentation} ->
+            {a : PresetoidAlgebra pres.signature} ->
+            ({x, y : U a} -> Show (a.relation x y)) =>
+            Show (pres .Axiom) =>
+            Show (U a) =>
+            Show (Op pres.signature) =>
+            HasPrecedence pres.signature =>
+            {x, y : U a} -> (|-) {pres} a x y -> Doc ()
+  display @{showR} = Derivation.display @{showR} . linearise
 
 {-
 export
