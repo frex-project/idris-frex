@@ -305,10 +305,10 @@ namespace Focus
 
   export
   display : (Show (U a), Show (Op sig), HasPrecedence sig) =>
-            Focus sig a -> Doc ()
-  display (MkFocus ctx t) =
+            Bool -> Focus sig a -> Doc ()
+  display b (MkFocus ctx t) =
     let focus = "[" ++ show t ++ "]" in
-    Term.display False (map (MkRaw . maybe focus show) ctx)
+    Term.display b (map (MkRaw . maybe focus show) ctx)
 
 namespace Derivation
 
@@ -331,15 +331,18 @@ namespace Derivation
            Either (U a) (Focus pres.signature a.algebra) ->
            Doc () -> List (Doc ())
     base b ctx p =
-      [ either (pretty . show) Focus.display ctx
+      [ either (pretty . show) (Focus.display True) ctx
       , byProof b p]
 
-    cong : {begin : U a} -> Bool ->
+    cong : {begin, end : U a} -> Bool ->
            Locate pres.signature a.algebra (Step pres a) begin end ->
            List (Doc ())
-    cong b (Here p) = base b (Left begin) (display @{showR} p)
-    cong b (Cong t {lhs} p) =
-      base b (Right (MkFocus t lhs)) (display @{showR} p)
+    cong b (Here p)
+      = base b (Left (if b then end else begin))
+      $ display @{showR} p
+    cong b (Cong t {lhs} {rhs} p)
+      = base b (Right (MkFocus t (if b then rhs else lhs)))
+      $ display @{showR} p
 
     step : {begin, end : U a} -> Closure pres a begin end -> List (Doc ())
     step (Fwd p) = cong False p
