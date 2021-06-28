@@ -1,5 +1,5 @@
 ||| Cosntructing the involutive monoid frex.
-||| 
+|||
 ||| This implementation uses the fact that if `a` is an involutive
 ||| monoid, then `Frex a s` can be represented by `Frex a.monoid (Bool, s)`.
 module Frexlet.Monoid.Involutive.Frex
@@ -18,6 +18,8 @@ import Frexlet.Monoid.Involutive.Properties
 import Frexlet.Monoid.Involutive.Involution
 
 import Data.Bool
+
+%default total
 
 -- Our construction uses an auxiliary frex for the underlying monoid
 

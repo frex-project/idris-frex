@@ -4,6 +4,8 @@ module Frex.Presentation
 import Frex.Signature
 import Frex.Algebra
 
+%default total
+
 public export
 record Equation (Sig : Signature) where
   constructor MkEq
@@ -25,9 +27,9 @@ projectSignature pres = pres.signature
 public export
 castEqHint : {auto castOp : sig1 ~> sig2} ->
    Cast (Equation sig1) (Equation sig2)
-castEqHint {castOp} = MkCast \eq => 
-  MkEq 
-  { Var = eq.Var 
+castEqHint {castOp} = MkCast \eq =>
+  MkEq
+  { Var = eq.Var
   , lhs = cast eq.lhs
   , rhs = cast eq.rhs
   }

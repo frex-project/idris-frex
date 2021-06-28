@@ -25,6 +25,8 @@ import Data.Vect.Extra
 infix 10 ^
 infix 5 ~>, <~>
 
+%default total
+
 ||| N-ary tuples
 public export
 (^) : Type -> Nat -> Type
@@ -43,7 +45,7 @@ uncurry {n = 0  } f xs = f
 uncurry {n = S n} f xs = Algebra.uncurry (f $ head xs) (tail xs)
 
 export
-uncurryCurryId : {n : Nat} -> (f : a ^ n -> a) -> (xs : a ^ n) -> 
+uncurryCurryId : {n : Nat} -> (f : a ^ n -> a) -> (xs : a ^ n) ->
   (Algebra.uncurry (Algebra.curry f)) xs = f xs
 uncurryCurryId f    []     = Refl
 uncurryCurryId f (x :: xs) = uncurryCurryId (\xs => f (x :: xs)) xs
@@ -116,7 +118,7 @@ Semantic (Algebra sig) (Term sig x) where
 
 ||| Specifies `bindTerms` specialises `map bindTerm`.
 export
-bindTermsIsMap : {auto a : Algebra sig} 
+bindTermsIsMap : {auto a : Algebra sig}
   -> (xs : Vect n (Term sig x)) -> (env : x -> U a)
   -> bindTerms {a} xs env = map (flip a.Sem env) xs
 bindTermsIsMap [] env = Refl
@@ -267,7 +269,7 @@ namespace Setoid
 
   public export
   id : (a : SetoidAlgebra sig) -> a ~> a
-  id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a) 
+  id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a)
           \f,xs => CalcWith @{cast a} $
           |~ a.Sem f xs
           ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))
@@ -486,23 +488,22 @@ namespace Signature
 
   public export
   OpTranslation : (castOp : {n : Nat} -> sig1.OpWithArity n -> sig2.OpWithArity n) -> sig1 ~> sig2
-  OpTranslation castOp = 
-     MkSignatureMorphism \op => 
-       Call (MkOp $ castOp op) 
+  OpTranslation castOp =
+     MkSignatureMorphism \op =>
+       Call (MkOp $ castOp op)
             (map Done Fin.range)
 
 
   public export
   cast : {auto castOp : sig1 ~> sig2} ->
      (Term sig1 a) -> (Term sig2 a)
-  
+
   public export
   castTerms : (castOp : sig1 ~> sig2) ->
      (Vect k (Term sig1 a)) -> (Vect k (Term sig2 a))
   castTerms castOp [] = []
   castTerms castOp (t :: ts) = (cast {castOp} t) :: castTerms castOp ts
-  
-  cast (Done x   ) = Done x
-  cast (Call f ts) = (Free sig2 _).Sem (castOp.H f.snd) 
-                   $ Signature.cast . flip index ts
 
+  cast (Done x   ) = Done x
+  cast (Call f ts) = (Free sig2 _).Sem (castOp.H f.snd)
+                   $ flip index $ Signature.castTerms castOp ts

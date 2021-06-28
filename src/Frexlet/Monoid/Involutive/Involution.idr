@@ -24,6 +24,8 @@ import Frexlet.Monoid.Involutive.Theory
 import Frexlet.Monoid.Involutive.Notation
 import Frexlet.Monoid.Involutive.Properties
 
+%default total
+
 namespace Algebra
   ||| Same monoid structure with the order of multiplication reversed:
   |||
@@ -210,4 +212,3 @@ namespace Back
   public export
   cast : {s : Setoid} -> {c : Monoid} -> {inv : Involution c} -> Env s c inv -> (s ~> cast c)
   cast env = env.H . (tuple (const {b = cast Bool} False) (id s))
-

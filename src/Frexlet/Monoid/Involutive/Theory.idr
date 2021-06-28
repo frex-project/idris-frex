@@ -5,6 +5,8 @@ import Frex
 
 import public Frexlet.Monoid
 
+%default total
+
 public export
 data Operation : Nat -> Type where
   Mono : Monoid.Theory.Operation n -> Operation n
