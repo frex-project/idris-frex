@@ -12,6 +12,8 @@ import Frex.Coproduct
 
 import Syntax.PreorderReasoning.Generic
 
+%default total
+
 public export
 record Extension {Pres : Presentation} (A : Model Pres)(X : Setoid) where
   constructor MkExtension

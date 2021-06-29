@@ -10,6 +10,8 @@ import Frex.Model
 import Data.Vect
 import Data.Vect.Properties
 
+%default total
+
 ||| A parameterisation
 public export
 record Parameterisation (Pres : Presentation)(X : Setoid)(A : Model Pres) where

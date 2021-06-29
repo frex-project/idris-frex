@@ -4,6 +4,8 @@ module Data.Setoid.Pair
 import Data.Setoid.Definition
 import Data.Setoid.Either
 
+%default total
+
 ||| Binary relation conjunction
 public export
 record And {A,B : Type} (p : A -> A -> Type) (q : B -> B -> Type) (xy1, xy2 : (A, B)) where

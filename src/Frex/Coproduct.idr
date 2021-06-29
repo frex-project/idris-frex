@@ -9,6 +9,8 @@ import Frex.Model
 
 infixr 3 <~.~>
 
+%default total
+
 ||| A cospan between models of a presentation. Looks a bit like this: \o/
 public export
 record (<~.~>) {Pres : Presentation} (L, R : Model Pres) where

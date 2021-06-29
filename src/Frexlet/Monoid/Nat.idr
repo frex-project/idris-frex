@@ -6,6 +6,8 @@ import Frexlet.Monoid.Theory
 
 import Data.Nat
 
+%default total
+
 ||| Additive monoid structure over the natural numbers
 public export
 Additive : Monoid

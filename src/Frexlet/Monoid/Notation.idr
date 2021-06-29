@@ -7,6 +7,8 @@ import Frexlet.Monoid.Theory
 import Notation.Additive
 import Notation.Multiplicative
 
+%default total
+
 public export
 (.Additive1) : (monoid : Monoid) -> Additive1 (U monoid)
 monoid.Additive1 = MkAdditive1 (monoid.sem Neutral) (monoid.sem Product)
@@ -57,4 +59,3 @@ notation3 : Multiplicative3 (Term Signature (a `Either` (Fin n)))
 notation3 = MkMultiplicative3
               (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
-

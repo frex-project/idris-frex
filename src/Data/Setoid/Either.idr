@@ -3,6 +3,8 @@ module Data.Setoid.Either
 
 import Data.Setoid.Definition
 
+%default total
+
 namespace Relation
   ||| Binary relation disjunction
   public export

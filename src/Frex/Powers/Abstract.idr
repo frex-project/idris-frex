@@ -9,6 +9,8 @@ import Frex.Model
 
 import Frex.Powers.Definition
 
+%default total
+
 parameters {pres : Presentation} {x : Setoid} {a : Model pres}
   public export
   id : (param : Parameterisation pres x a) -> param ~> param

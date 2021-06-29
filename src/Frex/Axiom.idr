@@ -10,6 +10,8 @@ import public Notation.Additive
 
 import Data.Fin
 
+%default total
+
 infix 1 =-=
 
 ||| Smart constructor for making equations look nicer
@@ -76,7 +78,7 @@ involutivity involution =
 public export
 antidistributivity : {sig : Signature} -> EqSpec sig [1, 2]
 antidistributivity involution product =
-  let (.inv) = call involution 
+  let (.inv) = call involution
       (*)    = call product
-  in 
+  in
   MkEquation 2 $ (X 0 * X 1).inv  =-= (X 1).inv * (X 0).inv
