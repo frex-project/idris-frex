@@ -28,6 +28,8 @@ modules = Frex
         , Frexlet.Monoid.Nat
         , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation
+        , Frexlet.Monoid.Notation.Additive
+        , Frexlet.Monoid.Notation.Multiplicative
         , Frexlet.Monoid.Commutative
         , Frexlet.Monoid.Commutative.Theory
         , Frexlet.Monoid.Commutative.Nat
@@ -47,7 +49,7 @@ modules = Frex
         , Data.Setoid.Vect
         , Data.Setoid.List
         , Data.Vect.Extra1
-        
+
 
 depends = contrib
 sourcedir = "src"
