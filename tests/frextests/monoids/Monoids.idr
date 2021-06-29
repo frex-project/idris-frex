@@ -26,35 +26,31 @@ sta x = Done (Left x)
 (+.) x y = Call (MkOp Product) [x, y]
 
 trivial : {a : Nat} -> a = a
-trivial = frexify {pres=MonoidTheory} {prf= ConsUlt Refl Refl (Ultimate Refl) }
+trivial = frexify {pres=MonoidTheory}
             (MonoidFrex Additive _)
              [a]
             (x1, x1)
 
 trivial2 : {a, b : Nat} -> a + b = a + b
 trivial2 = frexify {pres=MonoidTheory}
-            {prf= ConsUlt Refl Refl (ConsUlt Refl Refl (Ultimate Refl)) }
             (MonoidFrex Additive _)
              [a, b]
             (x1 +. x2, x1 +. x2)
 
 assoc : {a, b, c : Nat} -> a + (b + c) = (a + b) + c
 assoc = frexify {pres=MonoidTheory}
-          {prf= ConsUlt Refl Refl (ConsUlt Refl Refl (ConsUlt Refl Refl (Ultimate Refl))) }
           (MonoidFrex Additive _)
            [a, b, c]
           (x1 +. (x2 +. x3), (x1 +. x2) +. x3)
 
 rassoc : {a, b, c : Nat} -> (a + b) + c = a + (b + c)
 rassoc = frexify {pres=MonoidTheory}
-          {prf= ConsUlt Refl Refl (ConsUlt Refl Refl (ConsUlt Refl Refl (Ultimate Refl))) }
           (MonoidFrex Additive _)
            [a, b, c]
           ((x1 +. x2) +. x3, x1 +. (x2 +. x3))
 
 mixed : {a, b : Nat} -> (a + 1) + (1 + b) = (a + 2 + b)
 mixed = frexify {pres=MonoidTheory}
-          {prf= ConsUlt Refl Refl (ConsUlt Refl Refl (Ultimate Refl)) }
           (MonoidFrex Additive _)
            [a, b]
           ((x1 +. sta 1) +. (sta 1 +. x2), x1 +. sta 2 +. x2)
