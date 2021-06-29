@@ -26,6 +26,7 @@ modules = Frex
         , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Frex.Construction
         , Frexlet.Monoid.Nat
+        , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation
         , Frexlet.Monoid.Notation.Additive
         , Frexlet.Monoid.Notation.Multiplicative
