@@ -27,7 +27,10 @@ modules = Frex
         , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Frex.Construction
         , Frexlet.Monoid.Nat
+        , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation
+        , Frexlet.Monoid.Notation.Additive
+        , Frexlet.Monoid.Notation.Multiplicative
         , Frexlet.Monoid.Commutative
         , Frexlet.Monoid.Commutative.Theory
         , Frexlet.Monoid.Commutative.Nat
@@ -46,6 +49,7 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Involution
         , Frexlet.Monoid.Involutive.Frex
         -- Should move to contrib
+        , Data.Fun.Nary
         , Data.Setoid
         , Data.Setoid.Definition
         , Data.Setoid.Either

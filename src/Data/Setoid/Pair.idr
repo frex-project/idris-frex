@@ -107,3 +107,9 @@ distribute = MkSetoidHomomorphism
   { H = distributeFunction
   , homomorphic = distributeHomomorphism
   }
+
+public export
+pairIso : {a,b,c,d : Setoid} -> (a <~> c) -> (b <~> d) -> (Pair a b <~> Pair c d)
+pairIso ac bd = MkIsomorphism (bimap ac.Fwd bd.Fwd) (bimap ac.Bwd bd.Bwd)
+                  (IsIsomorphism (\(x,y) => MkAnd (ac.Iso.BwdFwdId x) (bd.Iso.BwdFwdId y))
+                                 (\(x,y) => MkAnd (ac.Iso.FwdBwdId x) (bd.Iso.FwdBwdId y)))
