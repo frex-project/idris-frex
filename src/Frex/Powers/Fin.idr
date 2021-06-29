@@ -16,6 +16,7 @@ import Frex.Powers.Definition
 import Frex.Powers.Construction
 import Frex.Powers.Abstract
 
+%default total
 
 public export
 FinPowerSetoid : {0 sig : Signature} -> (n: Nat) -> (a: SetoidAlgebra sig) -> Setoid
@@ -76,7 +77,7 @@ eval x = MkSetoidHomomorphism
    (indexHomomorphismLemma n a x)
 
 public export
-pointwiseBind : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig} 
+pointwiseBind : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig}
   -> (t : Term sig y) -> (env : y -> Vect n (U a)) -> (x : Fin n) ->
   a.equivalence.relation
    (index x
@@ -85,7 +86,7 @@ pointwiseBind : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig}
 pointwiseBind t env x = homoPreservesSem (Fin.eval x) t env
 
 public export
-representation : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig} -> 
+representation : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig} ->
   (n `FinPowerSetoidAlgebra` a) <~> (cast (Fin n) ~~> a)
 representation =
   let fwd : Vect n (U a) -> (U (cast (Fin n) ~~> a))

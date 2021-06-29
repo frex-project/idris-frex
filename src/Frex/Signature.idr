@@ -1,6 +1,8 @@
 ||| Definitions and functions dealing with single-sorted finitary signatures
 module Frex.Signature
 
+%default total
+
 ||| A single-sorted finitary signature
 public export
 record Signature where

@@ -90,3 +90,35 @@ Cast ([a,b] `ary` a) (AdditiveActedBy2 a b) where
 public export
 Cast ([a,b] `ary` a) (AdditiveActedBy3 a b) where
   cast = MkAdditiveActedBy3
+
+%hint
+public export
+fstAdditive1 : (Additive1 a, _) -> Additive1 a
+fstAdditive1 = fst
+
+%hint
+public export
+sndAdditive1 : (_, Additive1 a) -> Additive1 a
+sndAdditive1 = snd
+
+%hint
+public export
+fstAdditive2 : (Additive2 a, _) -> Additive2 a
+fstAdditive2 = fst
+
+%hint
+public export
+sndAdditive2 : (_, Additive2 a) -> Additive2 a
+sndAdditive2 = snd
+
+%hint
+public export
+fstAdditive3 : (Additive3 a, _) -> Additive3 a
+fstAdditive3 = fst
+
+%hint
+public export
+sndAdditive3 : (_, Additive3 a) -> Additive3 a
+sndAdditive3 = snd
+
+

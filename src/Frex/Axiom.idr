@@ -10,6 +10,8 @@ import public Notation.Additive
 
 import Data.Fin
 
+%default total
+
 infix 1 =-=
 
 ||| Smart constructor for making equations look nicer
@@ -67,3 +69,16 @@ commutativity product =
   let (+) = call product in
   MkEquation 2 $ X 0 + X 1 =-= X 1 + X 0
 
+public export
+involutivity : {sig : Signature} -> EqSpec sig [1]
+involutivity involution =
+  let (.inv) = call involution in
+  MkEquation 1 $ (X 0).inv.inv  =-= X 0
+
+public export
+antidistributivity : {sig : Signature} -> EqSpec sig [1, 2]
+antidistributivity involution product =
+  let (.inv) = call involution
+      (*)    = call product
+  in
+  MkEquation 2 $ (X 0 * X 1).inv  =-= (X 1).inv * (X 0).inv

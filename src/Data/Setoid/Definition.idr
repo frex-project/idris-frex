@@ -6,6 +6,8 @@ import public Decidable.Order
 
 infix 5 ~>, ~~>, <~>
 
+%default total
+
 public export
 record Equivalence (A : Type) where
   constructor MkEquivalence
@@ -171,4 +173,3 @@ Quotient a {b} q = MkSetoid a
     , symmetric =  \x,y=> b.equivalence.symmetric (q x) (q y)
     , transitive = \x,y,z  => b.equivalence.transitive (q x) (q y) (q z)
     }
-

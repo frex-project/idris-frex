@@ -13,6 +13,7 @@ import Data.Vect.Properties
 
 import Frex.Powers.Definition
 
+%default total
 
 parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
   public export
@@ -22,7 +23,7 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
   public export
   PowerAlgebra : Algebra Sig
   PowerAlgebra = MakeAlgebra (U PowerSetoid)
-      \f,phis => 
+      \f,phis =>
       MkSetoidHomomorphism (\i => (A).Sem f (map (\phi => phi.H i) phis))
                            \u, v, prf => congruence A f _ _ \i =>
                              CalcWith @{cast A} $
@@ -70,7 +71,7 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
 namespace Model
   public export
   (~~>) : {pres : Presentation} -> (x : Setoid) -> (a : Model pres) -> Model pres
-  (~~>) x a = 
+  (~~>) x a =
     let X_to_A : SetoidAlgebra pres.signature
         X_to_A = x ~~> a.Algebra
     in MkModel X_to_A
@@ -114,8 +115,8 @@ a ^ x = MkPower
              in CalcWith @{cast a} $
              |~ OtoA .H.H (other.Model.Sem op env)
              <~ a.Sem op (map (OtoA .H.H) env) ...(OtoA .preserves op env)
-                                                  -- vv too disgusting...
-             ~~ a.Sem op (map (\phi => phi.H i) (map _ env))
+                                                                  -- vv too disgusting...
+             ~~ a.Sem op (map (\phi : (x ~> cast a) => phi.H i) (map _ env))
                               ...(cong (a.Sem op)
                                  $ sym $ mapFusion _ _ env))
         \u,i => (cast a).equivalence.reflexive _
