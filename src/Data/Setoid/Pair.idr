@@ -54,3 +54,15 @@ tuple f g = MkSetoidHomomorphism
       (f.homomorphic z1 z2 prf)
       (g.homomorphic z1 z2 prf)
   }
+
+public export
+pair : {a,b,c,d : Setoid} -> (a ~> c) -> (b ~> d) -> (Pair a b ~> Pair c d)
+pair f g = tuple (f . (.fst)) (g . (.snd))
+
+public export
+pairIso : {a,b,c,d : Setoid} -> (a <~> c) -> (b <~> d) -> (Pair a b <~> Pair c d)
+pairIso ac bd = MkIsomorphism (pair ac.Fwd bd.Fwd) (pair ac.Bwd bd.Bwd) 
+                  (IsIsomorphism (\(x,y) => MkAnd (ac.Iso.BwdFwdId x) (bd.Iso.BwdFwdId y))
+                                 (\(x,y) => MkAnd (ac.Iso.FwdBwdId x) (bd.Iso.FwdBwdId y)))
+
+         
