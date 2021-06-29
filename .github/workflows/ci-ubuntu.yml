@@ -12,7 +12,7 @@ on:
 ########################################################################
 
 env:
-  IDRIS2_COMMIT: a28bc655440e963591aaa7cfc47adefc4e785452
+  IDRIS2_COMMIT: tags/v0.4.0
   SCHEME: scheme
 
 jobs:
@@ -55,10 +55,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build package
-        run: idris2 --build frex.ipkg
+        run: make build
+
+      - name: Run tests
+        run: make test
 
       - name: Build HTML doc
-        run: idris2 --mkdoc frex.ipkg
+        run: make doc
 
       - name: Deploy HTML
         uses: JamesIves/github-pages-deploy-action@4.1.3
