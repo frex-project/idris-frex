@@ -150,6 +150,11 @@ trans ab bc = MkIsomorphism (bc.Fwd . ab.Fwd) (ab.Bwd . bc.Bwd) (IsIsomorphism i
         i2 : (x : U c) -> c.equivalence.relation (bc.Fwd.H (ab.Fwd.H (ab.Bwd.H (bc.Bwd.H x)))) x
         i2 x = c.equivalence.transitive _ _ _ (bc.Fwd.homomorphic _ _ (ab.Iso.FwdBwdId _)) (bc.Iso.FwdBwdId x)
 
+public export
+IsoEquivalence : Equivalence Setoid
+IsoEquivalence = MkEquivalence (<~>) (\_ => refl) (\_,_ => sym) (\_,_,_ => trans)
+
+
 ||| Quotient a type by an function into a setoid
 |||
 ||| Instance of the more general coequaliser of two setoid morphisms.
