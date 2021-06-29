@@ -29,7 +29,7 @@ multUnitNeutral : (a : Monoid) -> (s : Setoid) -> (is : FrexCarrier a s) ->
        (the (U a) I1 *. is)
        is
 multUnitNeutral a s (Ultimate i) = Ultimate $ a.validate LftNeutrality [_]
-multUnitNeutral a s (ConsUlt i x is) = 
+multUnitNeutral a s (ConsUlt i x is) =
   ( a.validate LftNeutrality [_]
   , s.equivalence.reflexive _
   ) :: (FrexSetoid a s).equivalence.reflexive _
@@ -46,7 +46,7 @@ multAssociative : (a : Monoid) -> (s : Setoid) -> (i0,i1 : U a) -> (is : FrexCar
        (i0 *. (i1 *. is))
        ((i0 .*. i1) *. is)
 multAssociative a s i0 i1 (Ultimate i) = Ultimate $ a.validate Associativity [_,_,_]
-multAssociative a s i0 i1 (ConsUlt i x is) = 
+multAssociative a s i0 i1 (ConsUlt i x is) =
   ( a.validate Associativity [_,_,_]
   , s.equivalence.reflexive _
   ) :: (FrexSetoid a s).equivalence.reflexive _
@@ -86,7 +86,7 @@ appendUnitRgtNeutral : (a : Monoid) -> (s : Setoid) -> (is : FrexCarrier a s) ->
     (is .*. I1)
     is
 appendUnitRgtNeutral a s (Ultimate i) = Ultimate $ a.validate RgtNeutrality [_]
-appendUnitRgtNeutral a s (ConsUlt i x is) = 
+appendUnitRgtNeutral a s (ConsUlt i x is) =
   ( a.equivalence.reflexive i
   , s.equivalence.reflexive x
   ) :: appendUnitRgtNeutral a s is
@@ -100,7 +100,7 @@ appendAssociative : (a : Monoid) -> (s : Setoid) -> (is,js,ks : FrexCarrier a s)
     (is .*. (js .*. ks))
     ((is .*. js) .*. ks)
 appendAssociative a s (Ultimate i) js ks = multMultAssociative a s i js ks
-appendAssociative a s (ConsUlt i x is) js ks = 
+appendAssociative a s (ConsUlt i x is) js ks =
   ( a.equivalence.reflexive _
   , s.equivalence.reflexive _
   ) :: appendAssociative a s is js ks
@@ -115,7 +115,7 @@ FrexValidatesAxioms a s Associativity env = appendAssociative    a s (env 0) (en
 
 public export
 FrexMonoid : (a : Monoid) -> (s : Setoid) -> Monoid
-FrexMonoid a s = MkModel 
+FrexMonoid a s = MkModel
   { Algebra = FrexStructure a s
   , Validate = FrexValidatesAxioms a s
   }

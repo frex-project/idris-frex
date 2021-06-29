@@ -18,27 +18,27 @@ import Syntax.PreorderReasoning
 ||| Additive commutative monoid structure over the natural numbers
 public export
 Additive : CommutativeMonoid
-Additive 
-  = MkCommutativeMonoid Monoid.Nat.Additive       \env => plusCommutative _ _ 
+Additive
+  = MkCommutativeMonoid Monoid.Nat.Additive       \env => plusCommutative _ _
 
 ||| Multiplicative monoid structure over the natural numbers
 public export
 Multiplicative : CommutativeMonoid
-Multiplicative 
-  = MkCommutativeMonoid Monoid.Nat.Multiplicative \env => multCommutative _ _ 
+Multiplicative
+  = MkCommutativeMonoid Monoid.Nat.Multiplicative \env => multCommutative _ _
 
 public export
 multActionNat : (m, n : Nat) ->
-  let %hint 
+  let %hint
       notationA : Action1 Nat Nat
       notationA = NatAction1 Additive
   in m *. n = m * n
 multActionNat 0 n = Refl
 multActionNat (S m) n =
-  let %hint 
+  let %hint
       notationA : Action1 Nat Nat
       notationA = NatAction1 Additive
-  in Calc $ 
+  in Calc $
   |~ (1 + m) *. n
   ~~ n  +  m *. n  ...(Refl)
   ~~ n  +  m *  n  ...(cong (n +) (multActionNat m n))
@@ -46,12 +46,12 @@ multActionNat (S m) n =
 
 public export
 actionNatCommutative : (m, n : Nat) ->
-  let %hint 
+  let %hint
       notationA : Action1 Nat Nat
       notationA = NatAction1 Additive
   in m *. n = n *. m
 actionNatCommutative m n =
-  let %hint 
+  let %hint
       notationA : Action1 Nat Nat
       notationA = NatAction1 Additive
   in Calc $

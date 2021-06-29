@@ -14,7 +14,7 @@ infix 1 =-=
 
 ||| Smart constructor for making equations look nicer
 public export
-(=-=) : {0 a : Type} -> (t, s : Term sig a) 
+(=-=) : {0 a : Type} -> (t, s : Term sig a)
                   -> (Term sig a, Term sig a)
 t =-= s = (t, s)
 
