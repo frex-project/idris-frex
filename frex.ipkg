@@ -15,6 +15,7 @@ modules = Frex
         , Frex.Free
         , Frex.Free.Construction
         , Frex.Frex
+        , Frex.Frex.Construction
         , Notation
         , Notation.Additive
         , Notation.Multiplicative
