@@ -1,0 +1,4 @@
+1/2: Building NatTests (NatTests.idr)
+2/2: Building CommutativeMonoids (CommutativeMonoids.idr)
+Main> ok
+Main> Bye for now!
