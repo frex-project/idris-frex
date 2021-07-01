@@ -15,6 +15,8 @@ import Data.Nat
 
 import Syntax.PreorderReasoning
 
+%default total
+
 ||| Additive commutative monoid structure over the natural numbers
 public export
 Additive : CommutativeMonoid

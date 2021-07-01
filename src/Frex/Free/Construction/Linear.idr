@@ -12,6 +12,8 @@ import Data.Relation.Closure.Symmetric
 import Data.Relation.Closure.ReflexiveTransitive
 import Text.PrettyPrint.Prettyprinter
 
+%default total
+
 public export
 data Step : (pres : Presentation) ->
             (a : PresetoidAlgebra pres.signature) ->

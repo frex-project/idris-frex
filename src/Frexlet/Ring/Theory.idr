@@ -3,6 +3,8 @@ module Frexlet.Ring.Theory
 
 import Frex
 
+%default total
+
 public export
 data Operation : Nat -> Type where
   SNeutral : Operation 0

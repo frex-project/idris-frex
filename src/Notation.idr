@@ -2,6 +2,8 @@ module Notation
 
 import public Data.Fun
 
+%default total
+
 namespace SingleSorted
   public export
   ary : Nat -> (a : Type) -> Type

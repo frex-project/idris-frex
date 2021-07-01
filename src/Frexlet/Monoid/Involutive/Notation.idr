@@ -10,6 +10,8 @@ import Frexlet.Monoid.Involutive.Theory
 import Notation.Multiplicative
 import Frexlet.Monoid.Notation
 
+%default total
+
 public export
 interface Involutive a where
   constructor MkInvolutive

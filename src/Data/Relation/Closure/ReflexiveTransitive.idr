@@ -2,6 +2,8 @@ module Data.Relation.Closure.ReflexiveTransitive
 
 import Data.Relation
 
+%default total
+
 public export
 data RTList : Rel a -> Rel a where
   Nil  : RTList r x x

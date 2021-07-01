@@ -1,5 +1,7 @@
 module Data.Relation
 
+%default total
+
 public export
 0 Rel : Type -> Type
 Rel a = a -> a -> Type

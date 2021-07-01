@@ -20,6 +20,8 @@ import public Frex.Frex
 
 import public Data.Fun.Nary
 
+%default total
+
 public export
 frexEnv : {a : Model pres} -> {x : Setoid} -> (frex : Frex a x) ->
   Either (cast a) x ~> cast frex.Data.Model

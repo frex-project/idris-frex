@@ -8,6 +8,8 @@ import Frex.Free.Construction.Linear
 
 import Text.PrettyPrint.Prettyprinter
 
+%default total
+
 Zero : Term Signature (Fin n)
 Zero = call {n = Z} Neutral
 

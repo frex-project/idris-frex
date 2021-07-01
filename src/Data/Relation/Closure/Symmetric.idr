@@ -2,6 +2,8 @@ module Data.Relation.Closure.Symmetric
 
 import Data.Relation
 
+%default total
+
 public export
 data Symmetrise : Rel a -> Rel a where
   Fwd : {0 r : Rel a} -> r x y -> Symmetrise r x y

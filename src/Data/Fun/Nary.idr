@@ -2,6 +2,8 @@ module Data.Fun.Nary
 
 import Data.Vect
 
+%default total
+
 public export
 data Visibility = Visible | Hidden | Auto
 

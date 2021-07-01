@@ -12,7 +12,8 @@ import public Frexlet.Monoid.Commutative.Nat
 import public Frexlet.Monoid.Commutative.Coproduct
 import public Frexlet.Monoid.Commutative.Free
 
+%default total
+
 public export
 Frex : (a : CommutativeMonoid) -> {x : Setoid} -> Frex a x
 Frex a = CoproductsAndFreeFrex CoproductCospan (Free CommutativeMonoidTheory x) a
-

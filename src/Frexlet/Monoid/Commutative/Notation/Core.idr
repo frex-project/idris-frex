@@ -10,6 +10,8 @@ import public Data.HVect
 import public Frex.Free
 import public Frex.Free.Construction
 
+%default total
+
 namespace Algebra
   public export
   cast : (a : MonoidStructure) -> HVect [0 `ary` U a, 2 `ary` U a]

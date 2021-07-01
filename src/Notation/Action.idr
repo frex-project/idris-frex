@@ -7,6 +7,8 @@ import public Notation
 import public Notation.Additive
 import public Notation.Multiplicative
 
+%default total
+
 public export
 head : HVect (ty :: tys) -> ty
 head (x :: xs) = x

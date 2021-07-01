@@ -4,6 +4,8 @@ import Data.List
 import Data.List1
 import Data.Stream
 
+%default total
+
 export
 data Name = MkName String
 
