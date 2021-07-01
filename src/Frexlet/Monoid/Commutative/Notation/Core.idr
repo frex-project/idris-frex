@@ -33,8 +33,7 @@ public export
 
 public export
 mult : (a : CommutativeMonoid) -> Nat -> U a -> U a
-mult a n x = let _ : Additive1 (U a) = Prelude.cast (Core.Model.cast a)
-           in a.sum $ replicate n x
+mult a n x = a.sum $ replicate n x
 
 public export
 NatActionData : (a : CommutativeMonoid) -> ActionData Nat (U a)
