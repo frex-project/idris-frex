@@ -19,14 +19,17 @@ import Frex.Axiom
 
 import Frex.Frex
 import Frex.Free
+import Data.Setoid
+
+import Syntax.PreorderReasoning
 
 public export
-data EvaluationSigOperation : (sig : Signature) -> (a : Type) -> Nat -> Type where
+data EvaluationSigOperation : (sig : Signature) -> (0 a : Type) -> Nat -> Type where
   Op : sig.OpWithArity n -> EvaluationSigOperation sig a n
   Constant : a -> EvaluationSigOperation sig a 0
 
 public export
-EvaluationSig : (sig : Signature) -> (a : Type) -> Signature
+EvaluationSig : (sig : Signature) -> (0 a : Type) -> Signature
 EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 
 public export
@@ -34,14 +37,15 @@ EvalEmbed : (sig : Signature) -> sig ~> EvaluationSig sig a
 EvalEmbed _ = OpTranslation \op => Op op
 
 public export
-data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Type) -> Type where
+data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> Type where
   Axiom : axioms -> EvaluationAxiom sig axioms a
-  Evaluation  : {n : Nat} -> (f : sig.OpWithArity n) -> (cs : Vect n a) ->
+  Evaluation  : {n : Nat} -> (f : sig.OpWithArity n) -> (cs : Vect n (U a)) ->
     EvaluationAxiom sig axioms a
+  Assumption : {x,y : U a} -> a.equivalence.relation x y -> EvaluationAxiom sig axioms a
 
 public export
-EvaluationTheory : (pres : Presentation) -> (a : Algebra pres.signature) ->
-  (ax : EvaluationAxiom pres.signature pres.Axiom (U a)) ->
+EvaluationTheory : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) ->
+  (ax : EvaluationAxiom pres.signature pres.Axiom (cast a)) ->
   Equation (EvaluationSig pres.signature (U a))
 EvaluationTheory pres a (Axiom ax       ) = cast @{castEqHint @{EvalEmbed pres.signature}} $
   pres.axiom ax
@@ -49,4 +53,152 @@ EvaluationTheory pres a (Evaluation f cs) = MkEq
   { Var = Fin 0
   , lhs = Call (MkOp (Op f)) (map (\x => Call (MkOp $ Constant x) []) cs)
   , rhs = Call (MkOp $ Constant $ a.Sem (MkOp f) cs) []
+  }
+EvaluationTheory pres a (Assumption {x,y} _) = MkEq
+  { Var = Fin 0
+  , lhs = Call (MkOp $ Constant x) []
+  , rhs = Call (MkOp $ Constant y) []
+  }
+
+public export
+EvaluationPresentation : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) -> Presentation
+EvaluationPresentation pres a = MkPresentation
+  { signature = EvaluationSig pres.signature (U a)
+  , Axiom = EvaluationAxiom pres.signature pres.Axiom (cast a)
+  , axiom = EvaluationTheory pres a
+  }
+
+namespace Algebra
+  public export
+  cast : SetoidAlgebra (EvaluationSig sig a) ->
+         SetoidAlgebra sig
+  cast a = MkSetoidAlgebra
+    { algebra = MakeAlgebra
+      { U = U a
+      , Semantics = \op => a.algebra.Semantics $ MkOp $ Op $ snd op
+      }
+    , equivalence = a.equivalence
+    , congruence = \op => a.congruence (MkOp $ Op $ snd op)
+    }
+
+  --lemma1 : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} ->
+
+  export
+  lemma : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} ->
+    (n : Nat) -> (f : Fin n -> x) -> (env : x -> U a) ->
+    bindTerms {a} (map Done (tabulate f)) env = tabulate (env . f)
+  lemma  0    f env = Refl
+  lemma (S n) f env = cong (env (f FZ) ::) $ lemma n (f . FS) env
+
+  export
+  lemma2 : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} ->
+    (i : Fin n) -> (ts : Vect n (Term sig x)) -> (env : x -> U a) ->
+    index i (bindTerms {a} ts env) = bindTerm {a} (index i ts) env
+  lemma2 i ts env = Calc $
+    |~ index i (bindTerms {a} ts env)
+    ~~ index i (map (flip a.Sem env) ts) ...(cong (index i) $ bindTermsIsMap {a} _ _)
+    ~~ bindTerm {a} (index i ts) env    ...(indexNaturality _ _ _)
+
+  export
+  coherence : {sig : Signature} -> {s,x : Type} ->
+    (a : SetoidAlgebra (EvaluationSig sig s)) -> (t : Term sig x) -> (env : x -> U a) ->
+     a.Sem (Signature.cast @{EvalEmbed sig {a = s}} t) env ===
+     (Algebra.cast a).Sem t env
+
+  export
+  coherenceTerms : {sig : Signature} -> {s, x : Type} ->
+    (a : SetoidAlgebra (EvaluationSig sig s)) -> (ts : Vect n (Term sig x)) -> (env : x -> U a) ->
+     bindTerms {a = a.algebra               } (castTerms (EvalEmbed sig {a = s}) ts) env ===
+     bindTerms {a = (Algebra.cast a).algebra} ts env
+  coherenceTerms a [] env = Refl
+  coherenceTerms a (t :: ts) env = cong2 (::) (coherence a t env) (coherenceTerms a ts env)
+
+  coherence a (Done i) env = Refl
+  coherence a (Call f ts) env = cong (a.algebra.Semantics (MkOp (Op (f.snd)))) $
+    irrelevantEq $ Calc $
+    |~ bindTerms {a = a.algebra} (bindTerms {a = Free _ _} (map Done (tabulate Prelude.id))
+         (flip index (castTerms (EvalEmbed sig {a = s}) ts))) env
+    ~~ bindTerms {a = a.algebra} (map Done (tabulate Prelude.id))
+         (\i => bindTerm {a = a.algebra} (index i (castTerms (EvalEmbed sig {a = s}) ts)) env)
+       ...(bindTermsAssociative {a = a.algebra} _ _ _)
+    ~~ tabulate (\i => bindTerm {a = a.algebra} (index i (castTerms (EvalEmbed sig {a = s}) ts)) env)
+       ...(lemma {a = a.algebra} _ Prelude.id _)
+    ~~ bindTerms {a = a.algebra} (castTerms (EvalEmbed sig {a = s}) ts) env
+       ...(vectorExtensionality _ _ \i => Calc $
+         -- Not my best moment, sorry
+         |~ index i (Fin.tabulate _)
+         ~~ _ ...(indexTabulate _ _)
+         ~~ _ ...(sym $ lemma2 {a = a.algebra} _ _ _))
+    ~~ bindTerms {a = (cast a).algebra} ts env ...(coherenceTerms a _ _)
+
+namespace Model
+  public export
+  cast : {pres : Presentation} -> {a : SetoidAlgebra pres.signature} ->
+    Model (EvaluationPresentation pres a) -> (Model pres)
+  cast ea = MkModel
+    { Algebra = cast ea.Algebra
+    , Validate = \ax,env => CalcWith @{cast ea} $
+      |~ (Algebra.cast ea.Algebra).Sem (pres.axiom ax).lhs env
+      ~~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+            (pres.axiom ax).lhs) env
+          ...(sym $ coherence ea.Algebra _ _)
+      <~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+            (pres.axiom ax).rhs) env
+          ...(ea.Validate (Axiom ax) env)
+      ~~ (Algebra.cast ea.Algebra).Sem (pres.axiom ax).rhs env
+          ...(irrelevantEq $ coherence ea.Algebra _ _)
+    }
+
+namespace Homomorphism
+  public export
+  cast : {sig : Signature} -> {0 a : Type} ->
+    {b,c : SetoidAlgebra (EvaluationSig sig a)} -> (b ~> c) -> (Algebra.cast b ~> Algebra.cast c)
+  cast h = MkSetoidHomomorphism
+    { H = h.H
+    , preserves = \op => h.preserves (MkOp $ Op op.snd)
+    }
+
+public export
+freeAsExtension : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) -> Extension a s
+freeAsExtension fs = MkExtension
+  { Model = cast fs.Data.Model
+  , Embed = MkSetoidHomomorphism
+      { H = MkSetoidHomomorphism
+        { H = \i => fs.Data.Model.sem (Constant i)
+        , homomorphic = \x,y,prf => fs.Data.Model.validate (Assumption prf) []
+        }
+      , preserves = \(MkOp op),xs =>
+        CalcWith @{cast fs.Data.Model} $
+        |~ (fs.Data.Model.sem (Constant $ a.Sem (MkOp op) xs))
+        <~ fs.Data.Model.Sem (Call
+                    {sig = (EvaluationPresentation pres a.Algebra).signature, a = Fin 0}
+                  (MkOp (Construction.Op op))
+                  (map (\x => Call (MkOp $ Constant x) []) xs))
+                  (flip index Vect.Nil)
+           ...(fs.Data.Model.equivalence.symmetric _ _ $
+                 fs.Data.Model.validate (Evaluation op xs) [])
+        ~~ fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)
+           (map (\i => fs.Data.Model.sem (Constant i)) xs)
+           ...(cong (fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)) $
+               vectorExtensionality _ _ \i => Calc $
+               -- Sorry, this will do for now
+               |~ index i (bindTerms {a = fs.Data.Model.Algebra.algebra}
+                    (map (\x => Call (MkOp (Constant x)) []) xs)
+                    (flip index []))
+               ~~ index i (map (flip (bindTerm {a = fs.Data.Model.Algebra.algebra}) (flip index []))
+                             $ map (\x => Call (MkOp (Constant x)) []) xs)
+                  ...(cong (index i) $ bindTermsIsMap {a = fs.Data.Model.Algebra.algebra} _ _)
+               ~~ bindTerm {a = fs.Data.Model.Algebra.algebra}
+                     (index i (map (\x => Call (MkOp (Constant x)) []) xs))
+                           (flip index [])
+                  ...(indexNaturality _ _ _)
+               ~~ fs.Data.Model.Algebra.algebra.Semantics (MkOp (Constant (index i xs))) []
+                  ...(cong (\t => bindTerm {a = fs.Data.Model.Algebra.algebra} t (flip index [])) $
+                        indexNaturality _ _ _)
+               ~~ index i (map (\i => (fs.Data.Model.Algebra.algebra.Semantics
+                    (MkOp (Constant i)) Vect.Nil)) xs)
+               ...(sym $ indexNaturality _ _ _))
+      }
+  , Var = fs.Data.Env
   }
