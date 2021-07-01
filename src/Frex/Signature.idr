@@ -5,6 +5,8 @@ import Data.Finite
 import Data.String
 import Text.PrettyPrint.Prettyprinter
 
+%default total
+
 ||| A single-sorted finitary signature
 public export
 record Signature where

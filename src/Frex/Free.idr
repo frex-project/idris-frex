@@ -7,6 +7,8 @@ import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
 
+%default total
+
 ||| A model over a setoid `X` is a model that can also interpret the
 ||| elements of `X`.
 |||
@@ -59,12 +61,12 @@ parameters {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X)
 
   public export 0
   ExtenderSetoidHomomorphism : Type
-  ExtenderSetoidHomomorphism = ((other : Pres `ModelOver` X) -> 
+  ExtenderSetoidHomomorphism = ((other : Pres `ModelOver` X) ->
     (cast {to = Setoid} $ FX .Model) ~> (cast other.Model))
 
   public export 0
   ExtenderAlgebraHomomorphism : Type
-  ExtenderAlgebraHomomorphism = ((other : Pres `ModelOver` X) -> 
+  ExtenderAlgebraHomomorphism = ((other : Pres `ModelOver` X) ->
     (FX .Model) ~> (other.Model))
 
   ||| There's at most one homomorphism of models over X from FX

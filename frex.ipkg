@@ -20,6 +20,7 @@ modules = Frex
         , Notation.Additive
         , Notation.Multiplicative
         , Notation.Action
+        , Notation.Semantic
         , Frexlet.Monoid
         , Frexlet.Monoid.Theory
         , Frexlet.Monoid.Frex
@@ -27,7 +28,10 @@ modules = Frex
         , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Frex.Construction
         , Frexlet.Monoid.Nat
+        , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation
+        , Frexlet.Monoid.Notation.Additive
+        , Frexlet.Monoid.Notation.Multiplicative
         , Frexlet.Monoid.Commutative
         , Frexlet.Monoid.Commutative.Theory
         , Frexlet.Monoid.Commutative.Nat
@@ -39,9 +43,15 @@ modules = Frex
         , Frexlet.Monoid.Commutative.Free
         , Frexlet.Monoid.Commutative.Coproduct
         , Frexlet.Monoid.Commutative.Frex
-        , Frexlet.Ring.Theory
+        , Frexlet.Monoid.Involutive
+        , Frexlet.Monoid.Involutive.Theory
+        , Frexlet.Monoid.Involutive.Notation
+        , Frexlet.Monoid.Involutive.Properties
+        , Frexlet.Monoid.Involutive.Involution
+        , Frexlet.Monoid.Involutive.Frex
         -- Should move to contrib
         , Data.Finite
+        , Data.Fun.Nary
         , Data.Name
         , Data.Relation
         , Data.Relation.Closure.ReflexiveTransitive

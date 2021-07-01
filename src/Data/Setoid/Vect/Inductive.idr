@@ -7,6 +7,8 @@ import Data.Vect
 import Data.HVect
 import Data.Vect.Properties
 
+%default total
+
 namespace Relation
   public export
   data (.VectEquality) : (a : Setoid) -> Rel (Vect n (U a)) where

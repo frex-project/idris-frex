@@ -64,31 +64,38 @@ public export
 namespace Equality
   ||| Equality for UltList pen ult
   public export
-  data UltListEquality : (pen, ult : Setoid) -> (is, js : UltList (U pen) (U ult)) -> Type where
-    Ultimate : ult.equivalence.relation i j -> UltListEquality pen ult (Ultimate i) (Ultimate j)
-    ConsUlt  : ult.equivalence.relation i j ->
-               pen.equivalence.relation x y ->
-               UltListEquality pen ult is js ->
-               UltListEquality pen ult ((i,x) :: is) ((j,y) :: js)
+  data UltListEquality :
+         {pen,ult : Type} -> (penRel : pen -> pen -> Type)
+      -> (ultRel : ult -> ult -> Type) -> (is, js : UltList pen ult) -> Type where
+    [search penRel ultRel]
+    Ultimate : forall penRel, ultRel.
+      ultRel i j -> UltListEquality penRel ultRel (Ultimate i) (Ultimate j)
+    ConsUlt  : forall penRel, ultRel. ultRel i j ->
+               penRel x y ->
+               UltListEquality penRel ultRel is js ->
+               UltListEquality penRel ultRel ((i,x) :: is) ((j,y) :: js)
+
   -- Again, smart constructors so that we can avoid thinking about parity sometimes
   namespace Hack
     public export
-    (::) : ult.equivalence.relation i j -> Unit -> UltListEquality pen ult (Ultimate i) (Ultimate j)
+    (::) : forall penRel, ultRel.
+           ultRel i j -> Unit -> UltListEquality penRel ultRel (Ultimate i) (Ultimate j)
     (::) prf _ = Ultimate prf
 
   namespace Ult
     public export
-    (::) : ( ult.equivalence.relation i j
-           , pen.equivalence.relation x y
-           ) -> UltListEquality pen ult is js ->
-      UltListEquality pen ult ((i,x) :: is) ((j,y) :: js)
+    (::) : forall penRel, ultRel.
+           ( ultRel i j
+           , penRel x y
+           ) -> UltListEquality penRel ultRel is js ->
+      UltListEquality penRel ultRel ((i,x) :: is) ((j,y) :: js)
     (::) = Prelude.uncurry ConsUlt
 
 ---------------------- Equality on alternating is an equivalence
   ----------------- Reflexivity --------------------------
   public export
   UltListReflexive : (pen, ult : Setoid) -> (is : UltList (U pen) (U ult))
-    -> UltListEquality pen ult is is
+    -> UltListEquality pen.equivalence.relation ult.equivalence.relation is is
 
   UltListReflexive pen ult (Ultimate i) = Ultimate (ult.equivalence.reflexive i)
   UltListReflexive pen ult (ConsUlt i x is) =
@@ -99,8 +106,8 @@ namespace Equality
   ----------------- Symmetry --------------------------
   public export
   UltListSymmetric : (pen, ult : Setoid) -> (is,js : UltList (U pen) (U ult)) ->
-    (prf : UltListEquality pen ult is js) ->
-    UltListEquality pen ult js is
+    (prf : UltListEquality pen.equivalence.relation ult.equivalence.relation is js) ->
+    UltListEquality pen.equivalence.relation ult.equivalence.relation js is
 
   UltListSymmetric pen ult (Ultimate i) (Ultimate j) (Ultimate prf) =
     Ultimate $ ult.equivalence.symmetric i j prf
@@ -113,8 +120,12 @@ namespace Equality
   ---------------- Transitivity ------------------------
   public export
   UltListTransitive : (pen, ult : Setoid) -> (is,js,ks : UltList (U pen) (U ult)) ->
-    (prf1 : UltListEquality pen ult is js) -> (prf2 : UltListEquality pen ult js ks) ->
-    UltListEquality pen ult is ks
+    (prf1 : UltListEquality pen.equivalence.relation ult.equivalence.relation is js) ->
+    (prf2 : UltListEquality pen.equivalence.relation ult.equivalence.relation js ks) ->
+    UltListEquality
+      pen.equivalence.relation
+      ult.equivalence.relation
+      is ks
 
   UltListTransitive pen ult (Ultimate i) (Ultimate j) (Ultimate k) (Ultimate prf1) (Ultimate prf2)
     = Ultimate $ ult.equivalence.transitive i j k prf1 prf2
@@ -127,7 +138,8 @@ namespace Equality
 public export
 UltListSetoid : (pen, ult : Setoid) -> Setoid
 UltListSetoid pen ult = MkSetoid (UltList (U pen) (U ult)) $ MkEquivalence
-  { relation   = UltListEquality   pen ult
+  { relation   = UltListEquality   pen.equivalence.relation
+                                   ult.equivalence.relation
   , reflexive  = UltListReflexive  pen ult
   , symmetric  = UltListSymmetric  pen ult
   , transitive = UltListTransitive pen ult

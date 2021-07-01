@@ -3,6 +3,8 @@ module Data.Setoid.List
 
 import Data.Setoid.Definition
 
+%default total
+
 namespace Relation
   public export
   data (.ListEquality) : (a : Setoid) -> Rel (List $ U a) where

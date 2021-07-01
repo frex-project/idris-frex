@@ -7,6 +7,8 @@ import Data.Vect
 import Data.HVect
 import Data.Vect.Properties
 
+%default total
+
 public export
 VectSetoid : (n : Nat) -> (a : Setoid) -> Setoid
 VectSetoid n a = MkSetoid (Vect n (U a))

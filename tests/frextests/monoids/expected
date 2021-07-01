@@ -1,0 +1,5 @@
+1/3: Building NatTests (NatTests.idr)
+2/3: Building PairTests (PairTests.idr)
+3/3: Building Monoids (Monoids.idr)
+Main> ok
+Main> Bye for now!

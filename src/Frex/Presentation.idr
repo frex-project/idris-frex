@@ -10,6 +10,8 @@ import Data.String
 import Frex.Signature
 import Frex.Algebra
 
+%default total
+
 public export
 record Equation (Sig : Signature) where
   constructor MkEq
@@ -68,3 +70,14 @@ namespace Presentation
     showAxiom : p .Axiom -> Doc ()
     showAxiom ax = concat {t = List}
                  [pretty (show ax), ": ", display True (p.axiom ax)]
+
+%hint
+public export
+castEqHint : {auto castOp : sig1 ~> sig2} ->
+   Cast (Equation sig1) (Equation sig2)
+castEqHint {castOp} = MkCast \eq =>
+  MkEq
+  { support = eq.support
+  , lhs = cast eq.lhs
+  , rhs = cast eq.rhs
+  }

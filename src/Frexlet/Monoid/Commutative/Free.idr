@@ -298,11 +298,11 @@ uniqueExtender other extend xs =
       notation' = NatAction1 (Model n)
   in CalcWith @{cast other.Model} $
   |~ extend.H.H.H xs
-  ~~ extend.H.H.H ((Model n).sum (tabulate \i => (index i xs) *. unit n i)) 
+  ~~ extend.H.H.H ((Model n).sum (tabulate \i => (index i xs) *. unit n i))
         ...(cong extend.H.H.H $ sym $ normalForm n xs)
   <~ other.Model.sum (map extend.H.H.H $ (tabulate \i => (index i xs) *. unit n i))
         ...(sumPreservation (Model n) other.Model extend.H _)
-  ~~ other.Model.sum (tabulate \i => extend.H.H.H ((index i xs) *. unit n i)) 
+  ~~ other.Model.sum (tabulate \i => extend.H.H.H ((index i xs) *. unit n i))
         ...(cong other.Model.sum $ sym $ mapTabulate _ _)
   <~ other.Model.sum (tabulate \i => (index i xs) *. extend.H.H.H (unit n i))
         ...(sumTabulateExtensional other.Model _ _ \i =>
@@ -337,4 +337,3 @@ Free = MkFree
     , Unique = Uniqueness
     }
   }
-

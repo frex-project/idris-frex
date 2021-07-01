@@ -18,6 +18,8 @@ import public Frex.Free
 import public Frex.Coproduct
 import public Frex.Frex
 
+import public Data.Fun.Nary
+
 public export
 frexEnv : {a : Model pres} -> {x : Setoid} -> (frex : Frex a x) ->
   Either (cast a) x ~> cast frex.Data.Model
@@ -80,3 +82,17 @@ frexify frex env eq =
        ...(h.H.H.homomorphic _ _ prf)
   <~ bindTerm {a = a.Algebra.algebra} (snd eq) env'.H
        ...((Other).Model.equivalence.symmetric _ _ $ lemma (snd eq))
+
+public export
+solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (eq : ( Term pres.signature (U a `Either` Fin n)
+        , Term pres.signature (U a `Either` Fin n))) ->
+  {auto prf : frex.Data.Model.rel
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
+     ->
+  a.rel (a.Sem (fst eq) (either Prelude.id (flip Vect.index env)))
+        (a.Sem (snd eq) (either Prelude.id (flip Vect.index env))))
+solve n frex = Nary.curry n Hidden _ (frexify frex)

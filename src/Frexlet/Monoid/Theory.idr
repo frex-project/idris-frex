@@ -3,6 +3,8 @@ module Frexlet.Monoid.Theory
 
 import Frex
 
+%default total
+
 public export
 data Operation : Nat -> Type where
   Neutral : Operation 0

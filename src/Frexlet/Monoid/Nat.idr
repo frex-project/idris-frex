@@ -4,7 +4,9 @@ module Frexlet.Monoid.Nat
 import Frex
 import Frexlet.Monoid.Theory
 
-import Data.Nat
+import public Data.Nat
+
+%default total
 
 ||| Additive monoid structure over the natural numbers
 public export

@@ -55,10 +55,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build package
-        run: idris2 --build frex.ipkg
+        run: make build
+
+      - name: Run tests
+        run: make test
 
       - name: Build HTML doc
-        run: idris2 --mkdoc frex.ipkg
+        run: make doc
 
       - name: Deploy HTML
         uses: JamesIves/github-pages-deploy-action@4.1.3

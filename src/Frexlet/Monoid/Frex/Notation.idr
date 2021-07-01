@@ -56,4 +56,3 @@ Cast (ActionData a b) (Action2 a b) where
 public export
 Cast (ActionData a b) (Action3 a b) where
   cast datum = (cast $ head datum, cast $ tail datum)
-

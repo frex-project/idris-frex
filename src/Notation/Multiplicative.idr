@@ -90,3 +90,63 @@ Cast ([a,b] `ary` a) (MultiplicativeActedBy2 a b) where
 public export
 Cast ([a,b] `ary` a) (MultiplicativeActedBy3 a b) where
   cast = MkMultiplicativeActedBy3
+
+%hint
+public export
+fstMultiplicative1 : (Multiplicative1 a, _) -> Multiplicative1 a
+fstMultiplicative1 = fst
+
+%hint
+public export
+sndMultiplicative1 : (_, Multiplicative1 a) -> Multiplicative1 a
+sndMultiplicative1 = snd
+
+%hint
+public export
+fstMultiplicative2 : (Multiplicative2 a, _) -> Multiplicative2 a
+fstMultiplicative2 = fst
+
+%hint
+public export
+sndMultiplicative2 : (_, Multiplicative2 a) -> Multiplicative2 a
+sndMultiplicative2 = snd
+
+%hint
+public export
+fstMultiplicative3 : (Multiplicative3 a, _) -> Multiplicative3 a
+fstMultiplicative3 = fst
+
+%hint
+public export
+sndMultiplicative3 : (_, Multiplicative3 a) -> Multiplicative3 a
+sndMultiplicative3 = snd
+
+%hint
+public export
+fstMultiplicativeActsOn : (MultiplicativeActsOn a b, _) -> MultiplicativeActsOn a b
+fstMultiplicativeActsOn = fst
+
+%hint
+public export
+sndMultiplicativeActsOn : (_, MultiplicativeActsOn a b) -> MultiplicativeActsOn a b
+sndMultiplicativeActsOn = snd
+
+%hint
+public export
+fstMultiplicativeActsOn2 : (MultiplicativeActsOn2 a b, _) -> MultiplicativeActsOn2 a b
+fstMultiplicativeActsOn2 = fst
+
+%hint
+public export
+sndMultiplicativeActsOn2 : (_, MultiplicativeActsOn2 a b) -> MultiplicativeActsOn2 a b
+sndMultiplicativeActsOn2 = snd
+
+%hint
+public export
+fstMultiplicativeActsOn3 : (MultiplicativeActsOn3 a b, _) -> MultiplicativeActsOn3 a b
+fstMultiplicativeActsOn3 = fst
+
+%hint
+public export
+sndMultiplicativeActsOn3 : (_, MultiplicativeActsOn3 a b) -> MultiplicativeActsOn3 a b
+sndMultiplicativeActsOn3 = snd
