@@ -54,7 +54,8 @@ FreeModelZeroRepresentation  n = vectorExtensionality _ _ \i => Calc $
 export
 pointwiseSum : (n : Nat) -> (xss : Vect m (U $ Model n)) -> (i : Fin n) ->
   index i ((Model n).sum xss) = (Nat.Additive).sum (map (index i) xss)
-pointwiseSum n xss i = sumPreservation (Model n) (Nat.Additive) (Fin.eval i) xss
+pointwiseSum n xss i =
+  the _ $ sumPreservation (Model n) (Nat.Additive) (Fin.eval i) xss
 
 export
 pointwiseMult : (n : Nat) -> (m : Nat) -> (xs : (U $ Model n)) -> (i : Fin n) ->
@@ -298,11 +299,11 @@ uniqueExtender other extend xs =
       notation' = NatAction1 (Model n)
   in CalcWith @{cast other.Model} $
   |~ extend.H.H.H xs
-  ~~ extend.H.H.H ((Model n).sum (tabulate \i => (index i xs) *. unit n i)) 
+  ~~ extend.H.H.H ((Model n).sum (tabulate \i => (index i xs) *. unit n i))
         ...(cong extend.H.H.H $ sym $ normalForm n xs)
   <~ other.Model.sum (map extend.H.H.H $ (tabulate \i => (index i xs) *. unit n i))
         ...(sumPreservation (Model n) other.Model extend.H _)
-  ~~ other.Model.sum (tabulate \i => extend.H.H.H ((index i xs) *. unit n i)) 
+  ~~ other.Model.sum (tabulate \i => extend.H.H.H ((index i xs) *. unit n i))
         ...(cong other.Model.sum $ sym $ mapTabulate _ _)
   <~ other.Model.sum (tabulate \i => (index i xs) *. extend.H.H.H (unit n i))
         ...(sumTabulateExtensional other.Model _ _ \i =>
@@ -337,4 +338,3 @@ Free = MkFree
     , Unique = Uniqueness
     }
   }
-

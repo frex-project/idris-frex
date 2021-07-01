@@ -81,8 +81,6 @@ namespace Algebra
     , congruence = \op => a.congruence (MkOp $ Op $ snd op)
     }
 
-  --lemma1 : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} ->
-
   export
   lemma : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig} ->
     (n : Nat) -> (f : Fin n -> x) -> (env : x -> U a) ->
@@ -201,4 +199,121 @@ freeAsExtension fs = MkExtension
                ...(sym $ indexNaturality _ _ _))
       }
   , Var = fs.Data.Env
+  }
+
+
+public export
+(.OverAlgebra) : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (other : Extension a s) ->
+  SetoidAlgebra (EvaluationPresentation pres a.Algebra).signature
+other.OverAlgebra = MkSetoidAlgebra
+  { algebra = MakeAlgebra
+      { U = U other.Model
+      , Semantics = \case
+          MkOp (Op op     ) => other.Model.Algebra.algebra.Semantics (MkOp op)
+          MkOp (Constant i) => \_ => other.Embed.H.H i
+      }
+  , equivalence = other.Model.equivalence
+  , congruence = \case
+      MkOp {fst = arity} (Op op     ) => \xs,ys,prf =>
+        other.Model.Algebra.congruence (MkOp op) xs ys prf
+      MkOp (Constant i) => \_,_,_ => other.Model.equivalence.reflexive _
+  }
+
+export
+(.OverAlgebraCoherence) : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (other : Extension a s) ->
+  (env : x -> U other.Model) -> (t : Term pres.signature x) ->
+    (Algebra.cast other.OverAlgebra).Sem t env
+    = other.Model.Sem t env
+
+export
+OverAlgebraCoherenceAux : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (other : Extension a s) ->
+  (env : x -> U other.Model) -> (ts : Vect n $ Term pres.signature x) ->
+    bindTerms {a = (Algebra.cast other.OverAlgebra).algebra} ts env
+    = bindTerms {a = other.Model.Algebra.algebra} ts env
+OverAlgebraCoherenceAux other env [] = Refl
+OverAlgebraCoherenceAux other env (t :: ts) = cong2 (::)
+  (other.OverAlgebraCoherence env t)
+  (OverAlgebraCoherenceAux other env ts)
+
+other.OverAlgebraCoherence env (Done i   ) = Refl
+other.OverAlgebraCoherence env (Call (MkOp op) ts) =
+  cong (other.Model.Algebra.algebra.Semantics (MkOp op)) $
+    OverAlgebraCoherenceAux other env ts
+
+export
+OverAlgebraNop : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (other : Extension a s) -> (xs : Vect n (U a)) -> (env : x -> U other.Model) ->
+  bindTerms {a = other.OverAlgebra.algebra}
+    (map (\x => Call (MkOp $ Constant x) []) xs)
+    env
+  === map other.Embed.H.H xs
+OverAlgebraNop other xs env = vectorExtensionality _ _ \i => Calc $
+ |~ index i (bindTerms {a = other.OverAlgebra.algebra}
+               (map (\x => Call (MkOp $ Constant x) []) xs)
+               env)
+ ~~ index i (map (flip (bindTerm {a = other.OverAlgebra.algebra}) env)
+               (map (\x => Call (MkOp $ Constant x) []) xs))
+                                     ...(cong (index i) $
+                                         bindTermsIsMap {a = other.OverAlgebra.algebra}
+                                         _ _)
+ ~~ bindTerm {a = other.OverAlgebra.algebra}
+     (index i (map (\x => Call (MkOp $ Constant x) []) xs))
+     env  ...(indexNaturality _ _ _)
+ ~~ other.Embed.H.H (index i xs)
+       ...(cong (\u => bindTerm {a = other.OverAlgebra.algebra} u env) $
+           indexNaturality _ (\x => Call (MkOp $ Constant x) []) _)
+ ~~ index i (map other.Embed.H.H xs) ...(sym $ indexNaturality _ _ _)
+
+public export
+(.Over) : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (other : Extension a s) ->
+  (EvaluationPresentation pres a.Algebra) `ModelOver` s
+other.Over = MkModelOver
+  { Model = MkModel
+      { Algebra = other.OverAlgebra
+      , Validate = \case
+          Axiom ax        => \env => CalcWith @{cast other.Model} $
+            |~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+                 (pres.axiom ax).lhs) env
+            ~~ (Algebra.cast other.OverAlgebra).Sem (pres.axiom ax).lhs env
+               ...(irrelevantEq $ coherence other.OverAlgebra _ _)
+            ~~ other.Model.Sem (pres.axiom ax).lhs env
+               ...(other.OverAlgebraCoherence _ _)
+            <~ other.Model.Sem (pres.axiom ax).rhs env
+               ...(other.Model.Validate ax env)
+            ~~ (Algebra.cast other.OverAlgebra).Sem (pres.axiom ax).rhs env
+               ...(sym $ other.OverAlgebraCoherence _ _)
+            ~~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+                 (pres.axiom ax).rhs) env
+               ...(sym $ irrelevantEq $ coherence other.OverAlgebra _ _)
+          Evaluation f cs => \env => CalcWith @{cast other.Model} $
+            |~ other.Model.Algebra.algebra.Semantics (MkOp f)
+                 (bindTerms {a = other.OverAlgebra.algebra}
+                   (map (\x => Call (MkOp (Constant x)) []) cs) env)
+            ~~ other.Model.Algebra.algebra.Semantics (MkOp f)
+                 (map other.Embed.H.H cs)
+                 ...(cong (other.Model.Algebra.algebra.Semantics (MkOp f)) $
+                     OverAlgebraNop other _ _)
+            <~ other.Embed.H.H (a.Sem (MkOp f) cs)
+               ...(other.Model.equivalence.symmetric _ _ $
+                   other.Embed.preserves (MkOp f) _)
+          Assumption xyEq => \env => other.Embed.H.homomorphic _ _ xyEq
+      }
+  , Env   = other.Var
+  }
+
+public export
+ExtenderHomomorphism : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  ExtenderHomomorphism (freeAsExtension {a} fs)
+ExtenderHomomorphism fs other =
+  let h : fs.Data ~> other.Over
+      h = fs.UP.Exists other.Over
+  in MkSetoidHomomorphism
+  { H = h.H.H
+  , preserves = \case
+      MkOp op => \xs => h.H.preserves (MkOp $ Construction.Op op) xs
   }
