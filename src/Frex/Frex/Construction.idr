@@ -306,14 +306,20 @@ other.Over = MkModelOver
   }
 
 public export
-ExtenderHomomorphism : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+Extender : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
   (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
-  ExtenderHomomorphism (freeAsExtension {a} fs)
-ExtenderHomomorphism fs other =
+  Extender (freeAsExtension {a} fs)
+Extender fs other =
   let h : fs.Data ~> other.Over
       h = fs.UP.Exists other.Over
-  in MkSetoidHomomorphism
-  { H = h.H.H
-  , preserves = \case
-      MkOp op => \xs => h.H.preserves (MkOp $ Construction.Op op) xs
+  in MkExtensionMorphism
+  { H = MkSetoidHomomorphism
+    { H = h.H.H
+    , preserves = \case
+        MkOp op => \xs => h.H.preserves (MkOp $ Construction.Op op) xs
+    }
+  , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+    |~ h.H.H.H (fs.Data.Model.sem (Constant i))
+    <~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
+  , PreserveVar   = h.preserves
   }
