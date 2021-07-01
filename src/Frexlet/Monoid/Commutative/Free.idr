@@ -40,7 +40,7 @@ FreeCommutativeMonoidOver : (n : Nat) -> CommutativeMonoidTheory `ModelOver` (ca
 FreeCommutativeMonoidOver n =
   MkModelOver
   { Model = Model n
-  , Env   = mate (\i => unit n i)
+  , Env   = mate (unit n)
   }
 
 export
