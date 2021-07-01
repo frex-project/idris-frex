@@ -19,6 +19,7 @@ import Frex.Axiom
 
 import Frex.Frex
 import Frex.Free
+import public Frex.Free.Construction
 import Data.Setoid
 
 import Syntax.PreorderReasoning
@@ -323,3 +324,38 @@ Extender fs other =
     <~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
   , PreserveVar   = h.preserves
   }
+
+public export
+Uniqueness : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  Uniqueness (freeAsExtension {a} fs)
+Uniqueness fs other extend1 extend2 =
+ let lemma : (extend : (freeAsExtension {a} fs) ~> other) -> fs.Data ~> other.Over
+     lemma extend = MkHomomorphism
+       { H = MkSetoidHomomorphism
+           { H = extend.H.H
+           , preserves = \case
+               MkOp (Op op     ) => extend.H.preserves (MkOp op)
+               MkOp (Constant i) => \ [] => extend.PreserveEmbed i
+           }
+       , preserves = extend.PreserveVar
+       }
+ in fs.UP.Unique other.Over (lemma extend1) (lemma extend2)
+
+
+public export
+FrexByFree : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
+  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  Frex a s
+FrexByFree fs = MkFrex
+  { Data = freeAsExtension {a} fs
+  , UP = IsUniversal
+    { Exists = Extender {a} fs
+    , Unique = Uniqueness {a} fs
+    }
+  }
+
+public export
+Frex : {pres : Presentation} -> (a : Model pres) -> (s : Setoid) -> Frex a s
+Frex a s = FrexByFree {a}
+         $ Frex.Free.Construction.Free (EvaluationPresentation pres a.Algebra) s
