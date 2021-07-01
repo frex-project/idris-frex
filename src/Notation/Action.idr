@@ -68,4 +68,3 @@ Cast (ActionData a b) (MAction2 a b) where
 public export
 Cast (ActionData a b) (MAction3 a b) where
   cast datum = (cast $ head datum, cast $ tail datum)
-

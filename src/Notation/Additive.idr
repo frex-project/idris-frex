@@ -122,5 +122,3 @@ fstAdditive3 = fst
 public export
 sndAdditive3 : (_, Additive3 a) -> Additive3 a
 sndAdditive3 = snd
-
-

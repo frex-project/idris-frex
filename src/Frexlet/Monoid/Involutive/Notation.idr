@@ -60,10 +60,9 @@ notationSyntax : Involutive (Term (InvolutiveMonoidTheory).signature x)
 notationSyntax = MkInvolutive
   (call {sig = (InvolutiveMonoidTheory).signature} Involution)
 
-%hint 
+%hint
 public export
 notation1 : InvMult1 (Term (InvolutiveMonoidTheory).signature (a `Either` (Fin n)))
 notation1 = (notationSyntax, MkMultiplicative1
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Neutral)
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Product))
-

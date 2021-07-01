@@ -61,4 +61,3 @@ actionNatCommutative m n =
   ~~ m *  n ...(multActionNat _ _)
   ~~ n *  m ...(multCommutative _ _)
   ~~ n *. m ...(sym $ multActionNat _ _)
-
