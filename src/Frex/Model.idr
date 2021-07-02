@@ -35,6 +35,20 @@ public export 0
   (a : SetoidAlgebra sig ** Fin eq.support -> U a.algebra) -> Type
 eq =| (a ** env) = models a eq env
 
+||| Homomorphisms preserve equations in an environment
+public export
+eqPreservation : {sig : Signature} -> (eq : Equation sig) ->
+  {a,b : SetoidAlgebra sig} -> (env : Fin eq.support -> U a.algebra) ->
+  (h : a ~> b) ->
+  eq =| (a ** env) ->
+  eq =| (b ** h.H.H . env)
+eqPreservation eq env h prf = CalcWith @{cast b} $
+  |~ b.Sem eq.lhs (h.H.H . env)
+  <~ h.H.H (a.Sem eq.lhs env) ...(b.equivalence.symmetric _ _ $
+                                  homoPreservesSem h eq.lhs env)
+  <~ h.H.H (a.Sem eq.rhs env) ...(h.H.homomorphic _ _ prf)
+  <~ b.Sem eq.rhs (h.H.H . env) ...(homoPreservesSem h eq.rhs env)
+
 ||| States: `pres.signature`-algebra `a` satisfies the given equation.
 public export 0
 ValidatesEquation : (eq : Equation sig) -> (a : SetoidAlgebra sig) -> Type
