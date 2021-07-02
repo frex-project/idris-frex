@@ -1,4 +1,6 @@
-module Frexlet.Monoid.Examples
+module Main
+
+import Data.String
 
 import Frex
 import Frexlet.Monoid.Theory
@@ -45,3 +47,14 @@ myProof2
 
 view2 : String
 view2 = show $ display @{BORING} myProof2
+
+main : IO Builtin.Unit
+main = do
+  let separator : String := replicate 72 '-'
+  let banner = \ str => unlines [separator, "-- " ++ str, separator]
+  putStrLn (banner "Monoid Theory")
+  putStrLn $ show $ display MonoidTheory
+  putStrLn (banner "Simple proof")
+  putStrLn view
+  putStrLn (banner "Proof with congruence")
+  putStrLn view2
