@@ -17,4 +17,28 @@ test = frexify (Frexlet.Monoid.Involutive.Frex.Frex List _) [x,y]
             =-=
            (Dyn 0 .*. Dyn 1)
 
+PropListMonoid : {A:Type} -> Monoid
+PropListMonoid = MkModel
+  { Algebra = cast {from = Algebra Frexlet.Monoid.Theory.Signature} $ MkAlgebra
+        { U = List A
+        , Sem = \case
+            Neutral => []
+            Product => (++) }
+  , Validate = \case
+      LftNeutrality => \env => Refl
+      RgtNeutrality => \env => appendNilRightNeutral _
+      Associativity => \env => appendAssociative _ _ _ }
 
+PropListInvolutiveMonoid : {A: Type} -> InvolutiveMonoid
+PropListInvolutiveMonoid = MkModel (MkInvolutiveMonoidStructure ((PropListMonoid {A=A}) .Algebra)
+  (MkSetoidHomomorphism Data.List.reverse (\_,_,Refl => Refl)))
+  $ \case
+     (Mon LftNeutrality) => PropListMonoid .Validate LftNeutrality
+     (Mon RgtNeutrality) => PropListMonoid .Validate RgtNeutrality
+     (Mon Associativity) => PropListMonoid .Validate Associativity
+     Involutivity        => \env => reverseInvolutive _
+     Antidistributivity  => \env => sym (revAppend _ _)
+
+testProp : {A : Type} -> {x,y : List A} -> reverse (reverse y ++ ([] ++ reverse x)) = x ++ y
+testProp = solve 2 (Frex PropListInvolutiveMonoid _)
+         $ ((Dyn 1) .inv .*. (I1 .*. (Dyn 0) .inv)) .inv =-= Dyn 0 .*. Dyn 1
