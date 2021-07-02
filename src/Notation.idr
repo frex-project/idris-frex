@@ -2,6 +2,8 @@ module Notation
 
 import public Data.Fun
 
+%default total
+
 namespace SingleSorted
   public export
   ary : Nat -> (a : Type) -> Type
@@ -14,4 +16,3 @@ namespace MultiSorted
   ary : List Type -> (a : Type) -> Type
   ary [] a = a
   ary (ty :: tys) a = ty -> ary tys a
-

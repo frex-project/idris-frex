@@ -6,6 +6,8 @@ import Frex
 import Frexlet.Monoid.Theory
 import public Notation.Additive
 
+%default total
+
 public export
 (.Additive1) : (monoid : Monoid) -> Additive1 (U monoid)
 monoid.Additive1 = MkAdditive1 (monoid.sem Neutral) (monoid.sem Product)

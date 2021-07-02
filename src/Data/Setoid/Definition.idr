@@ -3,6 +3,7 @@ module Data.Setoid.Definition
 
 import public Syntax.PreorderReasoning.Generic
 import public Decidable.Order
+import public Data.Relation
 
 infix 5 ~>, ~~>, <~>
 
@@ -11,7 +12,7 @@ infix 5 ~>, ~~>, <~>
 public export
 record Equivalence (A : Type) where
   constructor MkEquivalence
-  0 relation  : (x,y : A) -> Type
+  0 relation  : Rel A
   reflexive : (x : A)
               ----------------
            -> relation x x
@@ -40,7 +41,7 @@ record Setoid where
   equivalence : Equivalence U
 
 public export
-record PreorderData A (rel : A -> A -> Type) where
+record PreorderData A (rel : Rel A) where
   constructor MkPreorderData
   reflexive : (x : A) -> rel x x
   transitive : (x,y,z : A) -> rel x y -> rel y z -> rel x z
@@ -55,7 +56,7 @@ reflect : (a : Setoid) -> {x, y : U a} -> x = y -> a.equivalence.relation x y
 reflect a Refl = a.equivalence.reflexive _
 
 public export
-MkPreorder : {0 a : Type} -> {0 rel : a -> a -> Type}
+MkPreorder : {0 a : Type} -> {0 rel : Rel a}
   -> (reflexive : (x : a) -> rel x x)
   -> (transitive : (x,y,z : a) -> rel x y -> rel y z -> rel x z)
   -> Preorder a rel
@@ -113,7 +114,6 @@ public export
   , transitive = \f,g,h,f_eq_g, g_eq_h, q => b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
   }
 %unbound_implicits on
-
 
 
 ||| Two setoid homomorphism are each other's inverses

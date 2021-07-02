@@ -14,6 +14,7 @@ modules = Frex
         , Frex.Coproduct
         , Frex.Free
         , Frex.Free.Construction
+        , Frex.Free.Construction.Linear
         , Frex.Frex
         , Notation
         , Notation.Additive
@@ -49,12 +50,19 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Involution
         , Frexlet.Monoid.Involutive.Frex
         -- Should move to contrib
+        , Data.Finite
         , Data.Fun.Nary
+        , Data.Name
+        , Data.Relation
+        , Data.Relation.Closure.ReflexiveTransitive
+        , Data.Relation.Closure.Symmetric
         , Data.Setoid
         , Data.Setoid.Definition
         , Data.Setoid.Either
         , Data.Setoid.Pair
         , Data.Setoid.Vect
+        , Data.Setoid.Vect.Functional
+        , Data.Setoid.Vect.Inductive
         , Data.Setoid.List
         , Data.Vect.Extra1
 

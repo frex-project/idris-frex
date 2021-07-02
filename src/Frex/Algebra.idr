@@ -13,6 +13,7 @@ import public Data.Vect
 import public Data.Vect.Elem
 import public Data.Vect.Properties
 import public Data.Rel
+import Data.String
 
 import Control.WellFounded
 
@@ -20,6 +21,10 @@ import Syntax.PreorderReasoning
 import Decidable.Order
 import Syntax.PreorderReasoning.Generic
 
+import Text.PrettyPrint.Prettyprinter
+
+import Data.Stream
+import Data.Name
 import Data.Vect.Extra
 
 infix 10 ^
@@ -91,6 +96,32 @@ data Term : (0 sig : Signature) -> Type -> Type where
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
          -> Term sig a
 
+namespace Term
+
+  export
+  display : (Show a, Show (Op sig), HasPrecedence sig) =>
+            (b : Bool) -> Term sig a -> Doc ()
+  display b = go False Open where
+
+    go : Bool -> Prec -> Term sig a -> Doc ()
+    go _ _ (Done v) = pretty (show v)
+    go b' c (Call f args) with (arity f) proof eq
+      go b' c (Call f args) | Z = pretty (show f)
+      go b' c (Call f args) | (S _)
+        = let op := pretty (show f)
+              catchall : Lazy (Doc ())
+                := hsep (op :: map (go b App) (toList args))
+          in case precedence f of
+               Nothing  => parens catchall
+               Just lvl =>
+                 let n = level lvl; d = User n; d' = User (S n) in
+                 parenthesise (b' || c > d) $ case args of
+                   [x]   => hsep [op, go b d x]
+                   [x,y] => case lvl of
+                     InfixL _ => hsep [go b d x, op, go b d' y]
+                     InfixR _ => hsep [go b d' x, op, go b d y]
+                   _ => catchall
+
 ------------------ Functor, Applicative, Monad -------------------------------------------
 
 public export total
@@ -153,6 +184,10 @@ Applicative (Term sig) where
 public export
 Monad (Term sig) where
   (>>=) = (Free sig _).Sem
+
+export
+(Show (Op sig), HasPrecedence sig) => Show (Term sig (Fin n)) where
+  show = show . display False . map (\ k => index (cast k) names)
 
 ||| Free `sig`-algebra over `n`-variables.
 public export

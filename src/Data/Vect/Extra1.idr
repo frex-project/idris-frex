@@ -9,6 +9,8 @@ import Data.Vect.Properties
 
 import Syntax.PreorderReasoning
 
+%default total
+
 export
 mapWithPosTabulate : {n : Nat} -> (f : Fin n -> a -> b) -> (x : a) ->
   mapWithPos f (replicate n x) = tabulate (flip f x)

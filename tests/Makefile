@@ -1,12 +1,11 @@
+INTERACTIVE ?= --interactive
+
 all: build
 
 build:
 	idris2 --build tests.ipkg
 
-run: $(patsubst frextests/%,run-%,$(wildcard frextests/*))
-
-run-%:
-	@echo running $*
-	./build/exec/runtests idris2 --failure-file failures --only $*
+run:
+	./build/exec/runtests idris2 $(INTERACTIVE) --failure-file failures
 
 .PHONY: all build run

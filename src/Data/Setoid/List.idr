@@ -7,7 +7,7 @@ import Data.Setoid.Definition
 
 namespace Relation
   public export
-  data (.ListEquality) : (a : Setoid) -> (xs, ys : List $ U a) -> Type where
+  data (.ListEquality) : (a : Setoid) -> Rel (List $ U a) where
     Nil : a.ListEquality [] []
     (::) : (hdEq : a.equivalence.relation x y) -> (tlEq : a.ListEquality xs ys) ->
           a.ListEquality (x :: xs) (y :: ys)
@@ -61,7 +61,7 @@ ListMapIsHomomorphism f g f_eq_g [] = []
 ListMapIsHomomorphism f g f_eq_g (x :: xs) = f_eq_g x :: ListMapIsHomomorphism f g f_eq_g xs
 
 public export
-ListMap : {a, b : Setoid} -> (a ~~> b) ~> (ListSetoid a ~~> ListSetoid b)
+ListMap : {0 a, b : Setoid} -> (a ~~> b) ~> (ListSetoid a ~~> ListSetoid b)
 ListMap = MkSetoidHomomorphism
   { H           = ListMapHomomorphism
   , homomorphic = ListMapIsHomomorphism

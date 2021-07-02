@@ -7,6 +7,8 @@ import Frexlet.Monoid.Theory
 
 import public Notation.Multiplicative
 
+%default total
+
 public export
 (.Multiplicative1) : (monoid : Monoid) -> Multiplicative1 (U monoid)
 monoid.Multiplicative1 = MkMultiplicative1 (monoid.sem Neutral) (monoid.sem Product)

@@ -15,6 +15,8 @@ import Data.Nat
 
 import Syntax.PreorderReasoning
 
+%default total
+
 ||| Additive commutative monoid structure over the natural numbers
 public export
 Additive : CommutativeMonoid
@@ -59,4 +61,3 @@ actionNatCommutative m n =
   ~~ m *  n ...(multActionNat _ _)
   ~~ n *  m ...(multCommutative _ _)
   ~~ n *. m ...(sym $ multActionNat _ _)
-

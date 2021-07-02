@@ -10,6 +10,8 @@ import Frexlet.Monoid.Involutive.Theory
 import Notation.Multiplicative
 import Frexlet.Monoid.Notation
 
+%default total
+
 public export
 interface Involutive a where
   constructor MkInvolutive
@@ -58,10 +60,9 @@ notationSyntax : Involutive (Term (InvolutiveMonoidTheory).signature x)
 notationSyntax = MkInvolutive
   (call {sig = (InvolutiveMonoidTheory).signature} Involution)
 
-%hint 
+%hint
 public export
 notation1 : InvMult1 (Term (InvolutiveMonoidTheory).signature (a `Either` (Fin n)))
 notation1 = (notationSyntax, MkMultiplicative1
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Neutral)
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Product))
-

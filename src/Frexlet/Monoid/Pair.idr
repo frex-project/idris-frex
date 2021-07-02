@@ -12,6 +12,8 @@ import Frexlet.Monoid.Frex.Properties
 import Data.Setoid
 import Data.Setoid.Pair
 
+%default total
+
 public export
 Unit : Setoid
 Unit = MkSetoid Builtin.Unit (EqualEquivalence _)

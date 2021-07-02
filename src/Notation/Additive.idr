@@ -5,6 +5,8 @@ import Notation
 import public Data.HVect
 import public Data.Fun.Extra
 
+%default total
+
 infixl 8 .+., :+:, |+|, +., +:, +|, .+, :+, |+
 
 public export
@@ -120,5 +122,3 @@ fstAdditive3 = fst
 public export
 sndAdditive3 : (_, Additive3 a) -> Additive3 a
 sndAdditive3 = snd
-
-

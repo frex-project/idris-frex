@@ -23,7 +23,7 @@ infix 1 =|
 ||| setoid equivalence.
 public export 0
 models : {sig : Signature} -> (a : SetoidAlgebra sig) -> (eq : Equation sig)
-  -> (env : eq.Var -> U a.algebra) -> Type
+  -> (env : Fin eq.support -> U a.algebra) -> Type
 models a eq env = a.equivalence.relation
                     (a.Sem eq.lhs env)
                     (a.Sem eq.rhs env)
@@ -32,13 +32,13 @@ models a eq env = a.equivalence.relation
 ||| more compactly, makes nice syntax sometimes
 public export 0
 (=|) : {sig : Signature} -> (eq : Equation sig) ->
-  (a : SetoidAlgebra sig ** eq.Var -> U a.algebra) -> Type
+  (a : SetoidAlgebra sig ** Fin eq.support -> U a.algebra) -> Type
 eq =| (a ** env) = models a eq env
 
 ||| States: `pres.signature`-algebra `a` satisfies the given equation.
 public export 0
 ValidatesEquation : (eq : Equation sig) -> (a : SetoidAlgebra sig) -> Type
-ValidatesEquation eq a = (env : eq.Var -> U a.algebra) ->
+ValidatesEquation eq a = (env : Fin eq.support -> U a.algebra) ->
   eq =| (a ** env)
 
 
@@ -73,9 +73,9 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   ||| Isomorphisms preserve all equations
   public export
   isoPreservesEq : (eq : Equation sig) ->
-    (env : eq.Var -> U b)  -> eq =| (a ** iso.Iso.Bwd.H . env) -> eq =| (b ** env)
+    (env : Fin eq.support -> U b)  -> eq =| (a ** iso.Iso.Bwd.H . env) -> eq =| (b ** env)
   isoPreservesEq eq env prf = CalcWith @{cast b} $
-    let env' : eq.Var -> U a
+    let env' : Fin eq.support -> U a
         env' = iso.Iso.Bwd.H . env
     in
     |~ b.Sem eq.lhs env
@@ -213,7 +213,7 @@ Sta : (x : a) -> Term sig (a `Either` Fin n)
 Sta x = Done (Left x)
 
 public export
-(.validate) : {0 n : Nat} -> (a : Model pres) -> (ax : Axiom pres) ->
-  {auto 0 ford : Fin n = (pres.axiom ax).Var} -> (env : Vect n (U a)) ->
-  (pres.axiom ax) =| (a.Algebra ** replace {p = \i => i -> U a} ford (flip Vect.index env))
-a.validate ax env = a.Validate ax \i => index (replace {p = id} (sym ford) i) env
+(.validate) : (a : Model pres) -> (ax : Axiom pres) ->
+  (env : Vect (support $ pres.axiom ax) (U a)) ->
+  (pres.axiom ax) =| (a.Algebra ** \ i => index i env)
+a.validate ax env = a.Validate ax (\ i => index i env)
