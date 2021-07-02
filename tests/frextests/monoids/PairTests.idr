@@ -16,12 +16,15 @@ assoc4 = solve 4 (MonoidFrex MonoidPair _)
 
 unitl : {a : Setoid} -> Pair Unit a <~> a
 unitl = solve 1 (MonoidFrex MonoidPair _)
+         { prf = ConsUlt leftNeut Refl $ Ultimate refl }
         $ I1 .*. Dyn 0 =-= Dyn 0
 
 unitr : {a : Setoid} -> Pair a Unit <~> a
 unitr = solve 1 (MonoidFrex MonoidPair _)
+         { prf = ConsUlt refl Refl $ Ultimate rightNeut }
         $ Dyn 0 .*. I1 =-= Dyn 0
 
 units : {a : Setoid} -> Pair (Pair Unit (Pair a Unit)) Unit <~> a
 units = solve 1 (MonoidFrex MonoidPair _)
+         { prf = ConsUlt leftNeut Refl $ Ultimate (trans rightNeut rightNeut) }
         $ (I1 .*. (Dyn 0 .*. I1)) .*. I1 =-= Dyn 0
