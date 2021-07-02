@@ -71,9 +71,9 @@ EvaluationPresentation pres a = MkPresentation
 
 namespace Algebra
   public export
-  cast : SetoidAlgebra (EvaluationSig sig a) ->
+  castEval : SetoidAlgebra (EvaluationSig sig a) ->
          SetoidAlgebra sig
-  cast a = MkSetoidAlgebra
+  castEval a = MkSetoidAlgebra
     { algebra = MakeAlgebra
       { U = U a
       , Semantics = \op => a.algebra.Semantics $ MkOp $ Op $ snd op
@@ -102,13 +102,13 @@ namespace Algebra
   coherence : {sig : Signature} -> {s,x : Type} ->
     (a : SetoidAlgebra (EvaluationSig sig s)) -> (t : Term sig x) -> (env : x -> U a) ->
      a.Sem (Signature.cast @{EvalEmbed sig {a = s}} t) env ===
-     (Algebra.cast a).Sem t env
+     (castEval a).Sem t env
 
   export
   coherenceTerms : {sig : Signature} -> {s, x : Type} ->
     (a : SetoidAlgebra (EvaluationSig sig s)) -> (ts : Vect n (Term sig x)) -> (env : x -> U a) ->
      bindTerms {a = a.algebra               } (castTerms (EvalEmbed sig {a = s}) ts) env ===
-     bindTerms {a = (Algebra.cast a).algebra} ts env
+     bindTerms {a = (castEval a).algebra} ts env
   coherenceTerms a [] env = Refl
   coherenceTerms a (t :: ts) env = cong2 (::) (coherence a t env) (coherenceTerms a ts env)
 
@@ -128,31 +128,31 @@ namespace Algebra
          |~ index i (Fin.tabulate _)
          ~~ _ ...(indexTabulate _ _)
          ~~ _ ...(sym $ lemma2 {a = a.algebra} _ _ _))
-    ~~ bindTerms {a = (cast a).algebra} ts env ...(coherenceTerms a _ _)
+    ~~ bindTerms {a = (castEval a).algebra} ts env ...(coherenceTerms a _ _)
 
 namespace Model
   public export
-  cast : {pres : Presentation} -> {a : SetoidAlgebra pres.signature} ->
+  castEval : {pres : Presentation} -> {a : SetoidAlgebra pres.signature} ->
     Model (EvaluationPresentation pres a) -> (Model pres)
-  cast ea = MkModel
-    { Algebra = cast ea.Algebra
+  castEval ea = MkModel
+    { Algebra = castEval ea.Algebra
     , Validate = \ax,env => CalcWith @{cast ea} $
-      |~ (Algebra.cast ea.Algebra).Sem (pres.axiom ax).lhs env
+      |~ (castEval ea.Algebra).Sem (pres.axiom ax).lhs env
       ~~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).lhs) env
           ...(sym $ coherence ea.Algebra _ _)
       <~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).rhs) env
           ...(ea.Validate (Axiom ax) env)
-      ~~ (Algebra.cast ea.Algebra).Sem (pres.axiom ax).rhs env
+      ~~ (castEval ea.Algebra).Sem (pres.axiom ax).rhs env
           ...(irrelevantEq $ coherence ea.Algebra _ _)
     }
 
 namespace Homomorphism
   public export
-  cast : {sig : Signature} -> {0 a : Type} ->
-    {b,c : SetoidAlgebra (EvaluationSig sig a)} -> (b ~> c) -> (Algebra.cast b ~> Algebra.cast c)
-  cast h = MkSetoidHomomorphism
+  castEval : {sig : Signature} -> {0 a : Type} ->
+    {b,c : SetoidAlgebra (EvaluationSig sig a)} -> (b ~> c) -> (castEval b ~> castEval c)
+  castEval h = MkSetoidHomomorphism
     { H = h.H
     , preserves = \op => h.preserves (MkOp $ Op op.snd)
     }
@@ -161,7 +161,7 @@ public export
 freeAsExtension : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
   (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) -> Extension a s
 freeAsExtension fs = MkExtension
-  { Model = cast fs.Data.Model
+  { Model = castEval fs.Data.Model
   , Embed = MkSetoidHomomorphism
       { H = MkSetoidHomomorphism
         { H = \i => fs.Data.Model.sem (Constant i)
@@ -225,14 +225,14 @@ export
 (.OverAlgebraCoherence) : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
   (other : Extension a s) ->
   (env : x -> U other.Model) -> (t : Term pres.signature x) ->
-    (Algebra.cast other.OverAlgebra).Sem t env
+    (castEval other.OverAlgebra).Sem t env
     = other.Model.Sem t env
 
 export
 OverAlgebraCoherenceAux : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
   (other : Extension a s) ->
   (env : x -> U other.Model) -> (ts : Vect n $ Term pres.signature x) ->
-    bindTerms {a = (Algebra.cast other.OverAlgebra).algebra} ts env
+    bindTerms {a = (castEval other.OverAlgebra).algebra} ts env
     = bindTerms {a = other.Model.Algebra.algebra} ts env
 OverAlgebraCoherenceAux other env [] = Refl
 OverAlgebraCoherenceAux other env (t :: ts) = cong2 (::)
@@ -279,13 +279,13 @@ other.Over = MkModelOver
           Axiom ax        => \env => CalcWith @{cast other.Model} $
             |~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).lhs) env
-            ~~ (Algebra.cast other.OverAlgebra).Sem (pres.axiom ax).lhs env
+            ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).lhs env
                ...(irrelevantEq $ coherence other.OverAlgebra _ _)
             ~~ other.Model.Sem (pres.axiom ax).lhs env
                ...(other.OverAlgebraCoherence _ _)
             <~ other.Model.Sem (pres.axiom ax).rhs env
                ...(other.Model.Validate ax env)
-            ~~ (Algebra.cast other.OverAlgebra).Sem (pres.axiom ax).rhs env
+            ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).rhs env
                ...(sym $ other.OverAlgebraCoherence _ _)
             ~~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).rhs) env
