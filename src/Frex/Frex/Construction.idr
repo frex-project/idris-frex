@@ -50,12 +50,12 @@ EvaluationTheory : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) -
   Equation (EvaluationSig pres.signature (U a))
 EvaluationTheory pres a (Axiom ax       ) = cast @{castEqHint @{EvalEmbed pres.signature}} $
   pres.axiom ax
-EvaluationTheory pres a (Evaluation f cs) = MkEq
+EvaluationTheory pres a (Evaluation f cs) = Presentation.MkEq
   { Var = Fin 0
   , lhs = Call (MkOp (Op f)) (map (\x => Call (MkOp $ Constant x) []) cs)
   , rhs = Call (MkOp $ Constant $ a.Sem (MkOp f) cs) []
   }
-EvaluationTheory pres a (Assumption {x,y} _) = MkEq
+EvaluationTheory pres a (Assumption {x,y} _) = Presentation.MkEq
   { Var = Fin 0
   , lhs = Call (MkOp $ Constant x) []
   , rhs = Call (MkOp $ Constant y) []
