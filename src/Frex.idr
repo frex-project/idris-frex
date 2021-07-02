@@ -15,6 +15,7 @@ import public Frex.Powers
 import public Frex.Free
 import public Frex.Coproduct
 import public Frex.Frex
+import public Frex.Frex.Construction
 
 import public Data.Fun.Nary
 
@@ -94,3 +95,43 @@ solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
   a.rel (a.Sem (fst eq) (either Prelude.id (flip Vect.index env)))
         (a.Sem (snd eq) (either Prelude.id (flip Vect.index env))))
 solve n frex = Nary.curry n Hidden _ (frexify frex)
+
+public export
+proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (eq : ( Term pres.signature (U a `Either` Fin n)
+        , Term pres.signature (U a `Either` Fin n))) ->
+  {auto prf : frex.Data.Model.rel
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
+     ->
+  let frex' : Frex a (cast $ Fin n)
+      frex' = Frex.Construction.Frex a (cast $ Fin n)
+  in frex'.Data.Model.rel
+    (frex'.Data.Model.Sem (fst eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+    (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+proveAux frex env eq =
+  let u = frexify frex ?proveAux_rhs eq
+  in ?h1i
+
+
+public export
+prove : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (eq : ( Term pres.signature (U a `Either` Fin n)
+        , Term pres.signature (U a `Either` Fin n))) ->
+  {auto prf : frex.Data.Model.rel
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
+     ->
+  let frex' : Frex a (cast $ Fin n)
+      frex' = Frex.Construction.Frex a (cast $ Fin n)
+  in frex'.Data.Model.rel
+    (frex'.Data.Model.Sem (fst eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+    (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H))))
+prove n frex = Nary.curry n Hidden _ (proveAux frex)
