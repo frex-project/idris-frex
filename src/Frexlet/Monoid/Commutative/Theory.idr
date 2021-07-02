@@ -5,6 +5,8 @@ import Frex
 
 import public Frexlet.Monoid
 
+%default total
+
 public export
 data Axiom
   = Mon Monoid.Theory.Axiom

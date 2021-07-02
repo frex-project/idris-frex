@@ -7,6 +7,8 @@ import public Notation
 import public Notation.Additive
 import public Notation.Multiplicative
 
+%default total
+
 public export
 head : HVect (ty :: tys) -> ty
 head (x :: xs) = x
@@ -66,4 +68,3 @@ Cast (ActionData a b) (MAction2 a b) where
 public export
 Cast (ActionData a b) (MAction3 a b) where
   cast datum = (cast $ head datum, cast $ tail datum)
-

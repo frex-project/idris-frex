@@ -7,6 +7,8 @@ import Test.Golden
 tests : TestPool
 tests = MkTestPool "Frex tests" [] Nothing
   [ "monoids"
+  , "commutative-monoids"
+  , "printer"
   ]
 
 main : IO ()

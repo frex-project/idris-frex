@@ -23,3 +23,7 @@ rassoc = solve 3 (MonoidFrex Additive _)
 mixed : {a, b : Nat} -> (a + 1) + (1 + b) = (a + 2 + b)
 mixed = solve 2 (MonoidFrex Additive _)
       $ (Dyn 0 .+. Sta 1) .+. (Sta 1 .+. Dyn 1) =-= Dyn 0 .+. Sta 2 .+. Dyn 1
+
+units : {a, b : Nat} -> (0 + (a + 0)) + 0 = a
+units = solve 1 (MonoidFrex Additive _)
+        $ (O1 .+. (Dyn 0 .+. O1)) .+. O1 =-= Dyn 0

@@ -5,6 +5,8 @@ import Notation
 import public Data.HVect
 import public Data.Fun.Extra
 
+%default total
+
 infixl 9 .*., :*:, |*|, *., *:, *|, .*, :*, |*
 
 public export

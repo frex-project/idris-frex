@@ -42,3 +42,30 @@ Unit = MkOp Neutral
 public export
 Prod : Op Signature
 Prod = MkOp Product
+
+export
+HasPrecedence Signature where
+ OpPrecedence Product = Just (InfixR 0)
+
+export
+Show (Op Signature) where
+  show (MkOp Neutral) = "ε"
+  show (MkOp Product) = "•"
+
+export
+Finite (Op Signature) where
+  enumerate = [Unit, Prod]
+
+export
+Finite Axiom where
+  enumerate = [ LftNeutrality
+              , RgtNeutrality
+              , Associativity
+              ]
+
+export
+Show Axiom where
+  show = \case
+    LftNeutrality => "Left neutrality"
+    RgtNeutrality => "Right neutrality"
+    Associativity => "Associativity"

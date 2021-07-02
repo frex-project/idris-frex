@@ -18,6 +18,8 @@ import Notation.Multiplicative
 import Notation.Additive
 import Frex.Axiom
 
+%default total
+
 public export
 invNeutral : (a : InvolutiveMonoid) ->
   let %hint

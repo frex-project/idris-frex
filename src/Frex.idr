@@ -6,6 +6,8 @@ module Frex
 
 import public Data.Setoid
 
+import public Data.Finite
+
 import public Frex.Signature
 import public Frex.Algebra
 import public Frex.Presentation
@@ -18,6 +20,8 @@ import public Frex.Frex
 import public Frex.Frex.Construction
 
 import public Data.Fun.Nary
+
+%default total
 
 public export
 frexEnv : {a : Model pres} -> {x : Setoid} -> (frex : Frex a x) ->
