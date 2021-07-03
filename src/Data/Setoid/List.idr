@@ -1,6 +1,7 @@
 ||| Setoid of lists over a setoid and associated definitions
 module Data.Setoid.List
 
+import Data.List
 import Data.Setoid.Definition
 
 %default total
@@ -66,3 +67,18 @@ ListMap = MkSetoidHomomorphism
   { H           = ListMapHomomorphism
   , homomorphic = ListMapIsHomomorphism
   }
+
+public export
+reverseHomomorphic : {a : Setoid} -> (x, y : List (U a)) ->
+  (a.ListEquality x y) -> a.ListEquality (reverse x) (reverse y)
+reverseHomomorphic x y prf = roh [] [] x y (a.ListEqualityReflexive _) prf
+  where roh  : (ws, xs, ys, zs : List (U a)) -> a.ListEquality ws xs -> a.ListEquality ys zs ->
+               a.ListEquality (reverseOnto ws ys) (reverseOnto xs zs)
+        roh ws xs   []      []    wx     []       = wx
+        roh ws xs (y::ys) (z::zs) wx (yzh :: yzt) = roh (y::ws) (z::xs) ys zs (yzh :: wx) yzt
+
+public export
+appendCongruence : {a : Setoid} -> (x1, x2, y1, y2 : List (U a)) ->
+  a.ListEquality x1 y1 -> a.ListEquality x2 y2 -> a.ListEquality (x1 ++ x2) (y1 ++ y2)
+appendCongruence   []    x2   []    y2    []    p = p
+appendCongruence (x::xs) x2 (y::ys) y2 (ph::pt) p = ph :: appendCongruence _ _ _ _ pt p

@@ -8,13 +8,6 @@ import Data.List
 
 %default total
 
-reverseHomomorphic : {A : Setoid} -> (x, y : List (U A)) -> (A .ListEquality x y) -> A .ListEquality (reverse x) (reverse y)
-reverseHomomorphic l1 l2 prf = roh [] [] l1 l2 (A .ListEqualityReflexive _) prf
-  where roh  : {A : Setoid} -> (w, x, y, z : List (U A)) -> (A .ListEquality w x) ->(A .ListEquality y z) ->
-               A .ListEquality (reverseOnto w y) (reverseOnto x z)
-        roh w x [] [] yz Nil = yz
-        roh w x (y::ys) (z::zs) wx (yzh :: yzt) = roh (y::w) (z::x) ys zs (yzh :: wx) yzt
-
 public export
 List : {A: Setoid} -> InvolutiveMonoid
 List = MkModel (MkInvolutiveMonoidStructure ((ListMonoid {A}) .Algebra)
