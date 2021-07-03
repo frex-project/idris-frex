@@ -21,6 +21,8 @@ import public Frex.Frex.Construction
 
 import public Data.Fun.Nary
 
+import Syntax.PreorderReasoning
+
 %default total
 
 public export
@@ -125,8 +127,8 @@ proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
                                           (frex'.Data.Var.H)))
     (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
                                           (frex'.Data.Var.H)))
-proveAux frex env eq = ?h1
-
+proveAux frex env eq = frexify
+  (frex.UP.Exists (Construction.Frex a (cast $ Fin n)).Data) eq prf
 
 
 public export
