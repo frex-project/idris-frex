@@ -9,13 +9,18 @@ import Data.Vect.Properties
 
 %default total
 
-namespace Relation
-  public export
-  data (.VectEquality) : (a : Setoid) -> Rel (Vect n (U a)) where
-    Nil : a.VectEquality [] []
-    (::) : (hdEq : a.equivalence.relation x y) ->
-           (tlEq : a.VectEquality xs ys) ->
-          a.VectEquality (x :: xs) (y :: ys)
+public export
+data (.VectEquality) : (a : Setoid) -> Rel (Vect n (U a)) where
+  Nil : a.VectEquality [] []
+  (::) : (hdEq : a.equivalence.relation x y) ->
+         (tlEq : a.VectEquality xs ys) ->
+         a.VectEquality (x :: xs) (y :: ys)
+
+export
+(++) : a.VectEquality xs ys -> a.VectEquality as bs ->
+       a.VectEquality (xs ++ as) (ys ++ bs)
+[] ++ qs = qs
+(p :: ps) ++ qs = p :: (ps ++ qs)
 
 public export
 (.VectEqualityReflexive) : (a : Setoid) -> (xs : Vect n $ U a) -> a.VectEquality xs xs

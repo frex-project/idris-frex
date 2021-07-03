@@ -2,6 +2,7 @@ module Frex.Free.Construction.Linear
 
 import Frex.Signature
 import Frex.Algebra
+import Frex.Algebra.Abstract
 import Frex.Presentation
 import Frex.Free.Construction
 
@@ -48,26 +49,6 @@ public export
         Term sig (Maybe a) ->
         Term sig (Maybe a)
 g :.: f = bindTerm {a = Free _ _} g (maybe f (Done . Just))
-
-bindTermExtensional :
-  {alg : Algebra sig} ->
-  (t : Term sig vars) -> {lhs, rhs : vars -> U alg} ->
-  (eq : (v : vars) -> lhs v === rhs v) ->
-  bindTerm t lhs === bindTerm t rhs
-bindTermsExtensional :
-  {alg : Algebra sig} ->
-  (ts : Vect n (Term sig vars)) -> {lhs, rhs : vars -> U alg} ->
-  (eq : (v : vars) -> lhs v === rhs v) ->
-  bindTerms ts lhs === bindTerms ts rhs
-
-bindTermExtensional (Done v) eq = eq v
-bindTermExtensional (Call f ts) eq
-  = cong (alg .Semantics f) (bindTermsExtensional ts eq)
-
-bindTermsExtensional [] eq = Refl
-bindTermsExtensional (t :: ts) eq
-  = cong2 (::) (bindTermExtensional t eq)
-               (bindTermsExtensional ts eq)
 
 export
 plugFusion :
@@ -176,24 +157,6 @@ keepFocus :
 keepFocus lhs rhs (Left t) = Refl
 keepFocus lhs rhs (Right FZ) = Refl
 keepFocus lhs rhs (Right (FS k)) = Refl
-
-bindTermMapFusion :
-  {alg : Algebra sig} ->
-  (ren : a -> vars) -> (t : Term sig a) -> (env : vars -> U alg) ->
-  bindTerm (map ren t) env === bindTerm t (env . ren)
-bindTermsMapFusion :
-  {alg : Algebra sig} ->
-  (ren : a -> vars) -> (ts : Vect n (Term sig a)) -> (env : vars -> U alg) ->
-  bindTerms (bindTerms {a = Free _ _} ts (Done . ren)) env === bindTerms ts (env . ren)
-
-bindTermMapFusion ren (Done v)    env = Refl
-bindTermMapFusion ren (Call f ts) env
-  = cong (alg .Semantics f) (bindTermsMapFusion ren ts env)
-
-bindTermsMapFusion ren [] env = Refl
-bindTermsMapFusion ren (t :: ts) env
-  = cong2 (::) (bindTermMapFusion ren t env)
-               (bindTermsMapFusion ren ts env)
 
 focusEq :
   {a : Algebra sig} ->
@@ -366,39 +329,3 @@ namespace Proof
             HasPrecedence pres.signature =>
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
   display @{showR} = Derivation.display @{showR} . linearise
-
-{-
-export
-display : {pres : Presentation} ->
-          {a : PresetoidAlgebra pres.signature} ->
---          ({x, y : U a} -> Show (a.relation x y)) =>
-          Show (pres .Axiom) =>
-          Show (U a) =>
-          Show (Op pres.signature) =>
-          HasPrecedence pres.signature =>
-          {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-display @{showR} prf = vcat [step False prf, pretty (show y)] where
-
-  byProof : Bool -> Doc () -> Doc ()
-  byProof False d = indent 2 $ "≡[" <++> d <++> "⟩"
-  byProof True  d = indent 2 $ "≡⟨" <++> d <++> "]"
-
-  step   : Bool -> {begin, end : U a} -> (|-) {pres} a begin end -> Doc ()
-  justif : Bool -> {begin, end : U a} -> (|-) {pres} a begin end -> Doc ()
-
-  step b prf = vcat [pretty (show begin), justif b prf]
-
-  justif b (Include p)
-    = ?goal -- byProof b $ pretty (show @{showR} p)
-  justif b (Refl p)
-    = byProof b "reflexivity"
-  justif b (Sym p)
-    = justif (not b) p
-  justif b (Transitive p q)
-    = vcat $ if b
-        then [justif b q, step b p]
-        else [justif b p, step b q]
-  justif b (ByAxiom eq env)
-    = byProof b $ pretty (show eq)
-  justif b (Congruence ctxt env) = ?goal_
--}

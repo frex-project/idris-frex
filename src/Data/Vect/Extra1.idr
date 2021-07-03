@@ -3,6 +3,7 @@ module Data.Vect.Extra1
 
 import Data.Vect
 import Data.Fin
+import Data.Fin.Extra
 import Data.Vect.Elem
 import Data.Vect.Extra
 import Data.Vect.Properties
@@ -47,3 +48,19 @@ mapWithPosFusion f g (x :: xs) = Calc $
   ~~ f 0 (g x) :: mapWithPos (f . FS) (map g xs)     ...(Refl)
   ~~ f 0 (g x) :: mapWithPos (\i => f (FS i) . g) xs ...(cong (f 0 (g x) ::) $ mapWithPosFusion _ _ _)
   ~~ mapWithPos (\i => f i . g) (x :: xs)            ...(Refl)
+
+export
+indexIndexSumLeft :
+  {0 m, n : Nat} ->
+  {xs : Vect m a} -> {0 ys : Vect n a} ->
+  (p : Fin m) -> index (indexSum {n = n} (Left p)) (xs ++ ys) === index p xs
+indexIndexSumLeft {xs = x :: _}  FZ     = Refl
+indexIndexSumLeft {xs = _ :: xs} (FS p) = indexIndexSumLeft p
+
+export
+indexIndexSumRight :
+  {0 m, n : Nat} ->
+  {xs : Vect m a} -> {0 ys : Vect n a} ->
+  (0 p : Fin n) -> index (indexSum {m = m} (Right p)) (xs ++ ys) === index p ys
+indexIndexSumRight {xs = []}      p = Refl
+indexIndexSumRight {xs = _ :: xs} p = indexIndexSumRight p

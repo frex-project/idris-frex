@@ -6,47 +6,73 @@ import Frex
 import Frexlet.Monoid.Theory
 
 import Frex.Free.Construction
+import Frex.Free.Construction.Combinators
 import Frex.Free.Construction.Linear
 
+import Data.Either.Extra
+import Data.Setoid.Vect.Inductive
 import Text.PrettyPrint.Prettyprinter
 
 %default total
 
-Zero : Term Signature (Fin n)
-Zero = call {n = Z} Neutral
+namespace Syntax
 
-(*) : Term Signature (Fin n) -> Term Signature (Fin n) ->
-      Term Signature (Fin n)
-(*) = call {n = 2} Product
+  public export
+  Zero : Term Signature (Fin n)
+  Zero = call {n = Z} Neutral
+
+  public export
+  (*) : Term Signature (Fin n) -> Term Signature (Fin n) ->
+        Term Signature (Fin n)
+  (*) = call {n = 2} Product
+
+namespace Context
+
+  public export
+  Zero : Term Signature (Either (Term Signature (Fin 10)) (Fin n))
+  Zero = call {n = Z} Neutral
+
+  public export
+  (*) : Term Signature (Either (Term Signature (Fin 10)) (Fin n)) ->
+        Term Signature (Either (Term Signature (Fin 10)) (Fin n)) ->
+        Term Signature (Either (Term Signature (Fin 10)) (Fin n))
+  (*) = call {n = 2} Product
+
+  public export
+  HOLE : Fin n -> Term Signature (Either (Term Signature (Fin 10)) (Fin n))
+  HOLE k = Done (Right k)
+
+  prefix 100 :~
+  public export
+  (:~) : Term Signature (Fin 10) ->
+         Term Signature (Either (Term Signature (Fin 10)) (Fin n))
+  (:~) t = Done (Left t)
 
 [BORING] Show a where
   show _ = "boring"
 
+-- Using a concrete name so that the constraints when forming `X k` compute
 infix 0 ~~
-(~~) : Term Signature (Fin 1) -> Term Signature (Fin 1) -> Type
+(~~) : Term Signature (Fin 10) -> Term Signature (Fin 10) -> Type
 (~~) = (|-) {pres = MonoidTheory}
-            (QuotientData MonoidTheory (irrelevantCast (Fin 1)))
+            (QuotientData MonoidTheory (irrelevantCast (Fin 10)))
 
 myProof : (X 0 * Zero) ~~ (Zero * X 0)
 myProof
-  = Transitive (ByAxiom RgtNeutrality (const (X 0)))
-  $ Sym $ ByAxiom LftNeutrality (const (X 0))
-
-view : String
-view = show $ display @{BORING} myProof
+  = Transitive (byAxiom MonoidTheory RgtNeutrality (X 0))
+  $ Sym $ byAxiom MonoidTheory LftNeutrality (X 0)
 
 myProof2 : (X 0 * (X 0 * Zero))
         ~~ (X 0 * (Zero * X 0))
 myProof2
-  = Congruence {n = 2} (X 0 * X 1)
-      {lhs = \case { FZ => X 0; FS FZ => X 0 * Zero}}
-      {rhs = \case { FZ => X 0; FS FZ => Zero * X 0}}
-    $ \case
-         FZ => Refl (X 0)
-         FS FZ => myProof
+  = congruence 1 (:~ X 0 * HOLE 0) myProof
 
-view2 : String
-view2 = show $ display @{BORING} myProof2
+myProof3 : (X 0 * (X 1 * (X 2 * X 3)))
+        ~~ (X 0 * Zero * (X 1 * X 2 * X 3))
+myProof3
+  = congruence 2 (HOLE 0 * HOLE 1)
+    (Sym $ byAxiom MonoidTheory RgtNeutrality (X 0))
+    (byAxiom MonoidTheory Associativity (X 1) (X 2) (X 3))
 
 main : IO Builtin.Unit
 main = do
@@ -55,6 +81,8 @@ main = do
   putStrLn (banner "Monoid Theory")
   putStrLn $ show $ display MonoidTheory
   putStrLn (banner "Simple proof")
-  putStrLn view
+  putStrLn $ show $ display @{BORING} myProof
   putStrLn (banner "Proof with congruence")
-  putStrLn view2
+  putStrLn $ show $ display @{BORING} myProof2
+  putStrLn (banner "Proof with different congruences")
+  putStrLn $ show $ display @{BORING} myProof3
