@@ -15,4 +15,9 @@ clean:
 test:
 	@${MAKE} -C tests build run
 
-.PHONY: all build install clean doc test
+deepclean:
+	@find . -type f -name '*.ttc' -exec rm -f {} \;
+	@find . -type f -name '*.ttm' -exec rm -f {} \;
+	@find . -type f -name '*.ibc' -exec rm -f {} \;
+
+.PHONY: all build install clean doc test deepclean

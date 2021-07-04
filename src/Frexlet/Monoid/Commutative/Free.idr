@@ -54,7 +54,8 @@ FreeModelZeroRepresentation  n = vectorExtensionality _ _ \i => Calc $
 export
 pointwiseSum : (n : Nat) -> (xss : Vect m (U $ Model n)) -> (i : Fin n) ->
   index i ((Model n).sum xss) = (Nat.Additive).sum (map (index i) xss)
-pointwiseSum n xss i = sumPreservation (Model n) (Nat.Additive) (Fin.eval i) xss
+pointwiseSum n xss i =
+  the _ $ sumPreservation (Model n) (Nat.Additive) (Fin.eval i) xss
 
 export
 pointwiseMult : (n : Nat) -> (m : Nat) -> (xs : (U $ Model n)) -> (i : Fin n) ->

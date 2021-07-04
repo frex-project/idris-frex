@@ -17,18 +17,64 @@ import public Frex.Powers
 import public Frex.Free
 import public Frex.Coproduct
 import public Frex.Frex
+import public Frex.Frex.Construction
 
 import public Data.Fun.Nary
+
+import Syntax.PreorderReasoning
 
 %default total
 
 public export
+extEnv : {a : Model pres} -> {x : Setoid} -> (ext : Extension a x) ->
+  Either (cast a) x ~> cast ext.Model
+extEnv ext = either ext.Embed.H ext.Var
+
+public export
+extensionLemma : {a : Model pres} -> {x : Setoid} -> {ext1,ext2 : Extension a x} ->
+  (h : ext1 ~> ext2) ->
+  (Either (cast {to = Setoid} a) x ~~> ext2.Model).rel
+    (h.H.H . (extEnv ext1))
+    (extEnv ext2)
+extensionLemma h (Left  x) = h.PreserveEmbed _
+extensionLemma h (Right i) = h.PreserveVar   _
+
+public export
 frexEnv : {a : Model pres} -> {x : Setoid} -> (frex : Frex a x) ->
   Either (cast a) x ~> cast frex.Data.Model
-frexEnv frex = either frex.Data.Embed.H
-                      frex.Data.Var
+frexEnv frex = extEnv frex.Data
+
 public export
-frexify : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+frexify : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
+  {ext1,ext2 : Extension a x} -> (h : ext1 ~> ext2) ->
+  (eq : ( Term pres.signature (U a `Either` U x)
+        , Term pres.signature (U a `Either` U x))) ->
+  (prf : ext1.Model.rel
+     (ext1.Model.Sem (fst eq) (extEnv ext1).H)
+     (ext1.Model.Sem (snd eq) (extEnv ext1).H)) ->
+  ext2.Model.rel
+     (ext2.Model.Sem (fst eq) (extEnv ext2).H)
+     (ext2.Model.Sem (snd eq) (extEnv ext2).H)
+frexify h eq prf = CalcWith @{cast ext2.Model} $
+  |~ ext2.Model.Sem (fst eq) (extEnv ext2).H
+  <~ ext2.Model.Sem (fst eq) (h.H.H . extEnv ext1).H
+       ...(ext2.Model.equivalence.symmetric _ _ $
+          (eval {x = (cast a) `Either` x}
+               {a = ext2.Model.Algebra} (fst eq)).homomorphic
+                      (h.H.H . (extEnv ext1))
+                      (extEnv ext2)
+                      $ extensionLemma h)
+  <~ ext2.Model.Sem (snd eq) (h.H.H . extEnv ext1).H
+       ...(eqPreservation eq (extEnv ext1).H h.H prf)
+  <~ ext2.Model.Sem (snd eq) (extEnv ext2).H
+       ...((eval {x = (cast a) `Either` x}
+                 {a = ext2.Model.Algebra} (snd eq)).homomorphic
+                      (h.H.H . (extEnv ext1))
+                      (extEnv ext2)
+                      $ extensionLemma h)
+
+public export
+solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
   (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
   (eq : ( Term pres.signature (U a `Either` Fin n)
         , Term pres.signature (U a `Either` Fin n))) ->
@@ -38,7 +84,7 @@ frexify : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
      ->
   a.rel (a.Sem (fst eq) (either Prelude.id (flip Vect.index env)))
         (a.Sem (snd eq) (either Prelude.id (flip Vect.index env)))
-frexify frex env eq =
+solveVect frex env eq =
   let AX : Model pres
       AX = frex.Data.Model
       Other : Extension a (cast $ Fin n)
@@ -49,41 +95,7 @@ frexify frex env eq =
         }
       h : frex.Data ~> Other
       h = frex.UP.Exists Other
-
-      env' : Either (cast a) (cast $ Fin n) ~> cast {to = Setoid} a
-      env' = either (id $ cast a) (mate $ flip Vect.index env)
-      extensionLemma : (Either (cast {to = Setoid} a) (cast $ Fin n) ~~>
-                         (cast (Other).Model)).equivalence.relation
-              (h.H.H . (frexEnv frex))
-              env'
-      extensionLemma (Left  x) = h.PreserveEmbed _
-      extensionLemma (Right i) = h.PreserveVar   _
-
-      lemma : (t : Term pres.signature $ (U a) `Either` (Fin n)) ->
-        (Other).Model.rel
-          (bindTerm {a = a.Algebra.algebra} t env'.H)
-          (h.H.H.H (bindTerm {a = (AX).Algebra.algebra} t (frexEnv frex).H))
-      lemma t = CalcWith @{cast (Other).Model} $
-        |~ bindTerm {a = a.Algebra.algebra} t env'.H
-        <~ bindTerm {a = a.Algebra.algebra} t (h.H.H.H . (frexEnv frex).H)
-             ...((Other).Model.equivalence.symmetric _ _
-                 $ (eval {x = (cast a) `Either` (cast $ Fin n)}
-                       {a = a.Algebra} t).homomorphic
-                       (h.H.H . (frexEnv frex))
-                       env'
-                       extensionLemma)
-        <~ h.H.H.H (bindTerm {a = (AX).Algebra.algebra} t (frexEnv frex).H)
-             ...((Other).Model.equivalence.symmetric _ _ $
-                 homoPreservesSem h.H t (frexEnv frex).H)
-
-  in CalcWith @{cast (Other).Model} $
-  |~ bindTerm {a = a.Algebra.algebra} (fst eq) env'.H
-  <~ h.H.H.H (bindTerm {a = (AX).Algebra.algebra} (fst eq) (frexEnv frex).H)
-       ...(lemma (fst eq))
-  <~ h.H.H.H (bindTerm {a = (AX).Algebra.algebra} (snd eq) (frexEnv frex).H)
-       ...(h.H.H.homomorphic _ _ prf)
-  <~ bindTerm {a = a.Algebra.algebra} (snd eq) env'.H
-       ...((Other).Model.equivalence.symmetric _ _ $ lemma (snd eq))
+  in frexify h eq prf
 
 public export
 solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
@@ -97,4 +109,43 @@ solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
      ->
   a.rel (a.Sem (fst eq) (either Prelude.id (flip Vect.index env)))
         (a.Sem (snd eq) (either Prelude.id (flip Vect.index env))))
-solve n frex = Nary.curry n Hidden _ (frexify frex)
+solve n frex = Nary.curry n Hidden _ (solveVect frex)
+
+public export
+proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (eq : ( Term pres.signature (U a `Either` Fin n)
+        , Term pres.signature (U a `Either` Fin n))) ->
+  {auto prf : frex.Data.Model.rel
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
+     ->
+  let frex' : Frex a (cast $ Fin n)
+      frex' = Frex.Construction.Frex a (cast $ Fin n)
+  in frex'.Data.Model.rel
+    (frex'.Data.Model.Sem (fst eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+    (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+proveAux frex env eq = frexify
+  (frex.UP.Exists (Construction.Frex a (cast $ Fin n)).Data) eq prf
+
+
+public export
+prove : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (eq : ( Term pres.signature (U a `Either` Fin n)
+        , Term pres.signature (U a `Either` Fin n))) ->
+  {auto prf : frex.Data.Model.rel
+     (frex.Sem (fst eq) (frexEnv frex).H)
+     (frex.Sem (snd eq) (frexEnv frex).H)}
+     ->
+  let frex' : Frex a (cast $ Fin n)
+      frex' = Frex.Construction.Frex a (cast $ Fin n)
+  in frex'.Data.Model.rel
+    (frex'.Data.Model.Sem (fst eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H)))
+    (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
+                                          (frex'.Data.Var.H))))
+prove n frex = Nary.curry n Hidden _ (proveAux frex)
