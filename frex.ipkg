@@ -30,6 +30,7 @@ modules = Frex
         , Frexlet.Monoid.Frex.Structure
         , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Frex.Construction
+        , Frexlet.Monoid.Free
         , Frexlet.Monoid.Nat
         , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation

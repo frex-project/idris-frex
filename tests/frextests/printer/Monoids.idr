@@ -4,7 +4,9 @@ import Data.String
 
 import Frex
 import Frexlet.Monoid.Theory
+import Frexlet.Monoid
 
+import Frex.Axiom
 import Frex.Free.Construction
 import Frex.Free.Construction.Combinators
 import Frex.Free.Construction.Linear
