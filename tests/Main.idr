@@ -9,6 +9,7 @@ tests = MkTestPool "Frex tests" [] Nothing
   [ "monoids"
   , "commutative-monoids"
   , "printer"
+  , "involutive-monoids"
   ]
 
 main : IO ()
