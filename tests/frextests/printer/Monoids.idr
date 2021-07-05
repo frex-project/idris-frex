@@ -59,8 +59,8 @@ infix 0 ~~
 
 myProof : (X 0 * Zero) ~~ (Zero * X 0)
 myProof
-  = Transitive (byAxiom MonoidTheory RgtNeutrality (X 0))
-  $ Sym $ byAxiom MonoidTheory LftNeutrality (X 0)
+  = Transitive (byAxiom MonoidTheory RgtNeutrality)
+  $ Sym $ byAxiom MonoidTheory LftNeutrality
 
 myProof2 : (X 0 * (X 0 * Zero))
         ~~ (X 0 * (Zero * X 0))
@@ -71,8 +71,8 @@ myProof3 : (X 0 * (X 1 * (X 2 * X 3)))
         ~~ (X 0 * Zero * (X 1 * X 2 * X 3))
 myProof3
   = congruence 2 (HOLE 0 * HOLE 1)
-    (Sym $ byAxiom MonoidTheory RgtNeutrality (X 0))
-    (byAxiom MonoidTheory Associativity (X 1) (X 2) (X 3))
+    (Sym $ byAxiom MonoidTheory RgtNeutrality)
+    (byAxiom MonoidTheory Associativity)
 
 main : IO Builtin.Unit
 main = do

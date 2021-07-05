@@ -87,15 +87,28 @@ congruence n t
     curry n Hidden _ $ \ rhs =>
     withEqualities lhs rhs $ congruence' t
 
-||| A byAxiom that's much more convenient to use
+||| A ByAxiom that's much more convenient to use
 export
-byAxiom :
+byAxiom' :
   (pres : Presentation) ->
   {0 a : PresetoidAlgebra pres.signature} ->
   (eq : Axiom pres) ->
   PI ((pres.axiom eq).support) Visible (U a) $ \env =>
     (|-) {pres} a (bindTerm {a = a.algebra} (pres.axiom eq).lhs (\ i => index i env))
                   (bindTerm {a = a.algebra} (pres.axiom eq).rhs (\ i => index i env))
-byAxiom pres eq
+byAxiom' pres eq
   = curry (pres.axiom eq).support Visible _ $ \ env =>
+    ByAxiom eq (\ i => index i env)
+
+||| A ByAxiom that's much more convenient to use
+export
+byAxiom :
+  (pres : Presentation) ->
+  {0 a : PresetoidAlgebra pres.signature} ->
+  (eq : Axiom pres) ->
+  PI ((pres.axiom eq).support) Hidden (U a) $ \env =>
+    (|-) {pres} a (bindTerm {a = a.algebra} (pres.axiom eq).lhs (\ i => index i env))
+                  (bindTerm {a = a.algebra} (pres.axiom eq).rhs (\ i => index i env))
+byAxiom pres eq
+  = curry (pres.axiom eq).support Hidden _ $ \ env =>
     ByAxiom eq (\ i => index i env)
