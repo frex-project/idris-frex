@@ -25,6 +25,10 @@ record PresetoidAlgebra (Sig : Signature) where
   algebra : Algebra Sig
   0 relation : (x, y : U algebra) -> Type
 
+public export
+Cast (SetoidAlgebra sig) (PresetoidAlgebra sig) where
+  cast set = MkPresetoidAlgebra set.algebra set.equivalence.relation
+
 ||| Carrier of underlying algebra
 public export 0
 U : PresetoidAlgebra sig -> Type
@@ -256,7 +260,7 @@ public export
 FreeUPUniqueMap : (pres : Presentation) -> (x : Setoid) -> (other : pres `ModelOver` x) ->
   (extend1, extend2 : FreeData pres x  ~> other) ->
   forall n. (ts : Vect n (U $ F pres x)) ->
-            (VectSetoid n (cast other.Model)).equivalence.relation
+            (Functional.VectSetoid n (cast other.Model)).equivalence.relation
                (map extend1.H.H.H ts)
                (map extend2.H.H.H ts)
 FreeUPUniqueMap pres x other extend1 extend2 []          _ impossible

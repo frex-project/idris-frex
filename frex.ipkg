@@ -3,6 +3,7 @@ authors = "Guillaume Allais, Edwin Brady, Nathan Corbin, Ohad Kammar, and Jeremy
 modules = Frex
         , Frex.Signature
         , Frex.Algebra
+        , Frex.Algebra.Abstract
         , Frex.Presentation
         , Frex.Axiom
         , Frex.Model
@@ -14,6 +15,7 @@ modules = Frex
         , Frex.Coproduct
         , Frex.Free
         , Frex.Free.Construction
+        , Frex.Free.Construction.Combinators
         , Frex.Free.Construction.Linear
         , Frex.Frex
         , Frex.Frex.Construction
@@ -51,6 +53,7 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Involution
         , Frexlet.Monoid.Involutive.Frex
         -- Should move to contrib
+        , Data.Either.Extra
         , Data.Finite
         , Data.Fun.Nary
         , Data.Name
