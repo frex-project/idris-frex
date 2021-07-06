@@ -1,0 +1,4 @@
+1/2: Building ListTests (ListTests.idr)
+2/2: Building InvolutiveMonoids (InvolutiveMonoids.idr)
+Main> ok
+Main> Bye for now!

@@ -32,6 +32,7 @@ modules = Frex
         , Frexlet.Monoid.Frex.Construction
         , Frexlet.Monoid.Free
         , Frexlet.Monoid.Nat
+        , Frexlet.Monoid.List
         , Frexlet.Monoid.Pair
         , Frexlet.Monoid.Notation
         , Frexlet.Monoid.Notation.Additive
@@ -53,6 +54,7 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Properties
         , Frexlet.Monoid.Involutive.Involution
         , Frexlet.Monoid.Involutive.Frex
+        , Frexlet.Monoid.Involutive.List
         -- Should move to contrib
         , Data.Either.Extra
         , Data.Finite
