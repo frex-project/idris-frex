@@ -69,6 +69,7 @@ modules = Frex
         , Data.Setoid.Vect.Functional
         , Data.Setoid.Vect.Inductive
         , Data.Setoid.List
+        , Data.Unit
         , Data.Vect.Extra1
 
 
