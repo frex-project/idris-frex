@@ -241,23 +241,29 @@ public export
 (MkInvolutiveExtension _ _ _ compat).VarCompatibility = compat
 
 -----------------------------------------------------------
-
 public export
 InvolutiveExtensionToExtension : {a : InvolutiveMonoid} -> {s : Setoid} ->
   InvolutiveExtension a s -> Extension a s
-InvolutiveExtensionToExtension ext = MkExtension
-  { Model = InvolutionToInvolutiveMonoid
+InvolutiveExtensionToExtension ext =
+  let model : InvolutiveMonoid
+      model = InvolutionToInvolutiveMonoid
                ext.MonoidExtension.Model
                ext.ModelInvolution
+  in MkExtension
+  { Model = model
   , Embed = MkSetoidHomomorphism
       { H = ext.MonoidExtension.Embed.H
-      , preserves = \case
-          MkOp (Mono op) => ext.MonoidExtension.Embed.preserves (MkOp op)
-          MkOp Involution => \ [i] => ext.PreserveInvolute i
+      , preserves =
+          let
+            homomorphism : Homomorphism a.Algebra model.Algebra
+                           ext.MonoidExtension.Embed.H.H
+            homomorphism (MkOp $ Mono op   ) = ext.MonoidExtension.Embed.preserves (MkOp op)
+            homomorphism (MkOp $ Involution) = \ [i] => ext.PreserveInvolute i
+
+          in homomorphism
       }
   , Var   = cast (MkEnv {H = ext.MonoidExtension.Var, compatibility = ext.VarCompatibility})
   }
-
 
 public export
 ExtensionToInvolutiveExtension : {a : InvolutiveMonoid} -> {s : Setoid} ->
@@ -428,3 +434,17 @@ ExtenderHomomorphism a s auxFrex other =
   , preserves = homomorphism
   }
 %nf_metavar_threshold 50
+
+public export
+InvExtender : (a : InvolutiveMonoid) -> (s : Setoid) -> (auxFrex : AuxFrexType a s) ->
+  Frex.Frex.Extender (InvMonoidExtension a s auxFrex)
+%nf_metavar_threshold 40000
+InvExtender a s auxFrex other = MkExtensionMorphism
+  { H = ExtenderHomomorphism a s auxFrex other
+  , PreserveEmbed = (auxFrex.UP.Exists
+      (ExtensionToInvolutiveExtension other).MonoidExtension).PreserveEmbed
+  , PreserveVar   = \i =>
+      (auxFrex.UP.Exists
+      (ExtensionToInvolutiveExtension other).MonoidExtension).PreserveVar
+      (False, i)
+  }
