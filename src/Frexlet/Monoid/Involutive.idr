@@ -26,7 +26,6 @@ import Data.Setoid
 
 %default total
 
-{-
 public export
 (.Env) : (ext : InvolutiveExtension a s) ->
   Env s ext.MonoidExtension.Model
@@ -37,17 +36,20 @@ public export
     }
 
 public export
-ExtenderHomomorphism : (a : InvolutiveMonoid) -> (s : Setoid) ->
-  ExtenderHomomorphism (InvMonoidExtension a s)
-ExtenderHomomorphism a s other =
+ExtenderHomomorphism : (a : InvolutiveMonoid) -> (s : Setoid) -> (auxFrex : AuxFrexType a s) ->
+  ExtenderHomomorphism (InvMonoidExtension a s auxFrex)
+%nf_metavar_threshold 80000
+ExtenderHomomorphism a s auxFrex other =
   let otherIExt : InvolutiveExtension a s
       otherIExt = ExtensionToInvolutiveExtension other
       aInvolution : Involution (cast a)
       aInvolution = InvolutiveMonoidToInvolution a
-      h : AuxFrexExtension a s ~> otherIExt.MonoidExtension
-      h = (AuxFrex a s).UP.Exists otherIExt.MonoidExtension
-      %hint frexNotation : InvMult1 (U $ FrexInvolutiveMonoid a s)
-      frexNotation = (FrexInvolutiveMonoid a s).Notation1
+      h : AuxFrexExtension a s auxFrex ~> otherIExt.MonoidExtension
+      h = auxFrex.UP.Exists otherIExt.MonoidExtension
+      frex : Extension a s
+      frex = InvMonoidExtension a s auxFrex
+      %hint frexNotation : InvMult1 (U $ FrexInvolutiveMonoid a s auxFrex)
+      frexNotation = (FrexInvolutiveMonoid a s auxFrex).Notation1
       %hint aNotation : InvMult1 (U a)
       aNotation = a.Notation1
       %hint otherNotation : InvMult1 (U $ other.Model)
@@ -68,7 +70,7 @@ ExtenderHomomorphism a s other =
         , Var   = otherIExt.MonoidExtension.Var .
                   bid
         }
-      {- So the lef and right halves of the next two diagram give us
+      {- So the left and right halves of the next two diagram give us
          extension morphism: AuxFrexExtension a s ~> presExt
 
                                   h.H
@@ -80,7 +82,7 @@ ExtenderHomomorphism a s other =
                  |                     |(other.Embed.preserves) |
                  |          Embed.rev  v      Embed.rev         |
                  |      /------------  a.rev -----------\       |
-                 |     |      (h.PreseveEmbed).rev      |       |
+                 |     |      (h.PreserveEmbed).rev     |       |
                  v     v               =                v       v
          (AuxFrexExtension a s).rev ------------------> (other.Model).rev
                                         h.H.rev
@@ -98,29 +100,37 @@ ExtenderHomomorphism a s other =
          (AuxFrexExtension a s) ---------------------> (other.Model).rev
                                    h.H.H
       -}
-      extendLHS,extendRHS : AuxFrexExtension a s ~> presExt
+      extendLHS,extendRHS : AuxFrexExtension a s auxFrex ~> presExt
       extendLHS = MkExtensionMorphism
-        { H =  h.H.rev . FrexInvolution a s
-        , PreserveEmbed = \i => other.Model.equivalence.reflexive _
-        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
-            |~ h.H.H.H ((AuxFrexExtension a s).Var.H bx).inv
-            <~ h.H.H.H ((AuxFrexExtension a s).Var.H $ bid.H bx)
+        { H =  h.H.rev . FrexInvolution a s auxFrex
+        , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+            |~ h.H.H.H ((AuxFrexExtension a s auxFrex).Embed.H.H i).inv
+            <~ h.H.H.H ((AuxFrexExtension a s auxFrex).Embed.H.H i.inv)
                ...(h.H.H.homomorphic _ _ $
-                   (FrexInvolutionExtensionMorphism a s).PreserveVar _)
+                   -- ought to be `frex.Embed.preserve Involute [_]` but idris gobbles
+                   -- up memory otherwise
+                   (FrexInvolutionExtensionMorphism a s auxFrex).PreserveEmbed _)
+            <~ otherIExt.MonoidExtension.Embed.H.H (i.inv)
+               ...(h.PreserveEmbed _)
+        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
+            |~ h.H.H.H ((AuxFrexExtension a s auxFrex).Var.H bx).inv
+            <~ h.H.H.H ((AuxFrexExtension a s auxFrex).Var.H $ bid.H bx)
+               ...(h.H.H.homomorphic _ _ $
+                   (FrexInvolutionExtensionMorphism a s auxFrex).PreserveVar _)
             <~ otherIExt.MonoidExtension.Var.H (bid.H bx)
                ...(h.PreserveVar _)
          }
       extendRHS = MkExtensionMorphism
         { H = otherIExt.ModelInvolution.H . h.H
         , PreserveEmbed = \i => CalcWith @{cast other.Model} $
-          |~ (h.H.H.H $ (AuxFrexExtension a s).Embed.H.H i ).inv
+          |~ (h.H.H.H $ (AuxFrexExtension a s auxFrex).Embed.H.H i ).inv
           <~ (otherIExt.MonoidExtension.Embed.H.H i).inv
              ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveEmbed i])
           <~ (otherIExt.MonoidExtension.Embed.H.H i.inv)
             ...( other.Model.equivalence.symmetric _ _
                $ other.Embed.preserves Involute [_])
         , PreserveVar   = \bx => CalcWith @{cast other.Model} $
-          |~ (h.H.H.H $ (AuxFrexExtension a s).Var.H bx).inv
+          |~ (h.H.H.H $ (AuxFrexExtension a s auxFrex).Var.H bx).inv
           <~ (otherIExt.MonoidExtension.Var.H bx).inv
              ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveVar bx])
           <~ (otherIExt.MonoidExtension.Var.H $ bid.H bx)
@@ -131,8 +141,10 @@ ExtenderHomomorphism a s other =
   , preserves = \case
       MkOp (Mono op)  => h.H.preserves (MkOp op)
       MkOp Involution => \ [i] =>
-        (AuxFrex a s).UP.Unique presExt extendLHS extendRHS i
+        auxFrex.UP.Unique presExt extendLHS extendRHS i
   }
+%nf_metavar_threshold 50
+{-
 
 public export
 InvExtender : (a : InvolutiveMonoid) -> (s : Setoid) ->
