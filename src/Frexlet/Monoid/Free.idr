@@ -31,6 +31,35 @@ TrivialMonoid =
       Associativity => \ _ => unitIrrelevant
   }
 
+||| The free monoid (over the empty setoid) is the trivial monoid
+public export
+FreeMonoidVoid : Free MonoidTheory (cast Void)
+FreeMonoidVoid = MkFree
+  { Data = MkModelOver
+      { Model = TrivialMonoid
+      , Env = mate (const ())
+      }
+  , UP   = IsFree
+    { Exists = \other => MkHomomorphism
+        { H = MkSetoidHomomorphism
+            { H = mate $ \_ => other.Model.sem Neutral
+            , preserves = \case
+                MkOp Neutral => \ [   ] => other.Model.equivalence.reflexive _
+                MkOp Product => \ [_,_] => other.Model.equivalence.symmetric _ _ $
+                                           other.Model.validate LftNeutrality [_]
+            }
+        , preserves = \case _ impossible
+        }
+    , Unique = \other, extend1, extend2,() => CalcWith @{cast other.Model} $
+        |~ extend1.H.H.H ()
+        ~~ extend1.H.H.H ((TrivialMonoid).sem Neutral) ...(Refl)
+        <~ other.Model.sem Neutral                     ...(extend1.H.preserves (MkOp Neutral) [])
+        <~ extend2.H.H.H ((TrivialMonoid).sem Neutral) ...(other.Model.equivalence.symmetric _ _ $
+                                                           extend2.H.preserves (MkOp Neutral) [])
+        ~~ extend2.H.H.H () ...(Refl)
+    }
+  }
+
 public export
 ||| The frex for the free monoid built out of n variables
 FreeFrex : (n : Nat) -> Frex TrivialMonoid (cast $ Fin n)
