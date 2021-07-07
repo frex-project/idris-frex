@@ -7,7 +7,7 @@ import Frex.Signature
 import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
-import Frex.Free
+import Frex.Free.Definition
 import Frex.Axiom
 
 import Data.String

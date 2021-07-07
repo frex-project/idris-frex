@@ -1,100 +1,123 @@
 ||| Definitions and constructions involving free models
 module Frex.Free
 
+import public Frex.Free.Definition
+import public Frex.Free.Construction
+
 import Data.Setoid
 import Frex.Signature
 import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
+import Frex.Powers
 
-%default total
+import Syntax.PreorderReasoning
+import public Data.Fun.Nary
 
-||| A model over a setoid `X` is a model that can also interpret the
-||| elements of `X`.
-|||
-||| For example, the monads associated to a presentation are the
-||| choices of a free model over each set(oid).
-public export
-record ModelOver (Pres : Presentation) (X : Setoid) where
-  constructor MkModelOver
-  Model : Model Pres
-  Env : X ~> cast Model
 
 public export
-(ford : pres.signature = sig) => Semantic (ModelOver pres x) (Op sig) where
-  (.SemType) a = a.Model.SemType
-  (.Sem)     a = a.Model.Sem
+extensionLemma : {0 pres : Presentation} -> {s : Setoid} -> {mod1,mod2 : pres `ModelOver` s} ->
+  (h : mod1 ~> mod2) ->
+  (s ~~> mod2.Model).rel
+    (h.H.H . (mod1.Env))
+    mod2.Env
+extensionLemma h = h.preserves
 
 public export
-(ford : pres.signature = sig) => Semantic (ModelOver pres x) (Term sig y) where
-  (.SemType) a = a.Model.SemType
-  (.Sem)     a = a.Model.Sem
-
-parameters {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X)
-  ||| States: Homomorphism between the models over X.
-  public export 0
-  PreservesEnv : (h : cast {to = Setoid} (A .Model) ~> cast (B .Model)) -> Type
-  PreservesEnv h = (X ~~> cast (B .Model)).equivalence.relation
-    (h . (A .Env))
-         (B .Env)
-
-||| A `Pres`-model over X homomorphism
+freeSolve : {pres : Presentation} -> {s : Setoid} ->
+  {mod1,mod2 : pres `ModelOver` s} -> (h : mod1 ~> mod2) ->
+  (eq : ( Term pres.signature (U s)
+        , Term pres.signature (U s))) ->
+  (prf : mod1.Model.rel
+     (mod1.Model.Sem (fst eq) mod1.Env.H)
+     (mod1.Model.Sem (snd eq) mod1.Env.H)) ->
+  mod2.Model.rel
+     (mod2.Model.Sem (fst eq) mod2.Env.H)
+     (mod2.Model.Sem (snd eq) mod2.Env.H)
+freeSolve h eq prf = CalcWith @{cast mod2.Model} $
+  |~ mod2.Model.Sem (fst eq) mod2.Env.H
+  <~ mod2.Model.Sem (fst eq) (h.H.H . mod1.Env).H
+       ...(mod2.Model.equivalence.symmetric _ _ $
+          (eval {x = s}
+               {a = mod2.Model.Algebra} (fst eq)).homomorphic
+                      (h.H.H . mod1.Env)
+                      mod2.Env
+                      $ extensionLemma h)
+  <~ mod2.Model.Sem (snd eq) (h.H.H . mod1.Env).H
+       ...(eqPreservation eq mod1.Env.H h.H prf)
+  <~ mod2.Model.Sem (snd eq) mod2.Env.H
+       ...((eval {x = s}
+                 {a = mod2.Model.Algebra} (snd eq)).homomorphic
+                      (h.H.H . mod1.Env)
+                      mod2.Env
+                      $ extensionLemma h)
 public export
-record (~>) {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X) where
-  constructor MkHomomorphism
-  H : (A .Model) ~> (B .Model)
-  preserves : PreservesEnv A B (H .H)
-
-parameters {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X)
-  ||| Weak initiality: for any other model over X there is a morphism from FX into it.
-  public export 0
-  Extender : Type
-  Extender = (other : Pres `ModelOver` X) -> FX ~> other
-
-  -- The following boilerplate lets us define a concrete `Extender` in stages.
-  -- Were we to have co-pattern matching, we wouldn't need this boilerplate since we
-  -- could define the various fields of Extender in stages
-
-  public export 0
-  ExtenderFunction : Type
-  ExtenderFunction = ((other : Pres `ModelOver` X) -> (U $ FX .Model) -> (U other.Model))
-
-  public export 0
-  ExtenderSetoidHomomorphism : Type
-  ExtenderSetoidHomomorphism = ((other : Pres `ModelOver` X) ->
-    (cast {to = Setoid} $ FX .Model) ~> (cast other.Model))
-
-  public export 0
-  ExtenderAlgebraHomomorphism : Type
-  ExtenderAlgebraHomomorphism = ((other : Pres `ModelOver` X) ->
-    (FX .Model) ~> (other.Model))
-
-  ||| There's at most one homomorphism of models over X from FX
-  public export 0
-  Uniqueness : Type
-  Uniqueness = (other : Pres `ModelOver` X) -> (extend1, extend2 : FX ~> other) ->
-    (FX .Model ~~> other.Model).equivalence.relation
-      extend1.H
-      extend2.H
-
-public export
-record Freeness {Pres : Presentation} {X : Setoid} (FX : Pres `ModelOver` X) where
-  constructor IsFree
-  Exists : Extender FX
-  Unique : Uniqueness FX
+solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (eq : ( Term pres.signature (Fin n)
+        , Term pres.signature (Fin n))) ->
+  {auto prf : free.Data.Model.rel
+     (free.Sem (fst eq) free.Data.Env.H)
+     (free.Sem (snd eq) free.Data.Env.H)}
+     ->
+  a.rel (a.Sem (fst eq) (flip Vect.index env))
+        (a.Sem (snd eq) (flip Vect.index env))
+solveVect free env eq =
+  let AX : Model pres
+      AX = free.Data.Model
+      Other : pres `ModelOver` (cast $ Fin n)
+      Other = MkModelOver
+        { Model = a
+        , Env   = mate (flip index env)
+        }
+      h : free.Data ~> Other
+      h = free.UP.Exists Other
+  in freeSolve h eq prf
 
 public export
-record Free (Pres : Presentation) (X : Setoid) where
-  constructor MkFree
-  Data : Pres `ModelOver` X
-  UP   : Freeness Data
+solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (eq : ( Term pres.signature (Fin n)
+        , Term pres.signature (Fin n))) ->
+  {auto prf : free.Data.Model.rel
+     (free.Sem (fst eq) free.Data.Env.H)
+     (free.Sem (snd eq) free.Data.Env.H)}
+     ->
+  a.rel (a.Sem (fst eq) (flip Vect.index env))
+        (a.Sem (snd eq) (flip Vect.index env)))
+solve n free = Nary.curry n Hidden _ (solveVect free)
 
 public export
-(ford : pres.signature = sig) => Semantic (Free pres x) (Op sig) where
-  (.SemType) a = a.Data.SemType
-  (.Sem)     a = a.Data.Sem
+proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (eq : ( Term pres.signature (Fin n)
+        , Term pres.signature (Fin n))) ->
+  {auto prf : free.Data.Model.rel
+     (free.Sem (fst eq) free.Data.Env.H)
+     (free.Sem (snd eq) free.Data.Env.H)}
+     ->
+  let free' : Free pres (cast $ Fin n)
+      free' = Free.Construction.Free pres (cast $ Fin n)
+  in free'.Data.Model.rel
+    (free'.Data.Model.Sem (fst eq) (free'.Data.Env.H))
+    (free'.Data.Model.Sem (snd eq) (free'.Data.Env.H))
+proveAux free env eq = freeSolve
+  (free.UP.Exists (Construction.Free pres (cast $ Fin n)).Data) eq prf
 
 public export
-(ford : pres.signature = sig) => Semantic (Free pres x) (Term sig y) where
-  (.SemType) a = a.Data.SemType
-  (.Sem)     a = a.Data.Sem
+prove : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (eq : ( Term pres.signature (Fin n)
+        , Term pres.signature (Fin n))) ->
+  {auto prf : free.Data.Model.rel
+     (free.Sem (fst eq) free.Data.Env.H)
+     (free.Sem (snd eq) free.Data.Env.H)}
+     ->
+  let free' : Free pres (cast $ Fin n)
+      free' = Free.Construction.Free pres (cast $ Fin n)
+  in free'.Data.Model.rel
+    (free'.Data.Model.Sem (fst eq) (free'.Data.Env.H))
+    (free'.Data.Model.Sem (snd eq) (free'.Data.Env.H)))
+prove n free = Nary.curry n Hidden _ (proveAux free)
