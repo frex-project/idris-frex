@@ -18,6 +18,7 @@ import public Frex.Free
 import public Frex.Coproduct
 import public Frex.Frex
 import public Frex.Frex.Construction
+import public Frex.Free.Construction.ByFrex
 
 import public Data.Fun.Nary
 

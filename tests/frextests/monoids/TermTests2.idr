@@ -10,50 +10,40 @@ import Frexlet.Monoid
 import Frexlet.Monoid.Free
 import Frexlet.Monoid.Notation.Additive
 
-var : {n : Nat} -> Fin n -> U (FreeMonoid n)
-var = (FreeFrex n).Data.Var.H
+import Syntax.PreorderReasoning
+
+var : {n : Nat} -> Fin n -> U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model
+var = (Construction.Free MonoidTheory $ cast $ Fin n).Data.Env.H
 
 infix 0 ~~
-0 (~~) : Rel (U (SyntacticMonoid n))
-(~~) = (SyntacticMonoid n).rel
+0 (~~) : Rel (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
+(~~) = (Free MonoidTheory $ cast $ Fin n).Data.Model.rel
 
 %hint
-notation: Additive1 (U (SyntacticMonoid 10))
-notation = (SyntacticMonoid 10).Additive1
+notation: {n : Nat} -> Additive1 (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
+notation = (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model.Additive1
 
-trivial :
-  let x := (SyntacticExtension 10).Embed.H.H (var 0)
-  in x ~~ x
-trivial = prove 0 (MonoidFrex (FreeMonoid 10) _)
-            (Sta (var 0) =-= Sta (var 0))
-
-trivial2 :
-  let a := (SyntacticExtension 10).Embed.H.H (var 0)
-      b := (SyntacticExtension 10).Embed.H.H (var 1)
-  in a .+. b ~~ a .+. b
-trivial2 = prove 0 (MonoidFrex (FreeMonoid 10) _)
-         $ Sta (var 0) .+. Sta (var 1) =-= Sta (var 0) .+. Sta (var 1)
-
+trivial : (var {n = 1} 0) ~~ var 0
+trivial = prove (FreeMonoidOver $ cast $ Fin _)
+               (Done 0 =-= Done 0)
+trivial2 : var {n = 2} 0 .+. var 1 ~~ var 0 .+. var 1
+trivial2 = prove (FreeMonoidOver $ cast $ Fin _)
+         (Done 0 .+. Done 1 =-= Done 0 .+. Done 1)
 assoc :
-  let a := (SyntacticExtension 10).Embed.H.H (var 0)
-      b := (SyntacticExtension 10).Embed.H.H (var 1)
-      c := (SyntacticExtension 10).Embed.H.H (var 2)
-  in a .+. (b .+. c) ~~ (a .+. b) .+. c
-assoc = prove 0 (MonoidFrex (FreeMonoid 10) _)
-      $ Sta (var 0) .+. (Sta (var 1) .+. Sta (var 2))
-       =-= (Sta (var 0) .+. Sta (var 1)) .+. Sta (var 2)
+   (var {n = 3} 0 .+. (var 1 .+. var 2)) ~~ (var 0 .+. var 1) .+. var 2
+assoc = prove (FreeMonoidOver $ cast $ Fin _) $
+         Done 0 .+. (Done 1 .+. Done 2)
+    =-= (Done 0 .+. Done 1) .+. Done 2
 
 rassoc :
-  let a := (SyntacticExtension 10).Embed.H.H (var 0)
-      b := (SyntacticExtension 10).Embed.H.H (var 1)
-      c := (SyntacticExtension 10).Embed.H.H (var 2)
+  let a := var {n = 3} 0
+      b := var {n = 3} 1
+      c := var {n = 3} 2
   in (a .+. b) .+. c ~~ a .+. (b .+. c)
-rassoc = prove 0 (MonoidFrex (FreeMonoid 10) _)
-       $ (Sta (var 0) .+. Sta (var 1)) .+. Sta (var 2)
-       =-= Sta (var 0) .+. (Sta (var 1) .+. Sta (var 2))
-
+rassoc = prove (FreeMonoidOver $ cast $ Fin _)
+       $ (Done 0 .+. Done 1) .+. Done 2
+       =-= Done 0 .+. (Done 1 .+. Done 2)
 units :
-  let a := (SyntacticExtension 10).Embed.H.H (var 0)
-  in (O1 .+. (a .+. O1)) .+. O1 ~~ a
-units = prove 0 (MonoidFrex (FreeMonoid 10) _)
-      $ (O1 .+. (Sta (var 0) .+. O1)) .+. O1 =-= Sta (var 0)
+  (O1 .+. (var {n = 1} 0 .+. O1)) .+. O1 ~~ var 0
+units = prove (FreeMonoidOver $ cast $ Fin _)
+      $ (O1 .+. (Done 0 .+. O1)) .+. O1 =-= Done 0

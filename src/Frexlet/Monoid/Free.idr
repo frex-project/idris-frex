@@ -3,8 +3,8 @@ module Frexlet.Monoid.Free
 import Data.Unit
 
 import Frex
-import Frexlet.Monoid
-import Frexlet.Monoid.Frex.Construction
+import Frexlet.Monoid.Theory
+import Frexlet.Monoid.Frex
 
 %default total
 
@@ -61,14 +61,13 @@ FreeMonoidVoid = MkFree
   }
 
 public export
-||| The frex for the free monoid built out of n variables
-FreeFrex : (n : Nat) -> Frex TrivialMonoid (cast $ Fin n)
-FreeFrex n = MonoidFrex TrivialMonoid (cast $ Fin n)
+FreeMonoidOver : (s : Setoid) -> Free MonoidTheory s
+FreeMonoidOver s = ByFrex FreeMonoidVoid (MonoidFrex TrivialMonoid s)
 
 ||| A free monoid built out of n variables
 public export
 FreeMonoid : (n : Nat) -> Monoid
-FreeMonoid n = (FreeFrex n).Data.Model
+FreeMonoid n = (FreeMonoidOver $ cast $ Fin n).Data.Model
 
 public export
 SyntacticFrex : (n : Nat) -> Frex (FreeMonoid n) (cast $ Fin 0)

@@ -89,8 +89,8 @@ solve : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
 solve n free = Nary.curry n Hidden _ (solveVect free)
 
 public export
-proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
-  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+prove : {n : Nat} -> {pres : Presentation} ->
+  (free : Free pres (cast $ Fin n)) ->
   (eq : ( Term pres.signature (Fin n)
         , Term pres.signature (Fin n))) ->
   {auto prf : free.Data.Model.rel
@@ -102,22 +102,5 @@ proveAux : {n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
   in free'.Data.Model.rel
     (free'.Data.Model.Sem (fst eq) (free'.Data.Env.H))
     (free'.Data.Model.Sem (snd eq) (free'.Data.Env.H))
-proveAux free env eq = freeSolve
+prove free eq = freeSolve
   (free.UP.Exists (Construction.Free pres (cast $ Fin n)).Data) eq prf
-
-public export
-prove : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
-  (free : Free pres (cast $ Fin n)) ->
-  PI n Hidden (U a) $ (\ env =>
-  (eq : ( Term pres.signature (Fin n)
-        , Term pres.signature (Fin n))) ->
-  {auto prf : free.Data.Model.rel
-     (free.Sem (fst eq) free.Data.Env.H)
-     (free.Sem (snd eq) free.Data.Env.H)}
-     ->
-  let free' : Free pres (cast $ Fin n)
-      free' = Free.Construction.Free pres (cast $ Fin n)
-  in free'.Data.Model.rel
-    (free'.Data.Model.Sem (fst eq) (free'.Data.Env.H))
-    (free'.Data.Model.Sem (snd eq) (free'.Data.Env.H)))
-prove n free = Nary.curry n Hidden _ (proveAux free)
