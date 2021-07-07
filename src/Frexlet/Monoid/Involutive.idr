@@ -26,33 +26,7 @@ import Data.Setoid
 
 %default total
 
-%nf_metavar_threshold 40000
-public export
-InvMonoidExtension : (a : InvolutiveMonoid) -> (s : Setoid) -> (auxFrex : AuxFrexType a s)
-  -> Extension a s
-{- The definition of the involution operation on FrexInvMonoid is:
-
-       Embed                                    Var
-   a -------------------> FrexInvMonoid a s  <---------------- (Bool, s)
-   | a.inv   =                 | FrexInvolution a s              | bimap not id
-   v                           v        =                        v
-   a.rev --> (FrexInvMonoid a s).rev <------------------------ (Bool, s)
-       Embed.rev                             Var
-
-  The LHS square tells us the monoid homomorphism `Embed` preserves the involution.
-  The RHS square gives us the compatibility condition to make an
-  `Env s (FrexInvMonoid a s) (FrexInvolution a s)`
-  which in turn gives the required `Var` map.
--}
-InvMonoidExtension a s auxFrex = InvolutiveExtensionToExtension $
-  MkInvolutiveExtension
-  { MonoidExtension  = AuxFrexExtension a s auxFrex
-  , ModelInvolution  = FrexInvolutionInvolution a s auxFrex
-  , PreserveInvolute = (FrexInvolutionExtensionMorphism a s auxFrex).PreserveEmbed
-  , VarCompatibility = (FrexInvolutionExtensionMorphism a s auxFrex).PreserveVar
-  }
 {-
-
 public export
 (.Env) : (ext : InvolutiveExtension a s) ->
   Env s ext.MonoidExtension.Model
