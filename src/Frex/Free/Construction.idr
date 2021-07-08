@@ -155,6 +155,17 @@ FreeData pres x = MkModelOver
   , Env   = FreeDataEnv pres x
   }
 
+
+||| Semantics in the free algebra is the identity
+export
+freeSem :
+  (pres : Presentation) -> (x : Setoid) ->
+  (t : Term pres.signature (U x)) ->
+  bindTerm {a = Free _ _}
+      t
+     ((FreeData pres x).Env.H) = t
+freeSem pres x t = bindPureRightUnit t
+
 ||| The function underlying the mediating homomorphism in the
 ||| universal property of the free model
 public export
@@ -260,42 +271,25 @@ FreeUPExists pres x other =
 ||| of the free model.
 public export
 FreeUPUnique : (pres : Presentation) -> (x : Setoid) -> Uniqueness (FreeData pres x)
-
--- As usual, we need an auxiliary mutually recursive function to deal
--- with the subterms
-
-||| Auxiliary definition: Strengthened induction hypothesis used to
-||| prove the uniqueness of the mediating homomorphism in the
-||| universal property of the free model.
-public export
-FreeUPUniqueMap : (pres : Presentation) -> (x : Setoid) -> (other : pres `ModelOver` x) ->
-  (extend1, extend2 : FreeData pres x  ~> other) ->
-  forall n. (ts : Vect n (U $ F pres x)) ->
-            (Functional.VectSetoid n (cast other.Model)).equivalence.relation
-               (map extend1.H.H.H ts)
-               (map extend2.H.H.H ts)
-FreeUPUniqueMap pres x other extend1 extend2 []          _ impossible
-FreeUPUniqueMap pres x other extend1 extend2 (t :: _ )  FZ
-  = FreeUPUnique pres x other extend1 extend2 t
-FreeUPUniqueMap pres x other extend1 extend2 (_ :: ts) (FS i)
-  = FreeUPUniqueMap pres x other extend1 extend2 ts i
-
-FreeUPUnique pres x other extend1 extend2 (Done j)
-  = CalcWith @{cast other.Model} $
-    |~ extend1.H.H.H (Done j)
-    <~ other.Env.H j          ...(extend1.preserves j)
-    <~ extend2.H.H.H (Done j) ...((cast other.Model).equivalence.symmetric _ _ (extend2.preserves j))
-
-FreeUPUnique pres x other extend1 extend2 (Call op xs)
-  = CalcWith @{cast other.Model} $
-  |~  extend1.H.H.H (Call op xs)
-  ~~  extend1.H.H.H ((F pres x).Sem op xs)      ...(Refl)
-  <~  other.Model.Sem op (map extend1.H.H.H xs) ...(extend1.H.preserves op xs)
-  <~  other.Model.Sem op (map extend2.H.H.H xs) ...(other.Model.Algebra.congruence op _ _
-                                                   $ FreeUPUniqueMap pres x other extend1 extend2 xs)
-  <~  extend2.H.H.H ((F pres x).Sem op xs)      ...((cast other.Model).equivalence.symmetric _ _
-                                                 $ extend2.H.preserves op xs)
-  ~~  extend2.H.H.H (Call op xs)                ...(Refl)
+FreeUPUnique pres x other extend1 extend2 t = CalcWith @{cast other.Model} $
+  |~ extend1.H.H.H t
+  ~~ extend1.H.H.H ((F pres x).Sem t (  (FreeData pres x).Env.H)) ...(sym $ cong extend1.H.H.H $
+                                                                      freeSem pres x t)
+  <~ other.Model.Sem t (extend1.H.H.H . (FreeData pres x).Env.H)  ...(homoPreservesSem extend1.H t _)
+  <~ other.Model.Sem t (extend2.H.H.H . (FreeData pres x).Env.H)  ...(bindCongruence t
+       (extend1.H.H . (FreeData pres x).Env)
+       (extend2.H.H . (FreeData pres x).Env)
+       \i => CalcWith @{cast other.Model} $
+         |~ extend1.H.H.H (Done i)
+         <~ other.Env.H i          ...(extend1.preserves i)
+         <~ extend2.H.H.H (Done i) ...(other.Model.equivalence.symmetric _ _ $
+                                       extend2.preserves i)
+       )
+  <~ extend2.H.H.H ((F pres x).Sem t ((FreeData pres x).Env.H))   ...(other.Model
+                                                                     .equivalence.symmetric _ _ $
+                                                                      homoPreservesSem extend2.H t _)
+  ~~ extend2.H.H.H t                                              ...(cong extend2.H.H.H $
+                                                                      freeSem pres x t)
 
 ||| The free model is indeed free.
 public export

@@ -38,33 +38,6 @@ record Lemma (pres : Presentation) where
 notation: {n : Nat} -> Additive1 (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
 notation = (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model.Additive1
 
-
-lemma :
-  {n : Nat} ->
-  (pres : Presentation) ->
-  (free : Free pres (cast $ Fin n)) ->
-  (t : Term pres.signature (Fin n)) ->
-  bindTerm {a = Free _ _}
-      t
-     ((Free.Construction.Free pres (cast $ Fin n)) .Data.Env.H) = t
-
-lemmas :
-  {n : Nat} ->
-  (pres : Presentation) ->
-  (free : Free pres (cast $ Fin n)) ->
-  (ts : Vect m (Term pres.signature (Fin n))) ->
-  bindTerms {a = Free _ _}
-      ts
-     ((Free.Construction.Free pres (cast $ Fin n)) .Data.Env.H) = ts
-
-lemma pres free (Done v) = Refl
-lemma pres free (Call f ts) = cong (Call f) (lemmas pres free ts)
-
-lemmas pres free [] = Refl
-lemmas pres free (t :: ts)
-  = cong2 (::) (lemma pres free t) (lemmas pres free ts)
-
-
 mkLemma : {pres : Presentation} ->
           {n : Nat} -> (free : Free pres (cast (Fin n))) ->
           (eq : (Term pres.signature (Fin n), Term pres.signature (Fin n))) ->
@@ -76,8 +49,8 @@ mkLemma free (lhs, rhs) =
   let equation : Equation pres.signature
       equation = MkEquation n (lhs, rhs)
   in MkLemma equation
-   $ rewrite sym (lemma pres free lhs) in
-     rewrite sym (lemma pres free rhs) in
+   $ rewrite sym (freeSem pres (cast $ Fin n) lhs) in
+     rewrite sym (freeSem pres (cast $ Fin n) rhs) in
      prove free (lhs, rhs)
 
 instantiate :
