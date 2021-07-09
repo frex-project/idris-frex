@@ -28,68 +28,9 @@ infix 0 ~~
 -- 0 (~~~) : Rel (Term Signature (Fin n))
 -- (~~~) = (|-) {pres = MonoidTheory} (QuotientData MonoidTheory (cast (Fin n)))
 
-public export
-record Lemma (pres : Presentation) where
-  constructor MkLemma
-  equation : Equation pres.signature
-  derivable : (|-) {pres} (QuotientData pres (cast (Fin equation.support)))
-              equation.lhs equation.rhs
 %hint
 notation: {n : Nat} -> Additive1 (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
 notation = (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model.Additive1
-
-mkLemma : {pres : Presentation} ->
-          {n : Nat} -> (free : Free pres (cast (Fin n))) ->
-          (eq : (Term pres.signature (Fin n), Term pres.signature (Fin n))) ->
-          {auto prf : free.Data.Model.rel
-                        (free.Sem (fst eq) free.Data.Env.H)
-                        (free.Sem (snd eq) free.Data.Env.H)} ->
-          Lemma pres
-mkLemma free (lhs, rhs) =
-  let equation : Equation pres.signature
-      equation = MkEquation n (lhs, rhs)
-  in MkLemma equation
-   $ rewrite sym (freeSem pres (cast $ Fin n) lhs) in
-     rewrite sym (freeSem pres (cast $ Fin n) rhs) in
-     prove free (lhs, rhs)
-
-instantiate :
-  {pres : Presentation} ->
-  {a : PresetoidAlgebra pres.signature} ->
-  {lhs, rhs : Term pres.signature (Fin n)} ->
-  (|-) {pres} (QuotientData pres (cast (Fin n))) lhs rhs ->
-  (env : Fin n -> U a) ->
-  (|-) {pres} a (bindTerm {a = a.algebra} lhs env) (bindTerm {a = a.algebra} rhs env)
-instantiate (Include (Assume Refl)) env = Refl _
-instantiate (Refl lhs) env = Refl _
-instantiate (Sym p) env = Sym (instantiate p env)
-instantiate (Transitive p q) env = Transitive (instantiate p env) (instantiate q env)
-instantiate (ByAxiom eq f) env =
-  -- for some reason these proofs need to be let-bound
-  let lhsEq = bindAssociative {a = a.algebra} ((pres.axiom eq).lhs) f env in
-  let rhsEq = bindAssociative {a = a.algebra} ((pres.axiom eq).rhs) f env in
-  rewrite lhsEq in
-  rewrite rhsEq in
-  ByAxiom eq _
-instantiate (Congruence t {lhs = lhsEnv} {rhs = rhsEnv} eqForEq) env =
-  let lhsEq = bindAssociative {a = a.algebra} t lhsEnv env in
-  let rhsEq = bindAssociative {a = a.algebra} t rhsEnv env in
-  rewrite lhsEq in
-  rewrite rhsEq in
-  Congruence t $ \ i => instantiate (eqForEq i) env
-
-||| A ByAxiom that's much more convenient to use
-export
-byLemma :
-  {pres : Presentation} ->
-  {a : PresetoidAlgebra pres.signature} ->
-  (lemma : Lemma pres) ->
-  PI (lemma.equation.support) Hidden (U a) $ \env =>
-    (|-) {pres} a (bindTerm {a = a.algebra} lemma.equation.lhs (\ i => index i env))
-                  (bindTerm {a = a.algebra} lemma.equation.rhs (\ i => index i env))
-byLemma (MkLemma (MkEq n lhs rhs) prf)
-  = curry n Hidden _ $ \ env =>
-    instantiate prf (\ i => index i env)
 
 Trivial : Lemma MonoidTheory
 Trivial = mkLemma (FreeMonoidOver $ cast $ Fin 1)
