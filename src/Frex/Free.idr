@@ -104,3 +104,48 @@ prove : {n : Nat} -> {pres : Presentation} ->
     (free'.Data.Model.Sem (snd eq) (free'.Data.Env.H))
 prove free eq = freeSolve
   (free.UP.Exists (Construction.Free pres (cast $ Fin n)).Data) eq prf
+
+public export
+(.simplify) : {pres : Presentation} -> {x : Setoid} ->
+  (freea : (free : Free pres x ** Model pres)) ->
+  (t : Term pres.signature (U x)) -> (env : x ~> cast (snd freea)) ->
+  U (snd freea)
+(free ** a).simplify t env
+  = (free.UP.Exists (MkModelOver a env)).H.H.H (free.Data.Model.Sem t (free.Data.Env).H)
+
+public export
+simplifyGeneral : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
+  (free : Free pres x) -> (env : x ~> cast a) ->
+  (t : Term pres.signature (U x)) ->
+  a.rel
+    (a.Sem t env.H)
+    ((free ** a).simplify t env)
+simplifyGeneral free env t =
+  let Other : pres `ModelOver` x
+      Other = MkModelOver a env
+      h : free.Data ~> Other
+      h = free.UP.Exists Other
+  in a.equivalence.symmetric _ _ $ CalcWith @{cast a} $
+  |~ h.H.H.H (free.Data.Sem t free.Data.Env.H)
+  <~ a.Sem t (h.H.H . free.Data.Env).H ...(homoPreservesSem h.H _ _)
+  <~ a.Sem t env.H                     ...((eval {x} {a = a.Algebra} t).homomorphic
+                                           (h.H.H . free.Data.Env) (Other).Env $
+                                           extensionLemma h)
+public export
+simplifyVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (t : Term pres.signature (Fin n)) ->
+  a.rel
+    (a.Sem t $ flip Vect.index env)
+    ((free ** a).simplify t (mate $ flip Vect.index env))
+simplifyVect free env = simplifyGeneral free (mate $ flip index env)
+
+public export
+simplify : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (free : Free pres (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (t : Term pres.signature (Fin n)) ->
+  a.rel
+    (a.Sem t $ flip Vect.index env)
+    ((free ** a).simplify t (mate $ flip Vect.index env)))
+simplify n free = Nary.curry n Hidden _ (simplifyVect free)
