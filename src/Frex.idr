@@ -149,3 +149,52 @@ prove : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
     (frex'.Data.Model.Sem (snd eq) (either frex'.Data.Embed.H.H
                                           (frex'.Data.Var.H))))
 prove n frex = Nary.curry n Hidden _ (proveAux frex)
+
+
+public export
+(.simplify) : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
+  (frex : Frex a x) ->
+  (env : x ~> cast a) -> (t : Term pres.signature (U a `Either` U x)) ->
+  U a
+frex.simplify env t
+  = (frex.UP.Exists (MkExtension a (id a) env)).H.H.H
+    (frex.Data.Model.Sem t (frexEnv frex).H)
+
+
+public export
+simplifyGeneral : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
+  (frex : Frex a x) ->
+  (env : x ~> cast a) -> (t : Term pres.signature (U a `Either` U x)) ->
+  a.rel
+    (a.Sem t (extEnv {a} $ MkExtension a (id a) env).H)
+    (frex.simplify {a} env t)
+simplifyGeneral frex env t =
+  let Other : Extension a x
+      Other = MkExtension a (id a) env
+      h : frex.Data ~> Other
+      h = frex.UP.Exists Other
+  in a.equivalence.symmetric _ _ $ CalcWith @{cast a} $
+  |~ h.H.H.H (frex.Data.Sem t (frexEnv frex).H)
+  <~ a.Sem t (h.H.H . (frexEnv frex)).H ...(homoPreservesSem h.H _ _)
+  <~ a.Sem t (extEnv Other).H           ...((eval {x = (cast a) `Either` x}
+                                                  {a = a.Algebra} t).homomorphic
+                                                  (h.H.H . (frexEnv frex)) (extEnv Other) $
+                                                  extensionLemma h)
+public export
+simplifyVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (t : Term pres.signature (Either (U a) (Fin n))) ->
+  a.rel
+    (a.Sem t $ (extEnv {a} $ MkExtension a (id a) (mate $ flip Vect.index env)).H)
+    (frex.simplify (mate $ flip Vect.index env) t)
+simplifyVect frex env = simplifyGeneral frex (mate $ flip index env)
+
+public export
+simplify : (n : Nat) -> {pres : Presentation} -> {a : Model pres} ->
+  (frex : Frex a (cast $ Fin n)) ->
+  PI n Hidden (U a) $ (\ env =>
+  (t : Term pres.signature (Either (U a) (Fin n))) ->
+  a.rel
+    (a.Sem t $ (extEnv {a} $ MkExtension a (id a) (mate $ flip Vect.index env)).H)
+    (frex.simplify (mate $ flip Vect.index env) t))
+simplify n frex = Nary.curry n Hidden _ (simplifyVect frex)
