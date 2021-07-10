@@ -159,7 +159,7 @@ namespace Homomorphism
 
 public export
 freeAsExtension : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
-  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) -> Extension a s
+  (fs : Free.Definition.Free (EvaluationPresentation pres a.Algebra) s) -> Extension a s
 freeAsExtension fs = MkExtension
   { Model = castEval fs.Data.Model
   , Embed = MkSetoidHomomorphism
@@ -308,7 +308,7 @@ other.Over = MkModelOver
 
 public export
 Extender : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
-  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  (fs : Free.Definition.Free (EvaluationPresentation pres a.Algebra) s) ->
   Extender (freeAsExtension {a} fs)
 Extender fs other =
   let h : fs.Data ~> other.Over
@@ -327,7 +327,7 @@ Extender fs other =
 
 public export
 Uniqueness : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
-  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  (fs : Free.Definition.Free (EvaluationPresentation pres a.Algebra) s) ->
   Uniqueness (freeAsExtension {a} fs)
 Uniqueness fs other extend1 extend2 =
  let lemma : (extend : (freeAsExtension {a} fs) ~> other) -> fs.Data ~> other.Over
@@ -345,7 +345,7 @@ Uniqueness fs other extend1 extend2 =
 
 public export
 FrexByFree : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
-  (fs : Free.Free (EvaluationPresentation pres a.Algebra) s) ->
+  (fs : Free.Definition.Free (EvaluationPresentation pres a.Algebra) s) ->
   Frex a s
 FrexByFree fs = MkFrex
   { Data = freeAsExtension {a} fs

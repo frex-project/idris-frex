@@ -6,6 +6,7 @@ modules = Frex
         , Frex.Algebra.Abstract
         , Frex.Presentation
         , Frex.Axiom
+        , Frex.Lemma
         , Frex.Model
         , Frex.Powers
         , Frex.Powers.Definition
@@ -14,9 +15,11 @@ modules = Frex
         , Frex.Powers.Fin
         , Frex.Coproduct
         , Frex.Free
+        , Frex.Free.Definition
         , Frex.Free.Construction
         , Frex.Free.Construction.Combinators
         , Frex.Free.Construction.Linear
+        , Frex.Free.Construction.ByFrex
         , Frex.Frex
         , Frex.Frex.Construction
         , Notation
@@ -30,6 +33,7 @@ modules = Frex
         , Frexlet.Monoid.Frex.Structure
         , Frexlet.Monoid.Frex.Properties
         , Frexlet.Monoid.Frex.Construction
+        , Frexlet.Monoid.Free
         , Frexlet.Monoid.Nat
         , Frexlet.Monoid.List
         , Frexlet.Monoid.Pair
@@ -70,6 +74,7 @@ modules = Frex
         , Data.Setoid.Vect.Functional
         , Data.Setoid.Vect.Inductive
         , Data.Setoid.List
+        , Data.Unit
         , Data.Vect.Extra1
 
 

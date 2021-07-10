@@ -6,6 +6,7 @@ import Frex.Model
 import Frex.Algebra
 import Frex.Algebra.Abstract
 import Frex.Free.Construction
+import Frex.Lemma
 
 import Data.Setoid
 import Data.Setoid.Vect.Inductive
@@ -112,3 +113,29 @@ byAxiom :
 byAxiom pres eq
   = curry (pres.axiom eq).support Hidden _ $ \ env =>
     ByAxiom eq (\ i => index i env)
+
+||| A ByAxiom-like combinator that's much more convenient to use
+export
+byLemma' :
+  {pres : Presentation} ->
+  {a : PresetoidAlgebra pres.signature} ->
+  (lemma : Lemma pres) ->
+  PI (lemma.equation.support) Visible (U a) $ \env =>
+    (|-) {pres} a (bindTerm {a = a.algebra} lemma.equation.lhs (\ i => index i env))
+                  (bindTerm {a = a.algebra} lemma.equation.rhs (\ i => index i env))
+byLemma' (MkLemma (MkEq n lhs rhs) prf)
+  = curry n Visible _ $ \ env =>
+    instantiate prf (\ i => index i env)
+
+||| A ByAxiom-like combinator that's much more convenient to use
+export
+byLemma :
+  {pres : Presentation} ->
+  {a : PresetoidAlgebra pres.signature} ->
+  (lemma : Lemma pres) ->
+  PI (lemma.equation.support) Hidden (U a) $ \env =>
+    (|-) {pres} a (bindTerm {a = a.algebra} lemma.equation.lhs (\ i => index i env))
+                  (bindTerm {a = a.algebra} lemma.equation.rhs (\ i => index i env))
+byLemma (MkLemma (MkEq n lhs rhs) prf)
+  = curry n Hidden _ $ \ env =>
+    instantiate prf (\ i => index i env)
