@@ -11,8 +11,6 @@ import Data.Vect.Extra
 import Data.HVect
 import Data.Fin
 
-import Decidable.Order
-
 infix 1 =|
 
 %default total

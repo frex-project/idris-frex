@@ -7,6 +7,7 @@ import Data.Vect
 import Data.HVect
 import Data.Vect.Properties
 import Data.Setoid.Vect.Inductive
+import Control.Order
 
 %default total
 

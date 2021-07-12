@@ -2,8 +2,11 @@
 module Data.Setoid.Definition
 
 import public Syntax.PreorderReasoning.Generic
-import public Decidable.Order
-import public Data.Relation
+import public Control.Relation
+import public Control.Order
+
+import Data.Vect
+import public Data.Fun.Nary
 
 infix 5 ~>, ~~>, <~>
 
@@ -47,10 +50,22 @@ record PreorderData A (rel : Rel A) where
   transitive : (x,y,z : A) -> rel x y -> rel y z -> rel x z
 
 public export
-[MkPreorderWorkaround] {x : PreorderData a rel} -> Preorder a rel where
-  transitive = x.transitive
-  reflexive  = x.reflexive
+[PreorderWorkaround] (Reflexive ty rel, Transitive ty rel) => Preorder ty rel where
 
+public export
+MkPreorderWorkaround : {preorderData : PreorderData ty rel} -> Order.Preorder ty rel
+MkPreorderWorkaround {preorderData} =
+  let reflexiveArg = MkReflexive {ty, rel} $
+                     lam Hidden (\y => rel y y) preorderData.reflexive
+      transitiveArg = MkTransitive {ty} {rel} $
+                      Nary.curry 3 Hidden
+                       (\[x,y,z] =>
+                         x `rel` y ->
+                         y `rel` z ->
+                         x `rel` z)
+                       (\[x,y,z] => preorderData.transitive _ _ _)
+
+  in PreorderWorkaround
 public export
 reflect : (a : Setoid) -> {x, y : U a} -> x = y -> a.equivalence.relation x y
 reflect a Refl = a.equivalence.reflexive _
@@ -60,7 +75,7 @@ MkPreorder : {0 a : Type} -> {0 rel : Rel a}
   -> (reflexive : (x : a) -> rel x x)
   -> (transitive : (x,y,z : a) -> rel x y -> rel y z -> rel x z)
   -> Preorder a rel
-MkPreorder reflexive transitive = MkPreorderWorkaround {x = MkPreorderData reflexive transitive}
+MkPreorder reflexive transitive = MkPreorderWorkaround {preorderData = MkPreorderData reflexive transitive}
 
 public export
 cast : (a : Setoid) -> Preorder (U a) (a.equivalence.relation)

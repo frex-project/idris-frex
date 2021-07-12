@@ -18,7 +18,6 @@ import Data.String
 import Control.WellFounded
 
 import Syntax.PreorderReasoning
-import Decidable.Order
 import Syntax.PreorderReasoning.Generic
 
 import Text.PrettyPrint.Prettyprinter
