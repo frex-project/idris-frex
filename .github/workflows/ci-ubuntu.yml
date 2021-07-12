@@ -12,7 +12,7 @@ on:
 ########################################################################
 
 env:
-  IDRIS2_COMMIT: tags/v0.4.0
+  IDRIS2_COMMIT: a07d42ac913cd6734a5748834dd8d3388f53d849
   SCHEME: scheme
 
 jobs:
