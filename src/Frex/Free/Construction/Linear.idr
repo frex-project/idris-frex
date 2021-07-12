@@ -18,7 +18,7 @@ import Text.PrettyPrint.Prettyprinter
 public export
 data Step : (pres : Presentation) ->
             (a : PresetoidAlgebra pres.signature) ->
-            Rel (U a) where
+            Control.Relation.Rel (U a) where
   Include : {x, y : U a} -> a.relation x y -> Step pres a x y
   ByAxiom : {0 a : PresetoidAlgebra pres.signature} ->
             (eq : Axiom pres) -> (env : Fin (pres.axiom eq).support -> U a) ->
@@ -66,14 +66,14 @@ plugFusion ctx2 ctx1 t
 public export
 data Locate : (sig : Signature) ->
               (a : Algebra sig) ->
-              Rel (U a) -> Rel (U a) where
+              Control.Relation.Rel (U a) -> Control.Relation.Rel (U a) where
 
   ||| We prove the equality by invoking a rule at the toplevel
-  Here : {0 r : Relation.Rel (U a)} -> r x y -> Locate sig a r x y
+  Here : {0 r : Control.Relation.Rel (U a)} -> r x y -> Locate sig a r x y
 
   ||| We focus on a subterm (that may appear in multiple places)
   ||| and rewrite it using a specific rule.
-  Cong : {0 r : Relation.Rel (U a)} ->
+  Cong : {0 r : Control.Relation.Rel (U a)} ->
          (t : Term sig (Maybe (U a))) ->
          {lhs, rhs : U a} -> r lhs rhs ->
          Locate sig a r (plug a t lhs) (plug a t rhs)
@@ -81,7 +81,7 @@ data Locate : (sig : Signature) ->
 public export 0
 Closure : (pres : Presentation) ->
           (a : PresetoidAlgebra pres.signature) ->
-          Rel (U a)
+          Control.Relation.Rel (U a)
 Closure pres a
   = Symmetrise                      -- Symmetric
   $ Locate pres.signature a.algebra -- Congruence
@@ -91,7 +91,7 @@ Closure pres a
 public export 0
 Derivation : (pres : Presentation) ->
              (a : PresetoidAlgebra pres.signature) ->
-             Rel (U a)
+             Control.Relation.Rel (U a)
 Derivation pres a
   = RTList          -- Reflexive, Transitive
   $ Closure pres a
@@ -191,7 +191,7 @@ keepEq t env = trans
 
 
 cong' : {sig : Signature} -> {a : Algebra sig} ->
-        {0 r : Rel (U a)} ->
+        {0 r : Control.Relation.Rel (U a)} ->
         (n : Nat) ->
         (t : Term sig (Either (U a) (Fin n))) ->
         {lhs, rhs : Fin n -> U a} ->
@@ -228,7 +228,7 @@ cong' (S k) t eq =
   $ cong' k (map (keep rhs) t) (\ k => eq (FS k)))
 
 cong : {sig : Signature} -> {a : Algebra sig} ->
-       {0 r : Rel (U a)} ->
+       {0 r : Control.Relation.Rel (U a)} ->
        {n : Nat} ->
        (t : Term sig (Fin n)) ->
        {lhs, rhs : Fin n -> U a} ->

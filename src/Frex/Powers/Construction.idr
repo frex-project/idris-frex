@@ -5,7 +5,6 @@ import Frex.Signature
 import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
-import Decidable.Order
 
 import Data.Vect
 import Data.Vect.Properties
