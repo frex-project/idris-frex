@@ -56,14 +56,14 @@ convolveDirac : (a : CommutativeMonoid) -> {n : Nat} ->
       notation : Action1 Nat (U a)
       notation = NatAction1 a
   in (f : Fin n -> U a) -> (i : Fin n) ->
-   a.rel (a.sum $ tabulate \j => (dirac i j ) *. f j)
+   a.rel (a.sum $ tabulate $ \j => (dirac i j ) *. f j)
          (f i)
 convolveDirac a f i =
   let %hint
       notation : Action1 Nat (U a)
       notation = NatAction1 a
       xs : Vect n (U a)
-      xs = tabulate \j => (dirac i j) *. f j
+      xs = tabulate $ \j => (dirac i j) *. f j
       pointMass : (j : Fin n) ->
         (i = j) `Either` (a.rel (index j xs)
                                 O1)

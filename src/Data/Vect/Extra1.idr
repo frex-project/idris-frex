@@ -26,11 +26,11 @@ mapWithPosTabulate {n = S n} f x = Calc $
 
 export
 mapWithPosAsTabulate : {n : Nat} -> (f : Fin n -> a -> b) -> (xs : Vect n a) ->
-  mapWithPos f xs = tabulate \i => f i (index i xs)
+  mapWithPos f xs = tabulate (\i => f i (index i xs))
 mapWithPosAsTabulate f xs = vectorExtensionality _ _ $ \i => Calc $
   |~ index i (mapWithPos f xs)
-  ~~ f i (index i xs)                          ...(indexMapWithPos _ _ _)
-  ~~ index i (tabulate \j => f j (index j xs)) ...(sym $ indexTabulate _ _)
+  ~~ f i (index i xs)                            ...(indexMapWithPos _ _ _)
+  ~~ index i (tabulate $ \j => f j (index j xs)) ...(sym $ indexTabulate _ _)
 
 -- Currently not used
 ||| Version of `map` with runtime-irrelevant access to the current position

@@ -35,7 +35,7 @@ EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 
 public export
 EvalEmbed : (sig : Signature) -> sig ~> EvaluationSig sig a
-EvalEmbed _ = OpTranslation \op => Op op
+EvalEmbed _ = OpTranslation Op
 
 public export
 data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> Type where
@@ -123,7 +123,7 @@ namespace Algebra
     ~~ tabulate (\i => bindTerm {a = a.algebra} (index i (castTerms (EvalEmbed sig {a = s}) ts)) env)
        ...(lemma {a = a.algebra} _ Prelude.id _)
     ~~ bindTerms {a = a.algebra} (castTerms (EvalEmbed sig {a = s}) ts) env
-       ...(vectorExtensionality _ _ \i => Calc $
+       ...(vectorExtensionality _ _ $ \i => Calc $
          -- Not my best moment, sorry
          |~ index i (Fin.tabulate _)
          ~~ _ ...(indexTabulate _ _)
@@ -180,7 +180,7 @@ freeAsExtension fs = MkExtension
         ~~ fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)
            (map (\i => fs.Data.Model.sem (Constant i)) xs)
            ...(cong (fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)) $
-               vectorExtensionality _ _ \i => Calc $
+               vectorExtensionality _ _ $ \i => Calc $
                -- Sorry, this will do for now
                |~ index i (bindTerms {a = fs.Data.Model.Algebra.algebra}
                     (map (\x => Call (MkOp (Constant x)) []) xs)
@@ -251,7 +251,7 @@ OverAlgebraNop : {pres : Presentation} -> {a : Model pres} -> {s : Setoid} ->
     (map (\x => Call (MkOp $ Constant x) []) xs)
     env
   === map other.Embed.H.H xs
-OverAlgebraNop other xs env = vectorExtensionality _ _ \i => Calc $
+OverAlgebraNop other xs env = vectorExtensionality _ _ $ \i => Calc $
  |~ index i (bindTerms {a = other.OverAlgebra.algebra}
                (map (\x => Call (MkOp $ Constant x) []) xs)
                env)

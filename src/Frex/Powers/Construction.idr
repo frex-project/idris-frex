@@ -22,9 +22,9 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
   public export
   PowerAlgebra : Algebra Sig
   PowerAlgebra = MakeAlgebra (U PowerSetoid)
-      \f,phis =>
+      $ \f,phis =>
       MkSetoidHomomorphism (\i => (A).Sem f (map (\phi => phi.H i) phis))
-                           \u, v, prf => congruence A f _ _ \i =>
+                           $ \u, v, prf => congruence A f _ _ $ \i =>
                              CalcWith @{cast A} $
                              |~ index i (map (\phi => phi.H u) phis)
                              ~~ (index i phis).H u ...(indexNaturality _ _ _)
@@ -39,8 +39,8 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
         equiv = equivalence PowerSetoid
     in MkSetoidAlgebra PowerAlgebra
     equiv
-    \f, phis, psis, prf, this => (A).congruence f _ _
-      \i => CalcWith @{cast A} $
+    $ \f, phis, psis, prf, this => (A).congruence f _ _
+     $ \i => CalcWith @{cast A} $
       |~ index i (map (\phi => phi.H this) phis)
       ~~ (index i phis).H this ...(indexNaturality _ _ _)
       <~ (index i psis).H this ...(prf i this)
@@ -53,8 +53,8 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
   eval x = MkSetoidHomomorphism
     (MkSetoidHomomorphism (\phi => phi.H x)
                           (\phi, psi, prf => prf x))
-    \f, phis => A .equivalence.reflexive
-              $ ((X ~~> A).Sem f phis).H x
+    $ \f, phis => A .equivalence.reflexive
+               $ ((X ~~> A).Sem f phis).H x
 
   -- In fact, holds on the nose (i.e., with equality), but it's much
   -- easier to just use the existing homoPreservesSem (which also
@@ -62,8 +62,8 @@ parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
   public export
   pointwiseBind : (t : Term Sig y) -> (env : y -> U (X ~~> A)) -> (x : U X) ->
     A .equivalence.relation
-     (((X ~~> A).Sem t        env  ).H x)
-     (        A .Sem t \i => (env i).H x)
+     (((X ~~> A).Sem t          env  ).H x)
+     (        A .Sem t $ \i => (env i).H x)
   pointwiseBind t env x
     = homoPreservesSem (Frex.Powers.Construction.eval x) t env
 
@@ -74,7 +74,7 @@ namespace Model
     let X_to_A : SetoidAlgebra pres.signature
         X_to_A = x ~~> a.Algebra
     in MkModel X_to_A
-              \ax, env, x => CalcWith @{cast a} $
+              $ \ax, env, x => CalcWith @{cast a} $
     |~ (X_to_A .Sem (pres.axiom ax).lhs env).H x
     <~ a       .Sem (pres.axiom ax).lhs (\i => (env i).H x) ...(pointwiseBind _ _ _)
     <~ a       .Sem (pres.axiom ax).rhs (\i => (env i).H x) ...(a.Validate _ _)
@@ -91,7 +91,7 @@ a ^ x = MkPower
      (x ~~> a)
      $ MkSetoidHomomorphism
        eval
-       \x,y,x_eq_y,f => f.homomorphic _ _ x_eq_y)
+       $ \x,y,x_eq_y,f => f.homomorphic _ _ x_eq_y)
   $ IsUniversal
   { Exists = \other =>
       MkParameterisationMorphism
@@ -100,13 +100,13 @@ a ^ x = MkPower
                (\u => MkSetoidHomomorphism (\i =>
                   let f  = other.Eval.H i
                   in f.H.H u)
-                 \i,j,i_eq_j =>
+                 $ \i,j,i_eq_j =>
                    (other.Eval).homomorphic i j i_eq_j u)
-            \u,v,u_eq_v,i =>
+            $ \u,v,u_eq_v,i =>
               let phi : other.Model ~> a
                   phi = .H (.Eval other) i
               in  phi.H.homomorphic u v u_eq_v)
-          \op,env,i =>
+          $ \op,env,i =>
              let OtoA : (other.Model ~> a)
                         -- Not sure why we need the annotation --- idris bug?
                  OtoA = (the (U x -> U (other.Model ~~> a))
@@ -118,7 +118,7 @@ a ^ x = MkPower
              ~~ a.Sem op (map (\phi : (x ~> cast a) => phi.H i) (map _ env))
                               ...(cong (a.Sem op)
                                  $ sym $ mapFusion _ _ env))
-        \u,i => (cast a).equivalence.reflexive _
+        $ \u,i => (cast a).equivalence.reflexive _
   , Unique = \other, extend1,extend2,u,i => CalcWith @{cast a} $
       |~ (the _ $ extend1.H.H.H u).H i
       <~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve u i)

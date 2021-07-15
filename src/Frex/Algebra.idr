@@ -84,7 +84,7 @@ Semantic (Algebra sig) (Op sig) where
 ||| @Sem : a semantic interpretation for each Sig-operation
 public export
 MkAlgebra : {0 Sig : Signature} -> (0 U : Type) -> (Sem : Sig `algebraOver'` U) -> Algebra Sig
-MkAlgebra u sem = MakeAlgebra u \f => uncurry (sem (snd f))
+MkAlgebra u sem = MakeAlgebra u $ \f => uncurry (sem (snd f))
 
 ||| Algebraic terms of this signature with variables in the given type
 public export
@@ -176,8 +176,8 @@ Functor (Term sig) where
 public export
 Applicative (Term sig) where
   pure = Done
-  (<*>) fs ts = (Free sig _).Sem fs \f =>
-                (Free sig _).Sem ts \x =>
+  (<*>) fs ts = (Free sig _).Sem fs $ \f =>
+                (Free sig _).Sem ts $ \x =>
                 Done (f x)
 
 public export
@@ -303,14 +303,14 @@ namespace Setoid
 
   public export
   id : (a : SetoidAlgebra sig) -> a ~> a
-  id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a)
+  id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a) $
           \f,xs => CalcWith @{cast a} $
           |~ a.Sem f xs
           ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))
 
   public export
   (.) : {a,b,c : SetoidAlgebra sig} -> b ~> c -> a ~> b -> a ~> c
-  g . f  = MkSetoidHomomorphism (H g . H f) \op, xs => CalcWith @{cast c} $
+  g . f  = MkSetoidHomomorphism (H g . H f) $ \op, xs => CalcWith @{cast c} $
     |~ g.H.H (f.H.H (a.Sem op xs))
     <~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
     <~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
@@ -523,7 +523,7 @@ namespace Signature
   public export
   OpTranslation : (castOp : {n : Nat} -> sig1.OpWithArity n -> sig2.OpWithArity n) -> sig1 ~> sig2
   OpTranslation castOp =
-     MkSignatureMorphism \op =>
+     MkSignatureMorphism $ \op =>
        Call (MkOp $ castOp op)
             (map Done Fin.range)
 

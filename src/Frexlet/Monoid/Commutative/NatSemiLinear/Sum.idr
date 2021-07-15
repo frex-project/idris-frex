@@ -149,7 +149,7 @@ sumCommutative : {n : Nat} -> (a : CommutativeMonoid) -> (f,g : Fin n -> U a) ->
   let %hint
       notation : Action1 Nat (U a)
       notation = NatAction1 a
-  in a.rel (a.sum $ tabulate \i => f i .+. g i)
+  in a.rel (a.sum $ tabulate $ \i => f i .+. g i)
            (a.sum (tabulate f) .+. a.sum (tabulate g))
 sumCommutative {n = 0} a f g =
   let %hint
@@ -164,8 +164,8 @@ sumCommutative {n = S n} a f g =
       notation : Action1 Nat (U a)
       notation = NatAction1 a
   in CalcWith @{cast a} $
-  |~ a.sum (tabulate \i => f i .+. g i)
-  ~~ (f 0 .+. g 0) .+. a.sum (tabulate \i => (f . FS) i .+. (g . FS) i)
+  |~ a.sum (tabulate $ \i => f i .+. g i)
+  ~~ (f 0 .+. g 0) .+. a.sum (tabulate $ \i => (f . FS) i .+. (g . FS) i)
               ...(Refl)
   <~ (f 0 .+. g 0) .+. (a.sum (tabulate $ f . FS) .+. a.sum (tabulate $ g . FS))
               ...(a.cong 1 (Sta (f 0 .+. g 0) :+: Dyn 0) [_] [_]
@@ -204,4 +204,3 @@ sumPreservation a b h (x :: xs) =
   <~ h.H.H x .+. b.sum (map h.H.H xs) ...(b.cong 1 (Sta _ .+. Dyn 0) [_] [_]
                                           [sumPreservation _ _ _ _])
   ~~ b.sum (map h.H.H (x :: xs))      ...(Refl)
-

@@ -14,7 +14,7 @@ data Axiom
 
 public export
 CommutativeMonoidTheory : Presentation
-CommutativeMonoidTheory = MkPresentation Theory.Signature Commutative.Theory.Axiom \case
+CommutativeMonoidTheory = MkPresentation Theory.Signature Commutative.Theory.Axiom $ \case
     Mon ax => (MonoidTheory).axiom ax
     Commutativity => commutativity Product
 

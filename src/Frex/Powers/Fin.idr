@@ -24,7 +24,7 @@ FinPowerSetoid n a = VectSetoid n (cast a)
 
 public export
 FinPowerAlgebra : {0 sig : Signature} -> (n: Nat) -> (a: SetoidAlgebra sig) ->  Algebra sig
-FinPowerAlgebra n a = MakeAlgebra (U $ FinPowerSetoid n a) \op, xss =>
+FinPowerAlgebra n a = MakeAlgebra (U $ FinPowerSetoid n a) $ \op, xss =>
   map (a.algebra.Sem op) (transpose xss)
 
 public export
@@ -47,7 +47,7 @@ FinPowerSetoidAlgebra : {0 sig : Signature} -> (n: Nat) -> (a: SetoidAlgebra sig
 FinPowerSetoidAlgebra n a =
   let equiv : Equivalence (U $ FinPowerSetoid n a)
       equiv = (FinPowerSetoid n a).equivalence
-  in MkSetoidAlgebra (FinPowerAlgebra n a) equiv \op,xss,yss,prf,i =>
+  in MkSetoidAlgebra (FinPowerAlgebra n a) equiv $ \op,xss,yss,prf,i =>
   let lemma : (j : Fin $ arity op) ->
               a.equivalence.relation
                 (index j (map (index i) xss))
@@ -73,7 +73,7 @@ eval : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig} ->
   (x : Fin n) -> (n `FinPowerSetoidAlgebra` a) ~> a
 eval x = MkSetoidHomomorphism
   (MkSetoidHomomorphism (index x)
-    \xs,ys,prf => prf x)
+    $ \xs,ys,prf => prf x)
    (indexHomomorphismLemma n a x)
 
 public export
@@ -92,16 +92,16 @@ representation =
   let fwd : Vect n (U a) -> (U (cast (Fin n) ~~> a))
       fwd xs = MkSetoidHomomorphism
                  (\x => index x xs)
-                 \x,y,x_eq_y => reflect (cast a)
+                 $ \x,y,x_eq_y => reflect (cast a)
                    (cong (flip index xs) x_eq_y)
   in MkIsomorphism
   { Iso = MkIsomorphism
       { Fwd = MkSetoidHomomorphism
                 fwd
-                \xs,ys,prf => prf
+                $ \xs,ys,prf => prf
       , Bwd = MkSetoidHomomorphism
                (\phi => tabulate phi.H)
-               \phis, psis, prf, i => CalcWith @{cast a} $
+               $ \phis, psis, prf, i => CalcWith @{cast a} $
                  |~ index i (tabulate phis.H)
                  ~~ phis.H i ...(indexTabulate _ _)
                  <~ psis.H i ...(prf i)

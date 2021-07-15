@@ -31,7 +31,7 @@ public export
 (.OverVoid) : (model : Model pres) -> pres `ModelOver` (cast Void)
 model.OverVoid = MkModelOver
   { Model = model
-  , Env   = mate \case _ impossible
+  , Env   = mate $ \case _ impossible
   }
 
 public export
