@@ -79,7 +79,7 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
              ...((eval {a = b, x = cast x} t).homomorphic
                    (mate env)
                    (iso.Iso.Fwd . (iso.Iso.Bwd . mate env))
-                \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H
+                $ \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H
                          iso.Iso.Iso.FwdBwdId
                          (env i))
     <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env))
@@ -203,7 +203,7 @@ public export
 (.cong) : {0 pres : Presentation} -> (a : Model pres) -> (0 n : Nat)
   -> (t : Term pres.signature (U a `Either` Fin n))
   -> (lhs, rhs : Vect n (U a))
-  -> HVect (tabulate \i => (cast a).equivalence.relation
+  -> HVect (tabulate $ \i => (cast a).equivalence.relation
        (index i lhs)
        (index i rhs))
   -> (cast a).equivalence.relation
@@ -213,7 +213,7 @@ public export
   = (Setoid.eval {x = cast $ U a `Either` Fin n} t).homomorphic
       (mate $ either Prelude.id $ flip index lhs)
       (mate $ either Prelude.id $ flip index rhs)
-      \case
+      $ \case
         Left  x => (cast a).equivalence.reflexive x
         Right i => replace {p = id}
               (indexTabulate _ _)

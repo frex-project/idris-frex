@@ -33,7 +33,7 @@ Model n = (Commutative.Nat.Additive ^ n).Data.Model
 ||| Monadic unit
 public export
 unit : (n : Nat) -> Fin n -> U (Model n)
-unit n i = Fin.tabulate \j => dirac i j
+unit n i = Fin.tabulate $ dirac i
 
 public export
 FreeCommutativeMonoidOver : (n : Nat) -> CommutativeMonoidTheory `ModelOver` (cast $ Fin n)
@@ -45,7 +45,7 @@ FreeCommutativeMonoidOver n =
 
 export
 FreeModelZeroRepresentation : (n : Nat) -> (Model n).sem Neutral = replicate n 0
-FreeModelZeroRepresentation  n = vectorExtensionality _ _ \i => Calc $
+FreeModelZeroRepresentation  n = vectorExtensionality _ _ $ \i => Calc $
   |~ index i (map (uncurry 0) (replicate n Vect.Nil))
   ~~ uncurry 0 (index i $ replicate n Vect.Nil) ...(indexNaturality _ _ _)
   ~~ 0                                          ...(Refl)
@@ -120,7 +120,7 @@ lemma2 : (n : Nat) -> (i : Fin n) -> (xs : Vect n Nat) ->
       %hint
       notation' : Action1 Nat (U $ Commutative.Nat.Additive)
       notation' = NatAction1 Additive
-  in map (index i) (tabulate \j => (index j xs) *. (unit n j))
+  in map (index i) (tabulate $ \j => (index j xs) *. (unit n j))
   =  tabulate (\j => (dirac i j) *. (index j xs))
 lemma2 n i xs =
   let %hint
@@ -130,9 +130,9 @@ lemma2 n i xs =
       notation' : Action1 Nat (U $ Commutative.Nat.Additive)
       notation' = NatAction1 Additive
   in Calc $
-        |~ map (index i) (tabulate \j => (index j xs) *. (unit n j))
+        |~ map (index i) (tabulate $ \j => (index j xs) *. (unit n j))
         ~~ tabulate (\j => (index i $ (index j xs) *. (unit n j))) ...(sym $ mapTabulate (index i)
-                                                                      \j => (index j xs) *. (unit n j))
+                                                                      $ \j => (index j xs) *. (unit n j))
         ~~ tabulate (\j => (dirac i j) *. (index j xs)) ...(tabulateExtensional _ _
                                                            $ \j => lemma1 n i j xs)
 
@@ -142,7 +142,7 @@ normalForm : (n : Nat) -> (xs : U (Model n)) ->
   let %hint
       notation : Action1 Nat (U $ Model n)
       notation = NatAction1 (Model n)
-  in (Model n).sum (tabulate \i => (index i xs) *. (unit n i)) = xs
+  in (Model n).sum (tabulate $ \i => (index i xs) *. (unit n i)) = xs
 normalForm n xs = vectorExtensionality _ _ $ \i =>
   let %hint
       notation : Action1 Nat (U $ Model n)
@@ -151,12 +151,12 @@ normalForm n xs = vectorExtensionality _ _ $ \i =>
       notation' : Action1 Nat (U $ Commutative.Nat.Additive)
       notation' = NatAction1 Additive
   in Calc $
-  |~ index i ((Model n).sum (tabulate \i => (index i xs) *. (unit n i)))
-  ~~ (Additive).sum (map (index i) (tabulate \i => (index i xs) *. (unit n i)))
-                                                                 ...(pointwiseSum n _ _)
-  ~~ (Additive).sum (tabulate \j => (dirac i j) *. (index j xs)) ...(cong (Additive).sum $
-                                                                    lemma2 n i xs)
-  ~~ index i xs                                                  ...(convolveDirac Additive _ _)
+  |~ index i ((Model n).sum (tabulate $ \i => (index i xs) *. (unit n i)))
+  ~~ (Additive).sum (map (index i) (tabulate $ \i => (index i xs) *. (unit n i)))
+                                                                   ...(pointwiseSum n _ _)
+  ~~ (Additive).sum (tabulate $ \j => (dirac i j) *. (index j xs)) ...(cong (Additive).sum $
+                                                                      lemma2 n i xs)
+  ~~ index i xs                                                    ...(convolveDirac Additive _ _)
 
 public export
 FreeExtenderFunction : ExtenderFunction (FreeCommutativeMonoidOver n)
@@ -214,11 +214,11 @@ extenderPreservesPlus other [xs,ys] =
       h = FreeExtenderFunction other
 
       lemma2 : (j : Fin n) ->
-        other.Model.rel (index j $ tabulate \i => (index i $ xs .+. ys) *. other.Env.H i)
-                        (index j $ tabulate \i => (index i xs) *. other.Env.H i
-                                              .+. (index i ys) *. other.Env.H i)
+        other.Model.rel (index j $ tabulate $ \i => (index i $ xs .+. ys) *. other.Env.H i)
+                        (index j $ tabulate $ \i => (index i xs) *. other.Env.H i
+                                                .+. (index i ys) *. other.Env.H i)
       lemma2 j = CalcWith @{cast other.Model} $
-        |~ index j (tabulate \i => (index i $ xs .+. ys) *. other.Env.H i)
+        |~ index j (tabulate $ \i => (index i $ xs .+. ys) *. other.Env.H i)
         ~~ index j (xs .+. ys) *. other.Env.H j           ...(indexTabulate _ _)
         ~~ ((index j xs) + (index j ys)) *. other.Env.H j
             ...(cong (\u : Nat => u *. (other.Env.H j)) $
@@ -226,19 +226,19 @@ extenderPreservesPlus other [xs,ys] =
                         j).preserves Plus [xs,ys])
         <~  (index j xs) *. other.Env.H j  .+.  (index j ys) *. other.Env.H j
             ...(multDistributesOverPlusLeft other.Model _ _ _)
-        ~~ index j (tabulate \i => (index i xs) *. other.Env.H i
-                                              .+. (index i ys) *. other.Env.H i)
+        ~~ index j (tabulate $ \i => (index i xs) *. other.Env.H i
+                                                .+. (index i ys) *. other.Env.H i)
             ...(sym $ indexTabulate _ _)
   in CalcWith @{cast other.Model} $
   |~ h (xs .+. ys)
   ~~ other.Model.sum (mapWithPos (\i, k => k *. other.Env.H i) (xs .+. ys)) ...(Refl)
-  ~~ other.Model.sum (tabulate \i => (index i $ xs .+. ys) *. other.Env.H i)
+  ~~ other.Model.sum (tabulate $ \i => (index i $ xs .+. ys) *. other.Env.H i)
       ...(cong other.Model.sum $ mapWithPosAsTabulate _ _)
-  <~ other.Model.sum (tabulate \i =>  (index i xs) *. other.Env.H i
+  <~ other.Model.sum (tabulate $ \i =>  (index i xs) *. other.Env.H i
                                   .+. (index i ys) *. other.Env.H i)
                    ...(other.Model.sum.homomorphic _ _ (\i => lemma2 i))
-  <~ other.Model.sum (tabulate \i => (index i xs) *. other.Env.H i) .+.
-     other.Model.sum (tabulate \i => (index i ys) *. other.Env.H i)
+  <~ other.Model.sum (tabulate $ \i => (index i xs) *. other.Env.H i) .+.
+     other.Model.sum (tabulate $ \i => (index i ys) *. other.Env.H i)
                    ...(sumCommutative other.Model _ _)
   <~ h xs .+. h ys ...(other.Model.cong 2 (Dyn 0 .+. Dyn 1) [_,_] [_,_]
                        [ Data.Setoid.Definition.reflect (cast other.Model) $ sym $
@@ -271,10 +271,10 @@ extenderIsMorphism {n} other i =
   in CalcWith @{cast other.Model} $
   |~ h (unit n i)
   ~~ other.Model.sum (mapWithPos (\j,k => k *. other.Env.H j) (unit n i)) ...(Refl)
-  ~~ other.Model.sum (tabulate \j => (index j (unit n i)) *. other.Env.H j)
+  ~~ other.Model.sum (tabulate $ \j => (index j (unit n i)) *. other.Env.H j)
     ...(cong other.Model.sum $ mapWithPosAsTabulate _ _)
-  ~~ other.Model.sum (tabulate \j => (dirac i j) *. other.Env.H j)
-    ...(cong other.Model.sum $ tabulateExtensional _ _ \j => cong (\u : Nat => u *. other.Env.H j)
+  ~~ other.Model.sum (tabulate $ \j => (dirac i j) *. other.Env.H j)
+    ...(cong other.Model.sum $ tabulateExtensional _ _ $ \j => cong (\u : Nat => u *. other.Env.H j)
        $indexTabulate (dirac i) j)
   <~ other.Env.H i ...(convolveDirac other.Model _ _)
 
@@ -299,17 +299,17 @@ uniqueExtender other extend xs =
       notation' = NatAction1 (Model n)
   in CalcWith @{cast other.Model} $
   |~ extend.H.H.H xs
-  ~~ extend.H.H.H ((Model n).sum (tabulate \i => (index i xs) *. unit n i))
+  ~~ extend.H.H.H ((Model n).sum (tabulate $ \i => (index i xs) *. unit n i))
         ...(cong extend.H.H.H $ sym $ normalForm n xs)
-  <~ other.Model.sum (map extend.H.H.H $ (tabulate \i => (index i xs) *. unit n i))
+  <~ other.Model.sum (map extend.H.H.H $ (tabulate $ \i => (index i xs) *. unit n i))
         ...(sumPreservation (Model n) other.Model extend.H _)
-  ~~ other.Model.sum (tabulate \i => extend.H.H.H ((index i xs) *. unit n i))
+  ~~ other.Model.sum (tabulate $ \i => extend.H.H.H ((index i xs) *. unit n i))
         ...(cong other.Model.sum $ sym $ mapTabulate _ _)
-  <~ other.Model.sum (tabulate \i => (index i xs) *. extend.H.H.H (unit n i))
-        ...(sumTabulateExtensional other.Model _ _ \i =>
+  <~ other.Model.sum (tabulate $ \i => (index i xs) *. extend.H.H.H (unit n i))
+        ...(sumTabulateExtensional other.Model _ _ $ \i =>
             multPreservation (Model n) other.Model extend.H (index i xs) (unit n i))
-  <~ other.Model.sum (tabulate \i => (index i xs) *. other.Env.H i)
-        ...(sumTabulateExtensional other.Model _ _ \i =>
+  <~ other.Model.sum (tabulate $ \i => (index i xs) *. other.Env.H i)
+        ...(sumTabulateExtensional other.Model _ _ $ \i =>
             multIsHomomorphism other.Model _ _ _ $
             extend.preserves i)
   ~~ FreeExtenderFunction other xs ...(cong other.Model.sum $ sym $

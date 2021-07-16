@@ -41,12 +41,12 @@ VectMap : {a, b : Setoid} -> (a ~~> b) ~> ((Functional.VectSetoid n a) ~~> (Func
 VectMap = MkSetoidHomomorphism
   (\f => MkSetoidHomomorphism
             (\xs => map f.H xs)
-            \xs, ys, prf, i  => CalcWith @{cast b} $
+            $ \xs, ys, prf, i  => CalcWith @{cast b} $
               |~ index i (map f.H xs)
               ~~ f.H (index i xs)     ...(indexNaturality _ _ _)
               <~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
               ~~ index i (map f.H ys) ...(sym $ indexNaturality _ _ _))
-  \f,g,prf,xs,i => CalcWith @{cast b} $
+  $ \f,g,prf,xs,i => CalcWith @{cast b} $
     |~ index i (map f.H xs)
     ~~ f.H (index i xs) ...(indexNaturality _ _ _)
     <~ g.H (index i xs) ...(prf _)

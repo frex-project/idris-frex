@@ -42,7 +42,7 @@ namespace Algebra
     , equivalence = a.equivalence
     , congruence = \case
         MkOp Neutral => \x,y,prf => a.congruence Unit x y prf
-        MkOp Product => \[x1,x2],[y1,y2],prf => a.congruence Prod [x2,x1] [y2,y1] \case
+        MkOp Product => \[x1,x2],[y1,y2],prf => a.congruence Prod [x2,x1] [y2,y1] $ \case
           0 => prf 1
           1 => prf 0
     }
@@ -58,7 +58,7 @@ public export
       LftNeutrality => a.Validate RgtNeutrality
       RgtNeutrality => a.Validate LftNeutrality
       Associativity => \env => a.equivalence.symmetric _ _
-                         $ a.Validate Associativity \case
+                         $ a.Validate Associativity $ \case
                          0 => env 2
                          1 => env 1
                          2 => env 0

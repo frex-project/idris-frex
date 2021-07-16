@@ -30,8 +30,9 @@ namespace Axiom
 
 public export
 InvolutiveMonoidTheory : Presentation
-InvolutiveMonoidTheory = MkPresentation Involutive.Theory.Signature Involutive.Theory.Axiom.Axiom
-  \case
+InvolutiveMonoidTheory
+  = MkPresentation Involutive.Theory.Signature Involutive.Theory.Axiom.Axiom
+  $ \case
     Mon ax => cast ((MonoidTheory).axiom ax)
     Involutivity       => involutivity       Involution
     Antidistributivity => antidistributivity Involution (Mono Product)

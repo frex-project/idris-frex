@@ -104,22 +104,22 @@ record (~>) (A,B : Setoid) where
 
 public export
 mate : {b : Setoid} -> (a -> U b) -> (cast a ~> b)
-mate f = MkSetoidHomomorphism f \x,y, prf => reflect b (cong f prf)
+mate f = MkSetoidHomomorphism f $ \x,y, prf => reflect b (cong f prf)
 
 ||| Identity Setoid homomorphism
 public export
 id : (a : Setoid) -> a ~> a
-id a = MkSetoidHomomorphism Prelude.id \x, y, prf => prf
+id a = MkSetoidHomomorphism Prelude.id $ \x, y, prf => prf
 
 ||| Composition of Setoid homomorphisms
 public export
 (.) : {a,b,c : Setoid} -> b ~> c -> a ~> b -> a ~> c
-g . f = MkSetoidHomomorphism (H g . H f) \x,y,prf => g.homomorphic _ _ (f.homomorphic _ _ prf)
+g . f = MkSetoidHomomorphism (H g . H f) $ \x,y,prf => g.homomorphic _ _ (f.homomorphic _ _ prf)
 
 public export
 (~~>) : (a,b : Setoid) -> Setoid
 %unbound_implicits off
-(~~>) a b = MkSetoid (a ~> b)
+(~~>) a b = MkSetoid (a ~> b) $
   let 0 relation : (f, g : a ~> b) -> Type
       relation f g = (x : U a) -> b.equivalence.relation (f.H x) (g.H x)
   in MkEquivalence
@@ -177,7 +177,7 @@ IsoEquivalence = MkEquivalence (<~>) (\_ => refl) (\_,_ => sym) (\_,_,_ => trans
 ||| Instance of the more general coequaliser of two setoid morphisms.
 public export
 Quotient : (0 a : Type) -> {b : Setoid} -> (a -> U b) -> Setoid
-Quotient a {b} q = MkSetoid a
+Quotient a {b} q = MkSetoid a $
   let 0 Relation : a -> a -> Type
       Relation x y = b.equivalence.relation
         (q x)

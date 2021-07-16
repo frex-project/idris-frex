@@ -75,7 +75,7 @@ namespace Presentation
 public export
 castEqHint : {auto castOp : sig1 ~> sig2} ->
    Cast (Equation sig1) (Equation sig2)
-castEqHint {castOp} = MkCast \eq =>
+castEqHint {castOp} = MkCast $ \eq =>
   MkEq
   { support = eq.support
   , lhs = cast eq.lhs

@@ -74,9 +74,9 @@ CoprodAlgebraCongruence a b (MkOp Neutral)      xy1       xy2       prf
      , b.Algebra.congruence (MkOp Neutral) [] [] (\i => case i of {}))
 CoprodAlgebraCongruence a b op@(MkOp Product) [xy1,xy2] [uv1,uv2] prf
    = ( a.Algebra.congruence Plus [fst xy1, fst xy2] [fst uv1, fst uv2]
-         \case {0 => fst (prf 0); 1 => fst (prf 1)}
+         $ \case {0 => fst (prf 0); 1 => fst (prf 1)}
      , b.Algebra.congruence Plus [snd xy1, snd xy2] [snd uv1, snd uv2]
-         \case {0 => snd (prf 0); 1 => snd (prf 1)})
+         $ \case {0 => snd (prf 0); 1 => snd (prf 1)})
 
 public export
 CoprodAlgebra : (a, b : CommutativeMonoid) -> MonoidStructure
@@ -230,7 +230,7 @@ ExtenderIsHomomorphism a b other (MkOp Neutral) []
                     [other.Lft.preserves Zero []
                     ,other.Rgt.preserves Zero []])
     <~ O1 ...(other.Sink.validate (Mon LftNeutrality) [O1])
-ExtenderIsHomomorphism a b other (MkOp Product) [(x1,y1),(x2,y2)] 
+ExtenderIsHomomorphism a b other (MkOp Product) [(x1,y1),(x2,y2)]
   = let %hint otherNotation : Action1 Nat (U other.Sink)
         otherNotation = NatAction1 (other.Sink)
         %hint aNotation : Action1 Nat (U a)

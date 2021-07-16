@@ -279,7 +279,7 @@ FreeUPUnique pres x other extend1 extend2 t = CalcWith @{cast other.Model} $
   <~ other.Model.Sem t (extend2.H.H.H . (FreeData pres x).Env.H)  ...(bindCongruence t
        (extend1.H.H . (FreeData pres x).Env)
        (extend2.H.H . (FreeData pres x).Env)
-       \i => CalcWith @{cast other.Model} $
+       $ \i => CalcWith @{cast other.Model} $
          |~ extend1.H.H.H (Done i)
          <~ other.Env.H i          ...(extend1.preserves i)
          <~ extend2.H.H.H (Done i) ...(other.Model.equivalence.symmetric _ _ $
