@@ -109,7 +109,7 @@ namespace Term
       go b' c (Call f args) | (S _)
         = let op := pretty (show f)
               catchall : Lazy (Doc ())
-                := hsep (op :: map (go b App) (toList args))
+                := hsep (op :: assert_total (map (go b App) (toList args)))
           in case precedence f of
                Nothing  => parens catchall
                Just lvl =>
