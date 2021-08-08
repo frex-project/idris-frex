@@ -76,7 +76,7 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
     in
     |~ b.Sem t env
     <~ b.Sem t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
-             ...((eval {a = b, x = cast x} t).homomorphic
+             ...((eval {a = b, x = irrelevantCast x} t).homomorphic
                    (mate env)
                    (iso.Iso.Fwd . (iso.Iso.Bwd . mate env))
                 $ \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H

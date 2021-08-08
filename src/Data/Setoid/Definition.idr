@@ -103,7 +103,7 @@ record (~>) (A,B : Setoid) where
   homomorphic : SetoidHomomorphism A B H
 
 public export
-mate : {b : Setoid} -> (a -> U b) -> (cast a ~> b)
+mate : {b : Setoid} -> (a -> U b) -> (irrelevantCast a ~> b)
 mate f = MkSetoidHomomorphism f $ \x,y, prf => reflect b (cong f prf)
 
 ||| Identity Setoid homomorphism

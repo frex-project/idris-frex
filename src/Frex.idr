@@ -77,7 +77,7 @@ frexify h eq prf = CalcWith @{cast ext2.Model} $
 
 public export
 solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
-  (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (frex : Frex a (irrelevantCast $ Fin n)) -> (env : Vect n (U a)) ->
   (eq : ( Term pres.signature (U a `Either` Fin n)
         , Term pres.signature (U a `Either` Fin n))) ->
   {auto prf : frex.Data.Model.rel
@@ -89,7 +89,7 @@ solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
 solveVect frex env eq =
   let AX : Model pres
       AX = frex.Data.Model
-      Other : Extension a (cast $ Fin n)
+      Other : Extension a (irrelevantCast $ Fin n)
       Other = MkExtension
         { Model = a
         , Embed = id a
@@ -184,7 +184,7 @@ simplifyGeneral frex env t =
                                                   extensionLemma h)
 public export
 simplifyVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
-  (frex : Frex a (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (frex : Frex a (irrelevantCast $ Fin n)) -> (env : Vect n (U a)) ->
   (t : Term pres.signature (Either (U a) (Fin n))) ->
   a.rel
     (a.Sem t $ (extEnv {a} $ MkExtension a (id a) (mate $ flip Vect.index env)).H)

@@ -417,7 +417,7 @@ ExtenderHomomorphism a s other =
 public export
 InvExtender : (a : InvolutiveMonoid) -> (s : Setoid) ->
   Frex.Frex.Extender (InvMonoidExtension a s)
-%nf_metavar_threshold 40000
+-- %nf_metavar_threshold 40000
 InvExtender a s other = MkExtensionMorphism
   { H = ExtenderHomomorphism a s other
   , PreserveEmbed = ((AuxFrex a s).UP.Exists
@@ -427,11 +427,11 @@ InvExtender a s other = MkExtensionMorphism
       (ExtensionToInvolutiveExtension other).MonoidExtension).PreserveVar
       (False, i)
   }
-%nf_metavar_threshold 50
+-- %nf_metavar_threshold 50
 
 public export
 Uniqueness : (a : InvolutiveMonoid) -> (s : Setoid) -> Uniqueness (InvMonoidExtension a s)
-%nf_metavar_threshold 80000
+-- %nf_metavar_threshold 80000
 Uniqueness a s other =
   let otherIExt : InvolutiveExtension a s
       otherIExt = ExtensionToInvolutiveExtension other
@@ -489,11 +489,11 @@ Uniqueness a s other =
         }
   in \extend1,extend2 => (AuxFrex a s).UP.Unique otherIExt.MonoidExtension
                             (lemma extend1) (lemma extend2)
-%nf_metavar_threshold 50
+-- %nf_metavar_threshold 50
 
 public export
 Frex : (a : InvolutiveMonoid) -> (s : Setoid) -> Frex a s
-%nf_metavar_threshold 80000
+-- %nf_metavar_threshold 80000
 Frex a s = MkFrex
   { Data = InvMonoidExtension a s
   , UP = IsUniversal
@@ -501,4 +501,4 @@ Frex a s = MkFrex
     , Unique = Uniqueness a s
     }
   }
-%nf_metavar_threshold 50
+-- %nf_metavar_threshold 50

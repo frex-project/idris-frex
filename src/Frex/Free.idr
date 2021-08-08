@@ -51,9 +51,10 @@ freeSolve h eq prf = CalcWith @{cast mod2.Model} $
                       (h.H.H . mod1.Env)
                       mod2.Env
                       $ extensionLemma h)
+
 public export
 solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
-  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (free : Free pres (irrelevantCast $ Fin n)) -> (env : Vect n (U a)) ->
   (eq : ( Term pres.signature (Fin n)
         , Term pres.signature (Fin n))) ->
   {auto prf : free.Data.Model.rel
@@ -65,7 +66,7 @@ solveVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
 solveVect free env eq =
   let AX : Model pres
       AX = free.Data.Model
-      Other : pres `ModelOver` (cast $ Fin n)
+      Other : pres `ModelOver` (irrelevantCast $ Fin n)
       Other = MkModelOver
         { Model = a
         , Env   = mate (flip index env)
@@ -133,7 +134,7 @@ simplifyGeneral free env t =
                                            extensionLemma h)
 public export
 simplifyVect : {0 n : Nat} -> {pres : Presentation} -> {a : Model pres} ->
-  (free : Free pres (cast $ Fin n)) -> (env : Vect n (U a)) ->
+  (free : Free pres (irrelevantCast $ Fin n)) -> (env : Vect n (U a)) ->
   (t : Term pres.signature (Fin n)) ->
   a.rel
     (a.Sem t $ flip Vect.index env)
