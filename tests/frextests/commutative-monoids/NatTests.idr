@@ -2,21 +2,24 @@ module NatTests
 
 import Frex
 import Frexlet.Monoid.Commutative
+import Data.Fin
+import Decidable.Equality
+import Frexlet.Monoid.Commutative.NatSemiLinear
 import Frexlet.Monoid.Commutative.Notation.Core
+import Frexlet.Monoid.Commutative.Nat
 
 commut : {a, b : Nat} -> a + b = b + a
-commut = solve 2 (Frex Additive)
-           {prf = (Refl, ByAxiom Commutativity (flip index [_,_]))}
+commut = Frex.solve 2 (Monoid.Commutative.Frex Nat.Additive)
       $ Dyn 0 .+. Dyn 1 =-= Dyn 1 .+. Dyn 0
 
 assoc : {a, b, c : Nat} -> a + (b + c) = (a + b) + c
-assoc = solve 3 (Frex Additive)
-           {prf = (Refl, ByAxiom (Mon Associativity) (flip index [_,_,_]))}
+assoc = solve 3 (Monoid.Commutative.Frex Nat.Additive)
       $ Dyn 0 .+. (Dyn 1 .+. Dyn 2) =-= (Dyn 0 .+. Dyn 1) .+. Dyn 2
 
 shuffle : {a, b, c : Nat} -> a + (b + c) = c + (a + b)
-shuffle = solve 3 (Frex Additive)
-           {prf = (Refl, Transitive
-                            (ByAxiom (Mon Associativity) (flip index [_,_,_]))
-                            (ByAxiom Commutativity (flip index [_,_])))}
+shuffle = solve 3 (Monoid.Commutative.Frex Nat.Additive)
       $ Dyn 0 .+. (Dyn 1 .+. Dyn 2) =-= Dyn 2 .+. (Dyn 0 .+. Dyn 1)
+
+plusSuccRightSucc : (n, m : Nat) -> n + S m = S (n + m)
+plusSuccRightSucc n m = solve 2 (Monoid.Commutative.Frex Nat.Additive)
+  $ Dyn 0 .+. (Sta 1 .+. Dyn 1) =-= Sta 1 .+. (Dyn 0 .+. Dyn 1)

@@ -9,11 +9,10 @@ import Notation.Action
 import Frexlet.Monoid.Commutative.Theory
 import Frexlet.Monoid.Commutative.Notation.Core
 
-import Frexlet.Monoid.Commutative.NatSemiLinear
+import public Frexlet.Monoid.Commutative.NatSemiLinear
 
 import public Frexlet.Monoid.Commutative.Nat
 import public Frexlet.Monoid.Commutative.Coproduct
 import public Frexlet.Monoid.Commutative.Free
 
 %default total
-
