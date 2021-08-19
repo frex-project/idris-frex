@@ -2,9 +2,6 @@ module NatTests
 
 import Frex
 import Frexlet.Monoid.Commutative
-import Data.Fin
-import Decidable.Equality
-import Frexlet.Monoid.Commutative.NatSemiLinear
 import Frexlet.Monoid.Commutative.Notation.Core
 import Frexlet.Monoid.Commutative.Nat
 
