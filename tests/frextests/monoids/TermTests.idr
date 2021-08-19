@@ -12,29 +12,33 @@ notationAdd2= MkAdditive2
               (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 
+%hint
+monoidNotation : {a : Monoid} -> (0 ford : b = U a) => Additive2 b
+monoidNotation {a} @{Refl} = a.Additive2
+
 infix 0 ~~
-0 (~~) : {x : Type} -> (lhs, rhs : Term Signature x) -> Type
-(~~) = (Free.Construction.Free MonoidTheory (cast x)).Data.Model.rel
+0 (~~) : {auto monoid : Monoid} -> (lhs, rhs : U monoid) -> Type
+(~~) = monoid.equivalence.relation
 
-trivial : {x : Type} -> {a : Term Signature x} -> a ~~ a
-trivial = solve {a = F _ _} 1 (FreeMonoidOver $ cast $ Fin _) (Done 0 =-= Done 0)
+trivial : {x : Type} -> {monoid : Monoid} -> {a : U monoid} -> a ~~ a
+trivial = solve 1 (FreeMonoidOver $ cast $ Fin _) (X 0 =-= X 0)
 
-trivial2 : {x : Type} -> {a, b : Term Signature x} ->
-           a :+: b ~~ a :+: b
-trivial2 = solve {a = F _ _} 2 (FreeMonoidOver $ cast $ Fin _)
-         $ Done 0 :+: Done 1 =-= Done 0 :+: Done 1
+trivial2 : {x : Type} -> {monoid : Monoid} -> {a, b : U monoid} ->
+           a :+: b  ~~ a :+: b
+trivial2 = solve 2 (FreeMonoidOver $ cast $ Fin _)
+         $ X 0 :+: X 1 =-= X 0 :+: X 1
 
-assoc : {x : Type} -> {a, b, c : Term Signature x} ->
+assoc : {x : Type} -> {monoid : Monoid} -> {a, b, c : U monoid} ->
         a :+: (b :+: c) ~~ (a :+: b) :+: c
-assoc = solve {a = F _ _} 3 (FreeMonoidOver (cast $ Fin _))
-      $ Done 0 :+: (Done 1 :+: Done 2) =-= (Done 0 :+: Done 1) :+: Done 2
+assoc = solve 3 (FreeMonoidOver (cast $ Fin _))
+      $ X 0 :+: (X 1 :+: X 2) =-= (X 0 :+: X 1) :+: X 2
 
-rassoc : {x : Type} -> {a, b, c : Term Signature x} ->
+rassoc : {x : Type} -> {monoid : Monoid} -> {a, b, c : U monoid} ->
          (a :+: b) :+: c ~~ a :+: (b :+: c)
-rassoc = solve {a = F _ _} 3 (FreeMonoidOver (cast $ Fin _))
-       $ (Done 0 :+: Done 1) :+: Done 2 =-= Done 0 :+: (Done 1 :+: Done 2)
+rassoc = solve 3 (FreeMonoidOver (cast $ Fin _))
+       $ (X 0 :+: X 1) :+: X 2 =-= X 0 :+: (X 1 :+: X 2)
 
-units : {x : Type} -> {a : Term Signature x} ->
-        (O2 :+: (a :+: O2)) :+: O2 ~~ a
-units = solve {a = F _ _} 1 (FreeMonoidOver (cast $ Fin 1))
-             $ (O2 :+: (Done 0 :+: O2)) :+: O2 =-= Done 0
+units : {x : Type} -> {monoid : Monoid} -> {a : U monoid} ->
+        (O2 :+: (a :+: O2)) :+: O2 ~~  a
+units = solve 1 (FreeMonoidOver (cast $ Fin 1))
+             $ (O2 :+: (X 0 :+: O2)) :+: O2 =-= X 0
