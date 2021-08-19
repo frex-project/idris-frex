@@ -1,0 +1,5 @@
+package monoids
+
+depends = contrib, frex
+
+main = Monoids

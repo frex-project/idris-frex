@@ -1,0 +1,5 @@
+package commutative-monoids
+
+depends = contrib, frex
+
+main = CommutativeMonoids

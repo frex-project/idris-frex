@@ -14,11 +14,11 @@ import Data.Vect.Properties
 import Syntax.PreorderReasoning.Generic
 import Syntax.PreorderReasoning
 
-import Frexlet.Monoid.Commutative.NatSemiLinear
+import public Frexlet.Monoid.Commutative.NatSemiLinear
 
 import public Frexlet.Monoid.Commutative.Nat
 
-import Decidable.Equality
+import public Decidable.Equality
 import Data.Bool.Decidable
 import Data.Nat
 import public Data.Vect.Extra
