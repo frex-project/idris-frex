@@ -3,6 +3,8 @@ module TermTests
 import Frex
 import Frex.Free.Construction.Combinators
 
+import Notation.Hints
+
 import Frexlet.Monoid
 import Frexlet.Monoid.Notation.Additive
 
@@ -13,8 +15,8 @@ notationAdd2= MkAdditive2
               (call {sig = Signature} Product)
 
 %hint
-monoidNotation : {a : Monoid} -> (0 ford : b = U a) => Additive2 b
-monoidNotation {a} @{Refl} = a.Additive2
+monoidNotation : (a : Monoid) -> NotationHint a Additive2
+monoidNotation a = notationHint Additive2 a.Additive2
 
 infix 0 ~~
 0 (~~) : {auto monoid : Monoid} -> (lhs, rhs : U monoid) -> Type
