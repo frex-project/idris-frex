@@ -35,6 +35,6 @@ rassoc = solve 3 (FreeMonoidOver (cast $ Fin _))
        $ (X 0 .+. X 1) .+. X 2 =-= X 0 .+. (X 1 .+. X 2)
 
 units : {monoid : Monoid} -> {a : U monoid} ->
-        (O1 .+. (a .+. O1)) .+. O1 ~~  a
+        (O1 .+. (a .+. O1)) .+. O1 ~~ a
 units = solve 1 (FreeMonoidOver (cast $ Fin 1))
              $ (O1 .+. (X 0 .+. O1)) .+. O1 =-= X 0
