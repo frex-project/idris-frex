@@ -20,25 +20,25 @@ infix 0 ~~
 0 (~~) : {auto monoid : Monoid} -> (lhs, rhs : U monoid) -> Type
 (~~) = monoid.equivalence.relation
 
-trivial : {x : Type} -> {monoid : Monoid} -> {a : U monoid} -> a ~~ a
+trivial : {monoid : Monoid} -> {a : U monoid} -> a ~~ a
 trivial = solve 1 (FreeMonoidOver $ cast $ Fin _) (X 0 =-= X 0)
 
-trivial2 : {x : Type} -> {monoid : Monoid} -> {a, b : U monoid} ->
+trivial2 : {monoid : Monoid} -> {a, b : U monoid} ->
            a :+: b  ~~ a :+: b
 trivial2 = solve 2 (FreeMonoidOver $ cast $ Fin _)
          $ X 0 :+: X 1 =-= X 0 :+: X 1
 
-assoc : {x : Type} -> {monoid : Monoid} -> {a, b, c : U monoid} ->
+assoc : {monoid : Monoid} -> {a, b, c : U monoid} ->
         a :+: (b :+: c) ~~ (a :+: b) :+: c
 assoc = solve 3 (FreeMonoidOver (cast $ Fin _))
       $ X 0 :+: (X 1 :+: X 2) =-= (X 0 :+: X 1) :+: X 2
 
-rassoc : {x : Type} -> {monoid : Monoid} -> {a, b, c : U monoid} ->
+rassoc : {monoid : Monoid} -> {a, b, c : U monoid} ->
          (a :+: b) :+: c ~~ a :+: (b :+: c)
 rassoc = solve 3 (FreeMonoidOver (cast $ Fin _))
        $ (X 0 :+: X 1) :+: X 2 =-= X 0 :+: (X 1 :+: X 2)
 
-units : {x : Type} -> {monoid : Monoid} -> {a : U monoid} ->
+units : {monoid : Monoid} -> {a : U monoid} ->
         (O2 :+: (a :+: O2)) :+: O2 ~~  a
 units = solve 1 (FreeMonoidOver (cast $ Fin 1))
              $ (O2 :+: (X 0 :+: O2)) :+: O2 =-= X 0
