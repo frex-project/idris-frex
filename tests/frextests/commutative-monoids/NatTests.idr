@@ -21,7 +21,8 @@ plusSuccRightSucc : (n, m : Nat) -> n + S m = S (n + m)
 plusSuccRightSucc n m = solve 2 (Monoid.Commutative.Frex Nat.Additive)
   $ Dyn 0 .+. (Sta 1 .+. Dyn 1) =-= Sta 1 .+. (Dyn 0 .+. Dyn 1)
 
-simplify : (n, m, k : Nat) -> (n + 6) + (k + n) + (m + 2) = k + 2*n + m + 8
+simplify : (n, m, k : Nat) ->
+  (n + 6) + (k + n) + (m + 2) = k + 2*n + m + 8
 simplify n m k = solve 3 (Monoid.Commutative.Frex Nat.Additive)
-      $ (Dyn 0 .+. Sta 6) .+. (Dyn 1 .+. Dyn 0) .+. (Dyn 2 .+. Sta 2) =-=
-      Dyn 1 .+. ((the Nat 2) *. Dyn 0) .+. Dyn 2 .+. Sta 8
+  $ (Dyn 0 .+. Sta 6) .+. (Dyn 1 .+. Dyn 0) .+. (Dyn 2 .+. Sta 2) =-=
+  Dyn 1 .+. ((the Nat 2) *. Dyn 0) .+. Dyn 2 .+. Sta 8
