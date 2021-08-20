@@ -21,10 +21,6 @@ infix 0 ~~
 -- 0 (~~~) : Rel (Term Signature (Fin n))
 -- (~~~) = (|-) {pres = MonoidTheory} (QuotientData MonoidTheory (cast (Fin n)))
 
-%hint
-notation: {n : Nat} -> Additive1 (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
-notation = (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model.Additive1
-
 Trivial : Lemma MonoidTheory
 Trivial = mkLemma (FreeMonoidOver $ cast $ Fin 1)
         $ X 0 =-= X 0
@@ -45,7 +41,7 @@ RAssoc = mkLemma (FreeMonoidOver $ cast $ Fin 3)
 
 Units : Lemma MonoidTheory
 Units = mkLemma (FreeMonoidOver $ cast $ Fin 1)
-      $ (O1 .+. (X 0 .+. O1)) .+. O1 =-= Done 0
+      $ (O1 .+. (X 0 .+. O1)) .+. O1 =-= X 0
 
 units : (O1 .+. (X {k = 1} 0 .+. O1)) .+. O1 ~~ X 0
 units = byLemma Units

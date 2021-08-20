@@ -22,21 +22,21 @@ monoid.Additive3 = MkAdditive3 (monoid.sem Neutral) (monoid.sem Product)
 
 %hint
 public export
-notationAdd1 : Additive1 (Term Signature (a `Either` (Fin n)))
+notationAdd1 : Additive1 (Term Signature x)
 notationAdd1= MkAdditive1
               (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 
 %hint
 public export
-notationAdd2 : Additive2 (Term Signature (a `Either` (Fin n)))
+notationAdd2 : Additive2 (Term Signature x)
 notationAdd2 = MkAdditive2
               (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
 
 %hint
 public export
-notationAdd3 : Additive3 (Term Signature (a `Either` (Fin n)))
+notationAdd3 : Additive3 (Term Signature x)
 notationAdd3 = MkAdditive3
               (call {sig = Signature} Neutral)
               (call {sig = Signature} Product)
