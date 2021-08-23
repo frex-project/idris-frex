@@ -27,6 +27,7 @@ modules = Frex
         , Notation.Multiplicative
         , Notation.Action
         , Notation.Semantic
+        , Notation.Hints
         , Frexlet.Monoid
         , Frexlet.Monoid.Theory
         , Frexlet.Monoid.Frex

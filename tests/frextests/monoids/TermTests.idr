@@ -3,44 +3,38 @@ module TermTests
 import Frex
 import Frex.Free.Construction.Combinators
 
+import Notation.Hints
+
 import Frexlet.Monoid
 import Frexlet.Monoid.Notation.Additive
 
 %hint
-notationAdd2 : Additive2 (Term Signature a)
-notationAdd2= MkAdditive2
-              (call {sig = Signature} Neutral)
-              (call {sig = Signature} Product)
+monoidNotation : (a : Monoid) -> NotationHint a Additive1
+monoidNotation a = a.notationHint Additive1 a.Additive1
 
 infix 0 ~~
-(~~) : {x : Type} -> (lhs, rhs : Term Signature x) -> Type
-(~~) = (|-) {pres = MonoidTheory} (QuotientData MonoidTheory (cast x))
+0 (~~) : {auto monoid : Monoid} -> (lhs, rhs : U monoid) -> Type
+(~~) = monoid.equivalence.relation
 
-trivial : {x : Type} -> {a : Term Signature x} -> a ~~ a
-trivial = solve 1 (MonoidFrex (F ? _) _) (Dyn 0 =-= Dyn 0)
+trivial : {monoid : Monoid} -> {a : U monoid} -> a ~~ a
+trivial = solve 1 (FreeMonoidOver $ cast $ Fin _) (X 0 =-= X 0)
 
-trivial2 : {x : Type} -> {a, b : Term Signature x} ->
-           a :+: b ~~ a :+: b
-trivial2 = solve 2 (MonoidFrex (F ? _) _)
-         $ Dyn 0 .+. Dyn 1 =-= Dyn 0 .+. Dyn 1
+trivial2 : {monoid : Monoid} -> {a, b : U monoid} ->
+           a .+. b  ~~ a .+. b
+trivial2 = solve 2 (FreeMonoidOver $ cast $ Fin _)
+         $ X 0 .+. X 1 =-= X 0 .+. X 1
 
-assoc : {x : Type} -> {a, b, c : Term Signature x} ->
-        a :+: (b :+: c) ~~ (a :+: b) :+: c
-assoc = solve 3 (MonoidFrex (F ? _) _)
-      $ Dyn 0 .+. (Dyn 1 .+. Dyn 2) =-= (Dyn 0 .+. Dyn 1) .+. Dyn 2
+assoc : {monoid : Monoid} -> {a, b, c : U monoid} ->
+        a .+. (b .+. c) ~~ (a .+. b) .+. c
+assoc = solve 3 (FreeMonoidOver (cast $ Fin _))
+      $ X 0 .+. (X 1 .+. X 2) =-= (X 0 .+. X 1) .+. X 2
 
-rassoc : {x : Type} -> {a, b, c : Term Signature x} ->
-         (a :+: b) :+: c ~~ a :+: (b :+: c)
-rassoc = solve 3 (MonoidFrex (F ? _) _)
-       $ (Dyn 0 .+. Dyn 1) .+. Dyn 2 =-= Dyn 0 .+. (Dyn 1 .+. Dyn 2)
+rassoc : {monoid : Monoid} -> {a, b, c : U monoid} ->
+         (a .+. b) .+. c ~~ a .+. (b .+. c)
+rassoc = solve 3 (FreeMonoidOver (cast $ Fin _))
+       $ (X 0 .+. X 1) .+. X 2 =-= X 0 .+. (X 1 .+. X 2)
 
-units : {x : Type} -> {a : Term Signature x} ->
-        (O2 :+: (a :+: O2)) :+: O2 ~~ a
-units = solve 1 (MonoidFrex (F ? _) _)
-        -- wtf
-        {prf = ConsUlt (byAxiom MonoidTheory LftNeutrality) Refl
-             $ Ultimate
-             $ Sym $ Transitive (Sym $ byAxiom MonoidTheory LftNeutrality)
-             $ Sym $ byAxiom MonoidTheory RgtNeutrality
-        }
-      $ (O1 .+. (Dyn 0 .+. O1)) .+. O1 =-= Dyn 0
+units : {monoid : Monoid} -> {a : U monoid} ->
+        (O1 .+. (a .+. O1)) .+. O1 ~~ a
+units = solve 1 (FreeMonoidOver (cast $ Fin 1))
+             $ (O1 .+. (X 0 .+. O1)) .+. O1 =-= X 0
