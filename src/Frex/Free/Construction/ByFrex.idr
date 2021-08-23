@@ -89,7 +89,8 @@ Uniqueness param other extend1 extend2 = param.FrexBy.UP.Unique
   extend2.toExtensionMorphism
 
 public export
-ByFrex : (initial : Free pres (cast Void)) -> Frex initial.Data.Model s -> Free pres s
+ByFrex : (initial : Free pres (cast Void)) ->
+  Frex initial.Data.Model s -> Free pres s
 ByFrex initial frex =
   let params = MkParameters
         { Initial = initial
