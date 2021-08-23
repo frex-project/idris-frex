@@ -1,6 +1,7 @@
 ||| The syntax and axioms for monoids
 module Frexlet.Monoid.Theory
 
+import Decidable.Equality
 import Frex
 
 %default total
@@ -55,6 +56,23 @@ Show (Op Signature) where
 export
 Finite (Op Signature) where
   enumerate = [Unit, Prod]
+
+export
+Uninhabited (Equal {a = Op Signature} {b = Op Signature}
+                (MkOp Neutral) (MkOp Product)) where
+  uninhabited Refl impossible
+
+export
+Uninhabited (Equal {a = Op Signature} {b = Op Signature}
+               (MkOp Product) (MkOp Neutral)) where
+  uninhabited Refl impossible
+
+export
+DecEq (Op Signature) where
+  decEq (MkOp Neutral) (MkOp Neutral) = Yes Refl
+  decEq (MkOp Product) (MkOp Product) = Yes Refl
+  decEq (MkOp Neutral) (MkOp Product) = No absurd
+  decEq (MkOp Product) (MkOp Neutral) = No absurd
 
 export
 Finite Axiom where

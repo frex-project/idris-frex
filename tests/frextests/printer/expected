@@ -13,26 +13,180 @@ Axioms:
 -- Simple proof
 ------------------------------------------------------------------------
 
-x • ε
-  ≡[ Right neutrality ⟩
-x
+[x] • ε
   ≡⟨ Left neutrality ]
+[ε • x] • ε
+  ≡⟨ Right neutrality ]
+((ε • x) • ε) • ε
+  ≡⟨ Associativity ]
+ε • x • [ε • ε]
+  ≡[ Left neutrality ⟩
+([ε] • x) • ε
+  ≡⟨ Left neutrality ]
+((ε • ε) • x) • ε
+  ≡⟨ Associativity ]
+(ε • ε) • x • ε
+  ≡⟨ Associativity ]
+ε • [ε • x • ε]
+  ≡[ Associativity ⟩
+ε • [(ε • x) • ε]
+  ≡[ Right neutrality ⟩
+ε • [ε • x]
+  ≡[ Left neutrality ⟩
 ε • x
 ------------------------------------------------------------------------
 -- Proof with congruence
 ------------------------------------------------------------------------
 
-x • [x • ε]
-  ≡[ Right neutrality ⟩
-x • [x]
+x • ([x] • ε)
   ≡⟨ Left neutrality ]
+x • ([ε • x] • ε)
+  ≡⟨ Right neutrality ]
+[x] • ((ε • x) • ε) • ε
+  ≡⟨ Left neutrality ]
+[ε • x] • ((ε • x) • ε) • ε
+  ≡⟨ Right neutrality ]
+(ε • x) • ε • [((ε • x) • ε) • ε]
+  ≡⟨ Associativity ]
+(ε • x) • ε • (ε • x • [ε • ε])
+  ≡[ Left neutrality ⟩
+((ε • x) • ε) • (ε • x) • ε
+  ≡⟨ Associativity ]
+ε • x • (ε • [(ε • x) • ε])
+  ≡⟨ Associativity ]
+ε • x • [ε • ε • x • ε]
+  ≡[ Associativity ⟩
+ε • x • [(ε • ε) • x • ε]
+  ≡[ Associativity ⟩
+ε • x • (([ε • ε] • x) • ε)
+  ≡[ Left neutrality ⟩
+ε • x • (([ε] • x) • ε)
+  ≡⟨ Left neutrality ]
+ε • x • [((ε • ε) • x) • ε]
+  ≡⟨ Associativity ]
+ε • x • [(ε • ε) • x • ε]
+  ≡⟨ Associativity ]
+ε • x • (ε • [ε • x • ε])
+  ≡[ Associativity ⟩
+(ε • x) • ε • (ε • x) • ε
+  ≡[ Associativity ⟩
+(ε • x) • ε • (([ε] • x) • ε)
+  ≡⟨ Left neutrality ]
+(ε • x) • ε • [((ε • ε) • x) • ε]
+  ≡⟨ Associativity ]
+(ε • x) • ε • [(ε • ε) • x • ε]
+  ≡⟨ Associativity ]
+(ε • x) • ε • (ε • [ε • x • ε])
+  ≡[ Associativity ⟩
+[(ε • x) • ε] • ε • (ε • x) • ε
+  ≡[ Right neutrality ⟩
+[ε • x] • ε • (ε • x) • ε
+  ≡[ Left neutrality ⟩
+x • (ε • [(ε • x) • ε])
+  ≡[ Right neutrality ⟩
+x • (ε • [ε • x])
+  ≡[ Left neutrality ⟩
 x • ε • x
 ------------------------------------------------------------------------
 -- Proof with different congruences
 ------------------------------------------------------------------------
 
-[x] • y • z • a
+x • (y • (z • [a]))
+  ≡⟨ Left neutrality ]
+x • (y • (z • [ε • a]))
   ≡⟨ Right neutrality ]
-x • ε • [y • z • a]
+x • (y • ([z] • (ε • a) • ε))
+  ≡⟨ Left neutrality ]
+x • (y • ([ε • z] • (ε • a) • ε))
+  ≡⟨ Right neutrality ]
+x • ([y] • ((ε • z) • ε) • (ε • a) • ε)
+  ≡⟨ Left neutrality ]
+x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
+  ≡⟨ Right neutrality ]
+[x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε
+  ≡⟨ Left neutrality ]
+[ε • x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε
+  ≡⟨ Right neutrality ]
+(ε • x) • ε • ((ε • y) • ε • [((ε • z) • ε) • (ε • a) • ε])
+  ≡⟨ Associativity ]
+(ε • x) • ε • ((ε • y) • ε • (ε • z • (ε • [(ε • a) • ε])))
+  ≡⟨ Associativity ]
+(ε • x) • ε • ((ε • y) • ε • (ε • z • [ε • ε • a • ε]))
   ≡[ Associativity ⟩
+(ε • x) • ε • ((ε • y) • ε • (ε • z • [(ε • ε) • a • ε]))
+  ≡[ Associativity ⟩
+(ε • x) • ε • ((ε • y) • ε • (ε • z • (([ε • ε] • a) • ε)))
+  ≡[ Left neutrality ⟩
+(ε • x) • ε • [((ε • y) • ε) • (ε • z) • (ε • a) • ε]
+  ≡⟨ Associativity ]
+(ε • x) • ε • (ε • y • (ε • [(ε • z) • (ε • a) • ε]))
+  ≡⟨ Associativity ]
+(ε • x) • ε • (ε • y • [ε • ε • z • (ε • a) • ε])
+  ≡[ Associativity ⟩
+(ε • x) • ε • (ε • y • [(ε • ε) • z • (ε • a) • ε])
+  ≡[ Associativity ⟩
+(ε • x) • ε • (ε • y • (([ε • ε] • z) • (ε • a) • ε))
+  ≡[ Left neutrality ⟩
+((ε • x) • ε) • (ε • y) • (ε • z) • (ε • a) • ε
+  ≡⟨ Associativity ]
+ε • x • (ε • [(ε • y) • (ε • z) • (ε • a) • ε])
+  ≡⟨ Associativity ]
+ε • x • [ε • ε • y • (ε • z) • (ε • a) • ε]
+  ≡[ Associativity ⟩
+ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
+  ≡[ Associativity ⟩
+ε • x • (([ε • ε] • y) • (ε • z) • (ε • a) • ε)
+  ≡[ Left neutrality ⟩
+ε • x • (([ε] • y) • (ε • z) • (ε • a) • ε)
+  ≡⟨ Left neutrality ]
+ε • x • [((ε • ε) • y) • (ε • z) • (ε • a) • ε]
+  ≡⟨ Associativity ]
+ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
+  ≡⟨ Associativity ]
+ε • x • (ε • [ε • y • (ε • z) • (ε • a) • ε])
+  ≡[ Associativity ⟩
+(ε • x) • ε • (ε • y) • (ε • z) • (ε • a) • ε
+  ≡[ Associativity ⟩
+(ε • x • [ε]) • (ε • y) • (ε • z) • (ε • a) • ε
+  ≡⟨ Left neutrality ]
+[(ε • x) • ε • ε] • (ε • y) • (ε • z) • (ε • a) • ε
+  ≡[ Associativity ⟩
+((ε • x) • ε) • ε • (ε • y • (ε • z • (([ε] • a) • ε)))
+  ≡⟨ Left neutrality ]
+((ε • x) • ε) • ε • (ε • y • (ε • z • [((ε • ε) • a) • ε]))
+  ≡⟨ Associativity ]
+((ε • x) • ε) • ε • (ε • y • (ε • z • [(ε • ε) • a • ε]))
+  ≡⟨ Associativity ]
+((ε • x) • ε) • ε • (ε • y • (ε • z • (ε • [ε • a • ε])))
+  ≡[ Associativity ⟩
+((ε • x) • ε) • ε • (ε • y • [(ε • z) • ε • (ε • a) • ε])
+  ≡[ Associativity ⟩
+((ε • x) • ε) • ε • [(ε • y) • ((ε • z) • ε) • (ε • a) • ε]
+  ≡[ Associativity ⟩
+((ε • x) • ε) • ε • ((ε • y • (([ε] • z) • ε)) • (ε • a) • ε)
+  ≡⟨ Left neutrality ]
+((ε • x) • ε) • ε • ((ε • y • [((ε • ε) • z) • ε]) • (ε • a) • ε)
+  ≡⟨ Associativity ]
+((ε • x) • ε) • ε • ((ε • y • [(ε • ε) • z • ε]) • (ε • a) • ε)
+  ≡⟨ Associativity ]
+((ε • x) • ε) • ε • ((ε • y • (ε • [ε • z • ε])) • (ε • a) • ε)
+  ≡[ Associativity ⟩
+((ε • x) • ε) • ε • ([(ε • y) • ε • (ε • z) • ε] • (ε • a) • ε)
+  ≡[ Associativity ⟩
+([(ε • x) • ε] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε
+  ≡[ Right neutrality ⟩
+([ε • x] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε
+  ≡[ Left neutrality ⟩
+x • ε • (([(ε • y) • ε] • (ε • z) • ε) • (ε • a) • ε)
+  ≡[ Right neutrality ⟩
+x • ε • (([ε • y] • (ε • z) • ε) • (ε • a) • ε)
+  ≡[ Left neutrality ⟩
+x • ε • ((y • [(ε • z) • ε]) • (ε • a) • ε)
+  ≡[ Right neutrality ⟩
+x • ε • ((y • [ε • z]) • (ε • a) • ε)
+  ≡[ Left neutrality ⟩
+x • ε • (y • z • [(ε • a) • ε])
+  ≡[ Right neutrality ⟩
+x • ε • (y • z • [ε • a])
+  ≡[ Left neutrality ⟩
 (x • ε) • (y • z) • a

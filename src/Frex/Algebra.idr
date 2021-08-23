@@ -5,6 +5,8 @@ import Frex.Signature
 import public Notation
 import public Notation.Semantic
 
+import Decidable.Equality
+
 import Data.Setoid
 import Data.Nat
 import Data.Nat.Order
@@ -94,6 +96,24 @@ data Term : (0 sig : Signature) -> Type -> Type where
   ||| An operator, applied to a vector of sub-terms
   Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
          -> Term sig a
+
+export
+Uninhabited (Done x = Call f xs) where uninhabited eq impossible
+export
+Uninhabited (Call f xs = Done x) where uninhabited eq impossible
+
+export
+(DecEq (Op sig), DecEq a) => DecEq (Term sig a) where
+  decEq (Done x) (Done y) with (decEq x y)
+    decEq (Done x) (Done y) | Yes prf = Yes (cong Done prf)
+    decEq (Done x) (Done y) | No nprf = No (\ Refl => nprf Refl)
+  decEq (Done _) (Call _ _) = No absurd
+  decEq (Call _ _) (Done _) = No absurd
+  decEq (Call f xs) (Call g ys) with (decEq f g)
+    decEq (Call f xs) (Call g ys) | No nopeq = No (\ Refl => nopeq Refl)
+    decEq (Call f xs) (Call f ys) | Yes Refl with (assert_total $ decEq xs ys)
+      decEq (Call f xs) (Call f ys) | Yes Refl | Yes eq = Yes (cong (Call f) eq)
+      decEq (Call f xs) (Call f ys) | Yes Refl | No noargeq = No (\ Refl => noargeq Refl)
 
 namespace Term
 
