@@ -5,6 +5,7 @@ import Data.String
 import Frex
 import Frexlet.Monoid.Theory
 import Frexlet.Monoid
+import Frexlet.Monoid.Notation.Multiplicative
 
 import Frex.Axiom
 import Frex.Free.Construction
@@ -17,29 +18,7 @@ import Text.PrettyPrint.Prettyprinter
 
 %default total
 
-namespace Syntax
-
-  public export
-  Zero : Term Signature (Fin n)
-  Zero = call {n = Z} Neutral
-
-  public export
-  (*) : Term Signature (Fin n) -> Term Signature (Fin n) ->
-        Term Signature (Fin n)
-  (*) = call {n = 2} Product
-
 namespace Context
-
-  public export
-  Zero : Term Signature (Either (Term Signature (Fin 10)) (Fin n))
-  Zero = call {n = Z} Neutral
-
-  public export
-  (*) : Term Signature (Either (Term Signature (Fin 10)) (Fin n)) ->
-        Term Signature (Either (Term Signature (Fin 10)) (Fin n)) ->
-        Term Signature (Either (Term Signature (Fin 10)) (Fin n))
-  (*) = call {n = 2} Product
-
   public export
   HOLE : Fin n -> Term Signature (Either (Term Signature (Fin 10)) (Fin n))
   HOLE k = Done (Right k)
@@ -59,22 +38,24 @@ infix 0 ~~
 (~~) = (|-) {pres = MonoidTheory}
             (QuotientData MonoidTheory (irrelevantCast (Fin 10)))
 
-myProof : (X 0 * Zero) ~~ (Zero * X 0)
+myProof : (X 0 .*. I1) ~~ (I1 .*. X 0)
 myProof
-  = Transitive (byAxiom MonoidTheory RgtNeutrality)
-  $ Sym $ byAxiom MonoidTheory LftNeutrality
+  = Free.prove (FreeMonoidOver _)
+  $ (X 0 .*. I1) =-= (I1 .*. X 0)
 
-myProof2 : (X 0 * (X 0 * Zero))
-        ~~ (X 0 * (Zero * X 0))
+myProof2 : (X 0 .*. (X 0 .*. I1))
+        ~~ (X 0 .*. (I1 .*. X 0))
 myProof2
-  = congruence 1 (:~ X 0 * HOLE 0) myProof
+  = Free.prove (FreeMonoidOver _)
+  $   (X 0 .*. (X 0 .*. I1))
+  =-= (X 0 .*. (I1 .*. X 0))
 
-myProof3 : (X 0 * (X 1 * (X 2 * X 3)))
-        ~~ (X 0 * Zero * (X 1 * X 2 * X 3))
+myProof3 : (X 0 .*. (X 1 .*. (X 2 .*. X 3)))
+        ~~ (X 0 .*. I1 .*. (X 1 .*. X 2 .*. X 3))
 myProof3
-  = congruence 2 (HOLE 0 * HOLE 1)
-    (Sym $ byAxiom MonoidTheory RgtNeutrality)
-    (byAxiom MonoidTheory Associativity)
+  = Free.prove (FreeMonoidOver _)
+  $   (X 0 .*. (X 1 .*. (X 2 .*. X 3)))
+  =-= (X 0 .*. I1 .*. (X 1 .*. X 2 .*. X 3))
 
 main : IO Builtin.Unit
 main = do
