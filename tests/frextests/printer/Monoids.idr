@@ -93,7 +93,7 @@ main = do
   printLn  $ display unicode @{BORING} myProof3
 
   -- latex
-  Right () <- writeFile "equations-output.tex" $
+  Right () <- writeFile "build/equations-output.tex" $
     unlines [ "\\documentclass{article}"
             , "\\usepackage{amsmath}"
             , "\\usepackage{newunicodechar}"

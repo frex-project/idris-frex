@@ -1,4 +1,4 @@
 rm -rf build
 
 $1 --exec main -p frex -p contrib Monoids.idr
-diff equations-expected.tex equations-output.tex >> output
+diff equations-expected.tex build/equations-output.tex &>> output

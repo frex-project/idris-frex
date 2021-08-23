@@ -295,7 +295,7 @@ unicode : Printer
 unicode = MkPrinter
   { beginProof       = Nothing
   , endProof         = Nothing
-  , sepJustification = hardline
+  , sepJustification = hardline <+> "  "
   , forwardStep      = ("≡[", "⟩")
   , backwardStep     = ("≡⟨", "]")
   , newline          = ""
@@ -306,7 +306,7 @@ latex : Printer
 latex = MkPrinter
   { beginProof       = Just "\\begin{align*}"
   , endProof         = Just "\\end{align*}"
-  , sepJustification = "& \\quad "
+  , sepJustification = hardline <+> "  & \\quad "
   , forwardStep      = ("\\text{=[", "⟩}")
   , backwardStep     = ("\\text{=⟨", "]}")
   , newline          = "\\\\"
@@ -334,10 +334,10 @@ namespace Derivation
     byProof : Bool -> Doc () -> Doc ()
     byProof False d
       = let (beg, end) = printer.forwardStep in
-        indent 2 $ pretty beg <++> d <++> pretty end <+> pretty printer.newline
+        pretty beg <++> d <++> pretty end <+> pretty printer.newline
     byProof True  d
       = let (beg, end) = printer.backwardStep in
-        indent 2 $ pretty beg <++> d <++> pretty end <+> pretty printer.newline
+        pretty beg <++> d <++> pretty end <+> pretty printer.newline
 
     base : Bool ->
            Either (U a) (Focus pres.signature a.algebra) ->
