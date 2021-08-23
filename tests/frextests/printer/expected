@@ -21,8 +21,6 @@ Axioms:
   ≡⟨ Associativity ]
 ε • x • [ε • ε]
   ≡[ Left neutrality ⟩
-(ε • [x]) • ε
-  ≡[ boring ⟩
 ([ε] • x) • ε
   ≡⟨ Left neutrality ]
 ((ε • ε) • x) • ε
@@ -62,10 +60,6 @@ x • ([ε • x] • ε)
   ≡[ Associativity ⟩
 ε • x • (([ε • ε] • x) • ε)
   ≡[ Left neutrality ⟩
-(ε • [x]) • (ε • x) • ε
-  ≡[ boring ⟩
-ε • x • ((ε • [x]) • ε)
-  ≡[ boring ⟩
 ε • x • (([ε] • x) • ε)
   ≡⟨ Left neutrality ]
 ε • x • [((ε • ε) • x) • ε]
@@ -143,14 +137,6 @@ x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
   ≡[ Associativity ⟩
 ε • x • (([ε • ε] • y) • (ε • z) • (ε • a) • ε)
   ≡[ Left neutrality ⟩
-(ε • [x]) • (ε • y) • (ε • z) • (ε • a) • ε
-  ≡[ boring ⟩
-ε • x • ((ε • [y]) • (ε • z) • (ε • a) • ε)
-  ≡[ boring ⟩
-ε • x • (ε • y • ((ε • [z]) • (ε • a) • ε))
-  ≡[ boring ⟩
-ε • x • (ε • y • (ε • z • ((ε • [a]) • ε)))
-  ≡[ boring ⟩
 ε • x • (([ε] • y) • (ε • z) • (ε • a) • ε)
   ≡⟨ Left neutrality ]
 ε • x • [((ε • ε) • y) • (ε • z) • (ε • a) • ε]

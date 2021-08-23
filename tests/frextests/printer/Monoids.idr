@@ -12,22 +12,13 @@ import Frex.Free.Construction
 import Frex.Free.Construction.Combinators
 import Frex.Free.Construction.Linear
 
+import Data.Fin
+import Decidable.Equality
 import Data.Either.Extra
 import Data.Setoid.Vect.Inductive
 import Text.PrettyPrint.Prettyprinter
 
 %default total
-
-namespace Context
-  public export
-  HOLE : Fin n -> Term Signature (Either (Term Signature (Fin 10)) (Fin n))
-  HOLE k = Done (Right k)
-
-  prefix 100 :~
-  public export
-  (:~) : Term Signature (Fin 10) ->
-         Term Signature (Either (Term Signature (Fin 10)) (Fin n))
-  (:~) t = Done (Left t)
 
 [BORING] Show a where
   show _ = "boring"
@@ -64,8 +55,8 @@ main = do
   putStrLn (banner "Monoid Theory")
   putStrLn $ show $ display MonoidTheory
   putStrLn (banner "Simple proof")
-  putStrLn $ show $ display @{BORING} myProof
+  putStrLn $ show $ Proof.display @{BORING} (Just %search) myProof
   putStrLn (banner "Proof with congruence")
-  putStrLn $ show $ display @{BORING} myProof2
+  putStrLn $ show $ display @{BORING} (Just %search) myProof2
   putStrLn (banner "Proof with different congruences")
-  putStrLn $ show $ display @{BORING} myProof3
+  putStrLn $ show $ display @{BORING} (Just %search) myProof3

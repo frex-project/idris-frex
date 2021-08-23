@@ -11,6 +11,7 @@ import Data.String
 import Data.Relation
 import Data.Relation.Closure.Symmetric
 import Data.Relation.Closure.ReflexiveTransitive
+import Decidable.Equality
 import Text.PrettyPrint.Prettyprinter
 
 %default total
@@ -245,17 +246,21 @@ cong t eq
 
 linearise : {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
+            Maybe (DecEq (U a)) ->
             (|-) {pres} a ~> Derivation pres a
-linearise (Include p) = [Fwd (Here (Include p))]
-linearise (Refl x) = []
-linearise (Sym p) = reverse sym (linearise p)
-linearise (Transitive p q) = linearise p ++ linearise q
-linearise (ByAxiom eq env) = [Fwd (Here (ByAxiom eq env))]
-linearise (Congruence t eq)
+linearise Nothing (Include p) = [Fwd (Here (Include p))]
+linearise (Just dec) (Include p) with (decEq x y)
+  linearise (Just dec) (Include p) | Yes eq = rewrite eq in []
+  linearise (Just dec) (Include p) | No _ = [Fwd (Here (Include p))]
+linearise mdec (Refl x) = []
+linearise mdec (Sym p) = reverse sym (linearise mdec p)
+linearise mdec (Transitive p q) = linearise mdec p ++ linearise mdec q
+linearise mdec (ByAxiom eq env) = [Fwd (Here (ByAxiom eq env))]
+linearise mdec (Congruence t eq)
   = concat
   $ map locate
   $ cong {sig = pres.signature} {r = Derivation pres a} t
-  $ \ v => linearise (eq v)
+  $ \ v => linearise mdec (eq v)
 
 public export
 record Focus (sig : Signature) (a : Algebra sig) where
@@ -327,5 +332,6 @@ namespace Proof
             Show (U a) =>
             Show (Op pres.signature) =>
             HasPrecedence pres.signature =>
+            Maybe (DecEq (U a)) ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display @{showR} = Derivation.display @{showR} . linearise
+  display @{showR} mdec = Derivation.display @{showR} . linearise mdec
