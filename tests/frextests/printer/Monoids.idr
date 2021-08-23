@@ -15,6 +15,8 @@ import Data.Either.Extra
 import Data.Setoid.Vect.Inductive
 import Text.PrettyPrint.Prettyprinter
 
+import System.File
+
 %default total
 
 namespace Syntax
@@ -78,13 +80,34 @@ myProof3
 
 main : IO Builtin.Unit
 main = do
+  -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
-  putStrLn (banner "Monoid Theory")
-  putStrLn $ show $ display MonoidTheory
-  putStrLn (banner "Simple proof")
-  putStrLn $ show $ display @{BORING} myProof
-  putStrLn (banner "Proof with congruence")
-  putStrLn $ show $ display @{BORING} myProof2
-  putStrLn (banner "Proof with different congruences")
-  putStrLn $ show $ display @{BORING} myProof3
+  putStrLn $ banner "Monoid Theory"
+  printLn  $ display MonoidTheory
+  putStrLn $ banner "Simple proof"
+  printLn  $ display unicode @{BORING} myProof
+  putStrLn $ banner "Proof with congruence"
+  printLn  $ display unicode @{BORING} myProof2
+  putStrLn $ banner "Proof with different congruences"
+  printLn  $ display unicode @{BORING} myProof3
+
+  -- latex
+  Right () <- writeFile "equations-output.tex" $
+    unlines [ "\\documentclass{article}"
+            , "\\usepackage{amsmath}"
+            , "\\usepackage{newunicodechar}"
+            , "\\newunicodechar{ε}{\\ensuremath{\\varepsilon}}"
+            , "\\newunicodechar{•}{\\ensuremath{\\bullet}}"
+            , "\\begin{document}"
+            , "\\subsection{myProof}"
+            , show $ display latex @{BORING} myProof
+            , "\\subsection{myProof2}"
+            , show $ display latex @{BORING} myProof2
+            , "\\subsection{myProof3}"
+            , show $ display latex @{BORING} myProof3
+            , "\\end{document}"
+            ]
+    | Left err => print err
+
+  pure ()
