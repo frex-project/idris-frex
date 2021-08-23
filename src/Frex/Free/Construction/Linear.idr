@@ -325,7 +325,7 @@ namespace Derivation
 namespace Proof
 
   export
-  display : {pres : Presentation} ->
+  displayPerhapsWithDecEq : {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
@@ -334,4 +334,29 @@ namespace Proof
             HasPrecedence pres.signature =>
             Maybe (DecEq (U a)) ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display @{showR} mdec = Derivation.display @{showR} . linearise mdec
+  displayPerhapsWithDecEq @{showR} mdec
+    = Derivation.display @{showR} . linearise mdec
+
+  export
+  display : {pres : Presentation} ->
+            {a : PresetoidAlgebra pres.signature} ->
+            ({x, y : U a} -> Show (a.relation x y)) =>
+            Show (pres .Axiom) =>
+            Show (U a) =>
+            Show (Op pres.signature) =>
+            HasPrecedence pres.signature =>
+            {auto dec : DecEq (U a)} ->
+            {x, y : U a} -> (|-) {pres} a x y -> Doc ()
+  display @{showR} {dec} = displayPerhapsWithDecEq @{showR} (Just dec)
+
+  export
+  displayWithDecEq
+    : {pres : Presentation} ->
+      {a : PresetoidAlgebra pres.signature} ->
+      ({x, y : U a} -> Show (a.relation x y)) =>
+      Show (pres .Axiom) =>
+      Show (U a) =>
+      Show (Op pres.signature) =>
+      HasPrecedence pres.signature =>
+      {x, y : U a} -> (|-) {pres} a x y -> Doc ()
+  displayWithDecEq @{showR} = displayPerhapsWithDecEq @{showR} Nothing

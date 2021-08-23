@@ -55,8 +55,8 @@ main = do
   putStrLn (banner "Monoid Theory")
   putStrLn $ show $ display MonoidTheory
   putStrLn (banner "Simple proof")
-  putStrLn $ show $ Proof.display @{BORING} (Just %search) myProof
+  putStrLn $ show $ Proof.display @{BORING} myProof
   putStrLn (banner "Proof with congruence")
-  putStrLn $ show $ display @{BORING} (Just %search) myProof2
+  putStrLn $ show $ display @{BORING} myProof2
   putStrLn (banner "Proof with different congruences")
-  putStrLn $ show $ display @{BORING} (Just %search) myProof3
+  putStrLn $ show $ display @{BORING} myProof3
