@@ -403,7 +403,8 @@ namespace Proof
 
   export
   displayWithDecEq
-    : {pres : Presentation} ->
+    : Printer ->
+      {pres : Presentation} ->
       {a : PresetoidAlgebra pres.signature} ->
       ({x, y : U a} -> Show (a.relation x y)) =>
       Show (pres .Axiom) =>
@@ -411,5 +412,4 @@ namespace Proof
       Show (Op pres.signature) =>
       HasPrecedence pres.signature =>
       {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayWithDecEq @{showR} = displayPerhapsWithDecEq @{showR} Nothing
->>>>>>> origin/main
+  displayWithDecEq printer @{showR} = displayPerhapsWithDecEq printer @{showR} Nothing
