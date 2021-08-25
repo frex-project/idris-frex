@@ -1,0 +1,130 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\usepackage{newunicodechar}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{•}{\ensuremath{\bullet}}
+\usepackage{ifthen}
+\usepackage{mathpartir}
+\newboolean{explanation}
+\setboolean{explanation}{false}
+\newcommand\explainabove[2]{\overset{\overset{%
+\clap{\text{\scriptsize #2}}}%
+{\downarrow}}{#1}}
+\newcommand\explainbelow[2]{\underset{\underset{%
+\clap{\text{\scriptsize #2}}}%
+{\uparrow}}{#1}}
+\newcommand\negate[1]{%
+  \ifthenelse{\boolean{#1}}{%
+    \setboolean{#1}{false}%
+    }{%
+    \setboolean{#1}{true}%
+    }%
+}
+\newcommand\explain[2]{%
+  \ifthenelse{\boolean{explanation}}{%
+    \explainabove{#1}{#2}%
+  }{%
+    \explainbelow{#1}{#2}%
+  }
+  \negate{explanation}
+}
+\begin{document}
+\subsection{myProof}
+\begin{mathpar}\mprset{flushleft}
+[x] • ε\explain={⟨ Left neutrality ]}
+[ε • x] • ε\explain={⟨ Right neutrality ]}
+((ε • x) • ε) • ε\explain={⟨ Associativity ]}
+ε • x • [ε • ε]\explain={[ Left neutrality ⟩}
+([ε] • x) • ε\explain={⟨ Left neutrality ]}
+((ε • ε) • x) • ε\explain={⟨ Associativity ]}
+(ε • ε) • x • ε\explain={⟨ Associativity ]}
+ε • [ε • x • ε]\explain={[ Associativity ⟩}
+ε • [(ε • x) • ε]\explain={[ Right neutrality ⟩}
+ε • [ε • x]\explain={[ Left neutrality ⟩}
+ε • x
+\end{mathpar}
+\subsection{myProof2}
+\begin{mathpar}\mprset{flushleft}
+x • ([x] • ε)\explain={⟨ Left neutrality ]}
+x • ([ε • x] • ε)\explain={⟨ Right neutrality ]}
+[x] • ((ε • x) • ε) • ε\explain={⟨ Left neutrality ]}
+[ε • x] • ((ε • x) • ε) • ε\explain={⟨ Right neutrality ]}
+(ε • x) • ε • [((ε • x) • ε) • ε]\explain={⟨ Associativity ]}
+(ε • x) • ε • (ε • x • [ε • ε])\explain={[ Left neutrality ⟩}
+((ε • x) • ε) • (ε • x) • ε\explain={⟨ Associativity ]}
+ε • x • (ε • [(ε • x) • ε])\explain={⟨ Associativity ]}
+ε • x • [ε • ε • x • ε]\explain={[ Associativity ⟩}
+ε • x • [(ε • ε) • x • ε]\explain={[ Associativity ⟩}
+ε • x • (([ε • ε] • x) • ε)\explain={[ Left neutrality ⟩}
+ε • x • (([ε] • x) • ε)\explain={⟨ Left neutrality ]}
+ε • x • [((ε • ε) • x) • ε]\explain={⟨ Associativity ]}
+ε • x • [(ε • ε) • x • ε]\explain={⟨ Associativity ]}
+ε • x • (ε • [ε • x • ε])\explain={[ Associativity ⟩}
+(ε • x) • ε • (ε • x) • ε\explain={[ Associativity ⟩}
+(ε • x) • ε • (([ε] • x) • ε)\explain={⟨ Left neutrality ]}
+(ε • x) • ε • [((ε • ε) • x) • ε]\explain={⟨ Associativity ]}
+(ε • x) • ε • [(ε • ε) • x • ε]\explain={⟨ Associativity ]}
+(ε • x) • ε • (ε • [ε • x • ε])\explain={[ Associativity ⟩}
+[(ε • x) • ε] • ε • (ε • x) • ε\explain={[ Right neutrality ⟩}
+[ε • x] • ε • (ε • x) • ε\explain={[ Left neutrality ⟩}
+x • (ε • [(ε • x) • ε])\explain={[ Right neutrality ⟩}
+x • (ε • [ε • x])\explain={[ Left neutrality ⟩}
+x • ε • x
+\end{mathpar}
+\subsection{myProof3}
+\begin{mathpar}\mprset{flushleft}
+x • (y • (z • [a]))\explain={⟨ Left neutrality ]}
+x • (y • (z • [ε • a]))\explain={⟨ Right neutrality ]}
+x • (y • ([z] • (ε • a) • ε))\explain={⟨ Left neutrality ]}
+x • (y • ([ε • z] • (ε • a) • ε))\explain={⟨ Right neutrality ]}
+x • ([y] • ((ε • z) • ε) • (ε • a) • ε)\explain={⟨ Left neutrality ]}
+x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)\explain={⟨ Right neutrality ]}
+[x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε\explain={⟨ Left neutrality ]}
+[ε • x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε\explain={⟨ Right neutrality ]}
+(ε • x) • ε • ((ε • y) • ε • [((ε • z) • ε) • (ε • a) • ε])\explain={⟨ Associativity ]}
+(ε • x) • ε • ((ε • y) • ε • (ε • z • (ε • [(ε • a) • ε])))\explain={⟨ Associativity ]}
+(ε • x) • ε • ((ε • y) • ε • (ε • z • [ε • ε • a • ε]))\explain={[ Associativity ⟩}
+(ε • x) • ε • ((ε • y) • ε • (ε • z • [(ε • ε) • a • ε]))\explain={[ Associativity ⟩}
+(ε • x) • ε • ((ε • y) • ε • (ε • z • (([ε • ε] • a) • ε)))\explain={[ Left neutrality ⟩}
+(ε • x) • ε • [((ε • y) • ε) • (ε • z) • (ε • a) • ε]\explain={⟨ Associativity ]}
+(ε • x) • ε • (ε • y • (ε • [(ε • z) • (ε • a) • ε]))\explain={⟨ Associativity ]}
+(ε • x) • ε • (ε • y • [ε • ε • z • (ε • a) • ε])\explain={[ Associativity ⟩}
+(ε • x) • ε • (ε • y • [(ε • ε) • z • (ε • a) • ε])\explain={[ Associativity ⟩}
+(ε • x) • ε • (ε • y • (([ε • ε] • z) • (ε • a) • ε))\explain={[ Left neutrality ⟩}
+((ε • x) • ε) • (ε • y) • (ε • z) • (ε • a) • ε\explain={⟨ Associativity ]}
+ε • x • (ε • [(ε • y) • (ε • z) • (ε • a) • ε])\explain={⟨ Associativity ]}
+ε • x • [ε • ε • y • (ε • z) • (ε • a) • ε]\explain={[ Associativity ⟩}
+ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]\explain={[ Associativity ⟩}
+ε • x • (([ε • ε] • y) • (ε • z) • (ε • a) • ε)\explain={[ Left neutrality ⟩}
+ε • x • (([ε] • y) • (ε • z) • (ε • a) • ε)\explain={⟨ Left neutrality ]}
+ε • x • [((ε • ε) • y) • (ε • z) • (ε • a) • ε]\explain={⟨ Associativity ]}
+ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]\explain={⟨ Associativity ]}
+ε • x • (ε • [ε • y • (ε • z) • (ε • a) • ε])\explain={[ Associativity ⟩}
+(ε • x) • ε • (ε • y) • (ε • z) • (ε • a) • ε\explain={[ Associativity ⟩}
+(ε • x • [ε]) • (ε • y) • (ε • z) • (ε • a) • ε\explain={⟨ Left neutrality ]}
+[(ε • x) • ε • ε] • (ε • y) • (ε • z) • (ε • a) • ε\explain={[ Associativity ⟩}
+((ε • x) • ε) • ε • (ε • y • (ε • z • (([ε] • a) • ε)))\explain={⟨ Left neutrality ]}
+((ε • x) • ε) • ε • (ε • y • (ε • z • [((ε • ε) • a) • ε]))\explain={⟨ Associativity ]}
+((ε • x) • ε) • ε • (ε • y • (ε • z • [(ε • ε) • a • ε]))\explain={⟨ Associativity ]}
+((ε • x) • ε) • ε • (ε • y • (ε • z • (ε • [ε • a • ε])))\explain={[ Associativity ⟩}
+((ε • x) • ε) • ε • (ε • y • [(ε • z) • ε • (ε • a) • ε])\explain={[ Associativity ⟩}
+((ε • x) • ε) • ε • [(ε • y) • ((ε • z) • ε) • (ε • a) • ε]\explain={[ Associativity ⟩}
+((ε • x) • ε) • ε • ((ε • y • (([ε] • z) • ε)) • (ε • a) • ε)\explain={⟨ Left neutrality ]}
+((ε • x) • ε) • ε • ((ε • y • [((ε • ε) • z) • ε]) • (ε • a) • ε)\explain={⟨ Associativity ]}
+((ε • x) • ε) • ε • ((ε • y • [(ε • ε) • z • ε]) • (ε • a) • ε)\explain={⟨ Associativity ]}
+((ε • x) • ε) • ε • ((ε • y • (ε • [ε • z • ε])) • (ε • a) • ε)\explain={[ Associativity ⟩}
+((ε • x) • ε) • ε • ([(ε • y) • ε • (ε • z) • ε] • (ε • a) • ε)\explain={[ Associativity ⟩}
+([(ε • x) • ε] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε\explain={[ Right neutrality ⟩}
+([ε • x] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε\explain={[ Left neutrality ⟩}
+x • ε • (([(ε • y) • ε] • (ε • z) • ε) • (ε • a) • ε)\explain={[ Right neutrality ⟩}
+x • ε • (([ε • y] • (ε • z) • ε) • (ε • a) • ε)\explain={[ Left neutrality ⟩}
+x • ε • ((y • [(ε • z) • ε]) • (ε • a) • ε)\explain={[ Right neutrality ⟩}
+x • ε • ((y • [ε • z]) • (ε • a) • ε)\explain={[ Left neutrality ⟩}
+x • ε • (y • z • [(ε • a) • ε])\explain={[ Right neutrality ⟩}
+x • ε • (y • z • [ε • a])\explain={[ Left neutrality ⟩}
+(x • ε) • (y • z) • a
+\end{mathpar}
+\end{document}

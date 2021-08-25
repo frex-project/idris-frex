@@ -280,10 +280,106 @@ namespace Focus
     let focus = "[" ++ show t ++ "]" in
     Term.display b (map (MkRaw . maybe focus show) ctx)
 
+record Printer where
+  constructor MkPrinter
+  ||| Opening a proof environment
+  beginProof       : Maybe String     -- e.g. \begin{align*}
+  ||| Closing a proof environment
+  endProof         : Maybe String     -- e.g. \end{align*}
+  ||| Separation between LHS and justification
+  sepJustification : Doc ()
+  ||| Forward step brackets
+  forwardStep      : (String, String) -- e.g. ≡[ and ⟩
+  ||| Backward (symmetric) step brackets
+  backwardStep     : (String, String) -- e.g. ≡⟨ and ]
+  ||| new line separator (on top of literal newlines)
+  newline          : String -- e.g. \\ in a latex align environment
+
+export
+unicode : Printer
+unicode = MkPrinter
+  { beginProof       = Nothing
+  , endProof         = Nothing
+  , sepJustification = hardline <+> "  "
+  , forwardStep      = ("≡[", "⟩")
+  , backwardStep     = ("≡⟨", "]")
+  , newline          = ""
+  }
+
+export
+latex : Printer
+latex = MkPrinter
+  { beginProof       = Just "\\begin{align*}"
+  , endProof         = Just "\\end{align*}"
+  , sepJustification = hardline <+> "  & \\quad "
+  , forwardStep      = ("\\text{=[", "⟩}")
+  , backwardStep     = ("\\text{=⟨", "]}")
+  , newline          = "\\\\"
+  }
+
+export
+latexPreamble : String
+latexPreamble
+  = #"""
+    \usepackage{amsmath}
+    \usepackage{newunicodechar}
+    \newunicodechar{ε}{\ensuremath{\varepsilon}}
+    \newunicodechar{•}{\ensuremath{\bullet}}
+    """#
+
+export
+compactLatex : Printer
+compactLatex = MkPrinter
+  { beginProof       = Just #"\begin{mathpar}\mprset{flushleft}"#
+  , endProof         = Just #"\end{mathpar}"#
+  , sepJustification = #"\explain={"#
+  , forwardStep      = (#"["#, "⟩}")
+  , backwardStep     = (#"⟨"#, "]}")
+  , newline          = #""#
+  }
+
+export
+compactLatexPreamble : String
+compactLatexPreamble = #"""
+              \usepackage{amsmath}
+              \usepackage{mathtools}
+              \usepackage{amssymb}
+              \usepackage{newunicodechar}
+              \usepackage{newunicodechar}
+              \newunicodechar{ε}{\ensuremath{\varepsilon}}
+              \newunicodechar{•}{\ensuremath{\bullet}}
+              \usepackage{ifthen}
+              \usepackage{mathpartir}
+              \newboolean{explanation}
+              \setboolean{explanation}{false}
+              \newcommand\explainabove[2]{\overset{\overset{%
+              \clap{\text{\scriptsize #2}}}%
+              {\downarrow}}{#1}}
+              \newcommand\explainbelow[2]{\underset{\underset{%
+              \clap{\text{\scriptsize #2}}}%
+              {\uparrow}}{#1}}
+              \newcommand\negate[1]{%
+                \ifthenelse{\boolean{#1}}{%
+                  \setboolean{#1}{false}%
+                  }{%
+                  \setboolean{#1}{true}%
+                  }%
+              }
+              \newcommand\explain[2]{%
+                \ifthenelse{\boolean{explanation}}{%
+                  \explainabove{#1}{#2}%
+                }{%
+                  \explainbelow{#1}{#2}%
+                }
+                \negate{explanation}
+              }
+              """#
+
 namespace Derivation
 
   export
-  display : {pres : Presentation} ->
+  display : Printer ->
+            {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
@@ -291,22 +387,33 @@ namespace Derivation
             Show (Op pres.signature) =>
             HasPrecedence pres.signature =>
             {x, y : U a} -> Derivation pres a x y -> Doc ()
-  display @{showR} prf = vcat [vcat (steps prf), pretty (show y)] where
+  display printer @{showR} prf = vcat $ concat {t = List}
+     [ toList (pretty <$> printer.beginProof)
+     , [ vcat (steps prf)
+       , pretty (show y) ]
+     , toList (pretty <$> printer.endProof)
+     ] where
 
     byProof : Bool -> Doc () -> Doc ()
-    byProof False d = indent 2 $ "≡[" <++> d <++> "⟩"
-    byProof True  d = indent 2 $ "≡⟨" <++> d <++> "]"
+    byProof False d
+      = let (beg, end) = printer.forwardStep in
+        pretty beg <++> d <++> pretty end <+> pretty printer.newline
+    byProof True  d
+      = let (beg, end) = printer.backwardStep in
+        pretty beg <++> d <++> pretty end <+> pretty printer.newline
 
     base : Bool ->
            Either (U a) (Focus pres.signature a.algebra) ->
-           Doc () -> List (Doc ())
-    base b ctx p =
+           Doc () -> Doc ()
+    base b ctx p = hcat
       [ either (pretty . show) (Focus.display True) ctx
-      , byProof b p]
+      , printer.sepJustification
+      , byProof b p
+      ]
 
     cong : {begin, end : U a} -> Bool ->
            Locate pres.signature a.algebra (Step pres a) begin end ->
-           List (Doc ())
+           Doc ()
     cong b (Here p)
       = base b (Left (if b then end else begin))
       $ display @{showR} p
@@ -314,18 +421,20 @@ namespace Derivation
       = base b (Right (MkFocus t (if b then rhs else lhs)))
       $ display @{showR} p
 
-    step : {begin, end : U a} -> Closure pres a begin end -> List (Doc ())
+    step : {begin, end : U a} -> Closure pres a begin end -> Doc ()
     step (Fwd p) = cong False p
     step (Bwd p) = cong True p
 
     steps  : {begin : U a} -> Derivation pres a begin end -> List (Doc ())
     steps [] = []
-    steps (r :: rs) = step r ++ steps rs
+    steps (r :: rs) = step r :: steps rs
 
 namespace Proof
 
   export
-  displayPerhapsWithDecEq : {pres : Presentation} ->
+  displayPerhapsWithDecEq :
+            Printer ->
+            {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
@@ -334,11 +443,12 @@ namespace Proof
             HasPrecedence pres.signature =>
             Maybe (DecEq (U a)) ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayPerhapsWithDecEq @{showR} mdec
-    = Derivation.display @{showR} . linearise mdec
+  displayPerhapsWithDecEq printer @{showR} mdec
+    = Derivation.display printer @{showR} . linearise mdec
 
   export
-  display : {pres : Presentation} ->
+  display : Printer ->
+            {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
@@ -347,11 +457,13 @@ namespace Proof
             HasPrecedence pres.signature =>
             {auto dec : DecEq (U a)} ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display @{showR} {dec} = displayPerhapsWithDecEq @{showR} (Just dec)
+  display printer @{showR} {dec}
+    = displayPerhapsWithDecEq printer @{showR} (Just dec)
 
   export
-  displayWithDecEq
-    : {pres : Presentation} ->
+  displayWithoutDecEq
+    : Printer ->
+      {pres : Presentation} ->
       {a : PresetoidAlgebra pres.signature} ->
       ({x, y : U a} -> Show (a.relation x y)) =>
       Show (pres .Axiom) =>
@@ -359,4 +471,5 @@ namespace Proof
       Show (Op pres.signature) =>
       HasPrecedence pres.signature =>
       {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayWithDecEq @{showR} = displayPerhapsWithDecEq @{showR} Nothing
+  displayWithoutDecEq printer @{showR}
+    = displayPerhapsWithDecEq printer @{showR} Nothing

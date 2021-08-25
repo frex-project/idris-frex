@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\newcommand\explainsym{\mid}
+\usepackage{flexisym}
+\usepackage{breqn}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{•}{\ensuremath{\bullet}}
+\newcommand\explain[2]{\overset{\overset{\clap{\text{\scriptsize #2}}}%
+    {\explainsym}}{#1}}
+\begin{document}
+\subsection{myProof}
+\begin{dmath*}
+x %• ε
+  \explain={foobar}
+x
+  =%\explain={⟨ Left neutrality ]}
+ε • x
+\end{dmath*}
+\subsection{myProof2}
+\begin{align*}
+x • [x • ε]
+  & \quad \text{=[ Right neutrality ⟩}\\
+x • [x]
+  & \quad \text{=⟨ Left neutrality ]}\\
+x • ε • x
+\end{align*}
+\subsection{myProof3}
+\begin{align*}
+[x] • y • z • a
+  & \quad \text{=⟨ Right neutrality ]}\\
+x • ε • [y • z • a]
+  & \quad \text{=[ Associativity ⟩}\\
+(x • ε) • (y • z) • a
+\end{align*}
+\end{document}

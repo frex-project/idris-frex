@@ -18,6 +18,8 @@ import Data.Either.Extra
 import Data.Setoid.Vect.Inductive
 import Text.PrettyPrint.Prettyprinter
 
+import System.File
+
 %default total
 
 [BORING] Show a where
@@ -48,15 +50,51 @@ myProof3
   $   (X 0 .*. (X 1 .*. (X 2 .*. X 3)))
   =-= (X 0 .*. I1 .*. (X 1 .*. X 2 .*. X 3))
 
+
 main : IO Builtin.Unit
 main = do
+  -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
-  putStrLn (banner "Monoid Theory")
-  putStrLn $ show $ display MonoidTheory
-  putStrLn (banner "Simple proof")
-  putStrLn $ show $ Proof.display @{BORING} myProof
-  putStrLn (banner "Proof with congruence")
-  putStrLn $ show $ display @{BORING} myProof2
-  putStrLn (banner "Proof with different congruences")
-  putStrLn $ show $ display @{BORING} myProof3
+  putStrLn $ banner "Monoid Theory"
+  printLn  $ display MonoidTheory
+  putStrLn $ banner "Simple proof"
+  printLn  $ display unicode @{BORING} myProof
+  putStrLn $ banner "Proof with congruence"
+  printLn  $ display unicode @{BORING} myProof2
+  putStrLn $ banner "Proof with different congruences"
+  printLn  $ display unicode @{BORING} myProof3
+
+  let output = #"\documentclass{article}"#
+              :: latexPreamble
+              ::
+              [ #"\begin{document}"#
+              , #"\subsection{myProof}"#
+              , show $ display latex @{BORING} myProof
+              , #"\subsection{myProof2}"#
+              , show $ display latex @{BORING} myProof2
+              , #"\subsection{myProof3}"#
+              , show $ display latex @{BORING} myProof3
+              , #"\end{document}"#
+              ]
+
+  let compact = #"\documentclass{article}"#
+            :: compactLatexPreamble
+            ::
+            [ #"\begin{document}"#
+            , #"\subsection{myProof}"#
+            , show $ display compactLatex @{BORING} myProof
+            , #"\subsection{myProof2}"#
+            , show $ display compactLatex @{BORING} myProof2
+            , #"\subsection{myProof3}"#
+            , show $ display compactLatex @{BORING} myProof3
+            , #"\end{document}"#
+            ]
+  -- latex
+  Right () <- writeFile "build/equations-output.tex" (unlines output)
+    | Left err => print err
+  Right () <- writeFile "build/equations-output-compact.tex" $
+    unlines compact
+    | Left err => print err
+
+  pure ()
