@@ -51,17 +51,6 @@ myProof3
   =-= (X 0 .*. I1 .*. (X 1 .*. X 2 .*. X 3))
 
 
-export
-latex' : Printer
-latex' = MkPrinter
-  { beginProof       = Just #"\begin{mathpar}\mprset{flushleft}"#
-  , endProof         = Just #"\end{mathpar}"#
-  , sepJustification = #"\explain={"#
-  , forwardStep      = (#"["#, "⟩}")
-  , backwardStep     = (#"⟨"#, "]}")
-  , newline          = #""#
-  }
-
 main : IO Builtin.Unit
 main = do
   -- unicode
@@ -76,68 +65,30 @@ main = do
   putStrLn $ banner "Proof with different congruences"
   printLn  $ display unicode @{BORING} myProof3
 
-  let output = #"""
-              \documentclass{article}
-              \usepackage{amsmath}
-              \usepackage{newunicodechar}
-              \newunicodechar{ε}{\ensuremath{\varepsilon}}
-              \newunicodechar{•}{\ensuremath{\bullet}}
-              """#
+  let output = #"\documentclass{article}"#
+              :: latexPreamble
               ::
-              [ "\\begin{document}"
-              , "\\subsection{myProof}"
+              [ #"\begin{document}"#
+              , #"\subsection{myProof}"#
               , show $ display latex @{BORING} myProof
-              , "\\subsection{myProof2}"
+              , #"\subsection{myProof2}"#
               , show $ display latex @{BORING} myProof2
-              , "\\subsection{myProof3}"
+              , #"\subsection{myProof3}"#
               , show $ display latex @{BORING} myProof3
-              , "\\end{document}"
+              , #"\end{document}"#
               ]
 
-  let compact = #"""
-              \documentclass{article}
-              \usepackage{amsmath}
-              \usepackage{mathtools}
-              \usepackage{amssymb}
-              \usepackage{newunicodechar}
-              \usepackage{newunicodechar}
-              \newunicodechar{ε}{\ensuremath{\varepsilon}}
-              \newunicodechar{•}{\ensuremath{\bullet}}
-              \usepackage{ifthen}
-              \usepackage{mathpartir}
-              \newboolean{explanation}
-              \setboolean{explanation}{false}
-              \newcommand\explainabove[2]{\overset{\overset{%
-              \clap{\text{\scriptsize #2}}}%
-              {\downarrow}}{#1}}
-              \newcommand\explainbelow[2]{\underset{\underset{%
-              \clap{\text{\scriptsize #2}}}%
-              {\uparrow}}{#1}}
-              \newcommand\negate[1]{%
-                \ifthenelse{\boolean{#1}}{%
-                  \setboolean{#1}{false}%
-                  }{%
-                  \setboolean{#1}{true}%
-                  }%
-              }
-              \newcommand\explain[2]{%
-                \ifthenelse{\boolean{explanation}}{%
-                  \explainabove{#1}{#2}%
-                }{%
-                  \explainbelow{#1}{#2}%
-                }
-                \negate{explanation}
-              }
-              """#
+  let compact = #"\documentclass{article}"#
+            :: compactLatexPreamble
             ::
-            [ "\\begin{document}"
-            , "\\subsection{myProof}"
-            , show $ display latex' @{BORING} myProof
-            , "\\subsection{myProof2}"
-            , show $ display latex' @{BORING} myProof2
-            , "\\subsection{myProof3}"
-            , show $ display latex' @{BORING} myProof3
-            , "\\end{document}"
+            [ #"\begin{document}"#
+            , #"\subsection{myProof}"#
+            , show $ display compactLatex @{BORING} myProof
+            , #"\subsection{myProof2}"#
+            , show $ display compactLatex @{BORING} myProof2
+            , #"\subsection{myProof3}"#
+            , show $ display compactLatex @{BORING} myProof3
+            , #"\end{document}"#
             ]
   -- latex
   Right () <- writeFile "build/equations-output.tex" (unlines output)

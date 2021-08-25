@@ -317,6 +317,64 @@ latex = MkPrinter
   , newline          = "\\\\"
   }
 
+export
+latexPreamble : String
+latexPreamble
+  = #"""
+    \usepackage{amsmath}
+    \usepackage{newunicodechar}
+    \newunicodechar{ε}{\ensuremath{\varepsilon}}
+    \newunicodechar{•}{\ensuremath{\bullet}}
+    """#
+
+export
+compactLatex : Printer
+compactLatex = MkPrinter
+  { beginProof       = Just #"\begin{mathpar}\mprset{flushleft}"#
+  , endProof         = Just #"\end{mathpar}"#
+  , sepJustification = #"\explain={"#
+  , forwardStep      = (#"["#, "⟩}")
+  , backwardStep     = (#"⟨"#, "]}")
+  , newline          = #""#
+  }
+
+export
+compactLatexPreamble : String
+compactLatexPreamble = #"""
+              \usepackage{amsmath}
+              \usepackage{mathtools}
+              \usepackage{amssymb}
+              \usepackage{newunicodechar}
+              \usepackage{newunicodechar}
+              \newunicodechar{ε}{\ensuremath{\varepsilon}}
+              \newunicodechar{•}{\ensuremath{\bullet}}
+              \usepackage{ifthen}
+              \usepackage{mathpartir}
+              \newboolean{explanation}
+              \setboolean{explanation}{false}
+              \newcommand\explainabove[2]{\overset{\overset{%
+              \clap{\text{\scriptsize #2}}}%
+              {\downarrow}}{#1}}
+              \newcommand\explainbelow[2]{\underset{\underset{%
+              \clap{\text{\scriptsize #2}}}%
+              {\uparrow}}{#1}}
+              \newcommand\negate[1]{%
+                \ifthenelse{\boolean{#1}}{%
+                  \setboolean{#1}{false}%
+                  }{%
+                  \setboolean{#1}{true}%
+                  }%
+              }
+              \newcommand\explain[2]{%
+                \ifthenelse{\boolean{explanation}}{%
+                  \explainabove{#1}{#2}%
+                }{%
+                  \explainbelow{#1}{#2}%
+                }
+                \negate{explanation}
+              }
+              """#
+
 namespace Derivation
 
   export
@@ -399,10 +457,11 @@ namespace Proof
             HasPrecedence pres.signature =>
             {auto dec : DecEq (U a)} ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display printer @{showR} {dec} = displayPerhapsWithDecEq printer @{showR} (Just dec)
+  display printer @{showR} {dec}
+    = displayPerhapsWithDecEq printer @{showR} (Just dec)
 
   export
-  displayWithDecEq
+  displayWithoutDecEq
     : Printer ->
       {pres : Presentation} ->
       {a : PresetoidAlgebra pres.signature} ->
@@ -412,4 +471,5 @@ namespace Proof
       Show (Op pres.signature) =>
       HasPrecedence pres.signature =>
       {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayWithDecEq printer @{showR} = displayPerhapsWithDecEq printer @{showR} Nothing
+  displayWithoutDecEq printer @{showR}
+    = displayPerhapsWithDecEq printer @{showR} Nothing
