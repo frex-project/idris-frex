@@ -22,6 +22,8 @@ import Frex.Free
 import public Frex.Free.Construction
 import Data.Setoid
 
+import Decidable.Equality
+
 import Syntax.PreorderReasoning
 
 public export
@@ -33,6 +35,61 @@ public export
 EvaluationSig : (sig : Signature) -> (0 a : Type) -> Signature
 EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 
+export
+(Show (Op sig), Show a) => Show (Op $ EvaluationSig sig a) where
+  show (MkOp (Op op     )) = show (MkOp op)
+  show (MkOp (Constant c)) = show c
+
+export
+HasPrecedence sig => HasPrecedence (EvaluationSig sig a) where
+  OpPrecedence (Op op) = OpPrecedence op
+
+
+depCong : {0 p : a -> Type} -> (0 f : (x : a) -> p x) -> {0 x1, x2 : a} -> (prf : x1 = x2) ->
+  f x1 = f x2
+depCong f Refl = Refl
+
+depCong2 : {0 p : a -> Type} -> {0 q : (x : a) -> (y : p x) -> Type} ->
+  (0 f : (x : a) -> (y : p x) -> q x y) ->
+  {0 x1, x2 : a} -> (prf : x1 = x2) ->
+  {0 y1 : p x1} -> {y2 : p x2} -> (prf : y1 = y2) ->
+  f x1 y1 = f x2 y2
+depCong2 f Refl Refl = Refl
+
+
+OpInjective : {0 op1, op2 : Op sig} -> op1 = op2 -> (op1.fst = op2.fst, op1.snd ~=~ op2.snd)
+OpInjective Refl = (Refl, Refl)
+
+OpEq : (arity1 = arity2) ->
+  {0 op1 : sig.OpWithArity arity1} ->
+  {0 op2 : sig.OpWithArity arity2} ->
+  (op1 ~=~ op2) -> MkOp {Sig=sig, fst = arity1} op1 = MkOp {Sig=sig, fst = arity2} op2
+OpEq Refl Refl = Refl
+
+OpEqEvalSig : (arity1 = arity2) ->
+  {0 op1 : sig.OpWithArity arity1} ->
+  {0 op2 : sig.OpWithArity arity2} ->
+  (op1 ~=~ op2) ->
+  MkOp {Sig=EvaluationSig sig a, fst = arity1} (Op op1) =
+  MkOp {Sig=EvaluationSig sig a, fst = arity2} (Op op2)
+OpEqEvalSig Refl Refl = Refl
+
+
+export
+(DecEq (Op sig), DecEq a) => DecEq (Op (EvaluationSig sig a)) where
+  decEq (MkOp {fst = fst1} (Op op1)) (MkOp {fst = fst2} (Op op2)) =
+    case decEq (MkOp op1) (MkOp op2) of
+      Yes op1_eq_op2 => Yes $ OpEqEvalSig
+                          (fst $ OpInjective op1_eq_op2)
+                          (snd $ OpInjective op1_eq_op2)
+      No contra => No (\Refl => contra $ Refl)
+  decEq (MkOp (Op op1)) (MkOp (Constant c2)) = No $ \case Refl impossible
+  decEq (MkOp (Constant c1)) (MkOp (Op op2)) = No $ \case Refl impossible
+  decEq (MkOp (Constant c1)) (MkOp (Constant c2)) = case decEq c1 c2 of
+    Yes Refl  => Yes Refl
+    No contra => No $ \Refl => contra Refl
+
+
 public export
 EvalEmbed : (sig : Signature) -> sig ~> EvaluationSig sig a
 EvalEmbed _ = OpTranslation Op
@@ -43,6 +100,12 @@ data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> T
   Evaluation  : {n : Nat} -> (f : sig.OpWithArity n) -> (cs : Vect n (U a)) ->
     EvaluationAxiom sig axioms a
   Assumption : {x,y : U a} -> a.equivalence.relation x y -> EvaluationAxiom sig axioms a
+
+export
+Show axioms => Show (EvaluationAxiom sig axioms a) where
+  show (Axiom ax) = show ax
+  show (Evaluation f cs) = "Evaluate"
+  show (Assumption x)    = "Assumption"
 
 public export
 EvaluationTheory : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) ->
