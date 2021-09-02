@@ -34,7 +34,7 @@ infix 0 ~~
 myProof : (X 0 .*. I1) ~~ (I1 .*. X 0)
 myProof
   = Free.prove (FreeMonoidOver _)
-  $ (X 0 .*. I1) =-= (I1 .*. X 0)
+  $ (X 0 .*. I1)src/ =-= (I1 .*. X 0)
 
 myProof2 : (X 0 .*. (X 0 .*. I1))
         ~~ (X 0 .*. (I1 .*. X 0))

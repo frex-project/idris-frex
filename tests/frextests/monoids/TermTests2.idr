@@ -6,6 +6,9 @@ import Frex
 import Frex.Free.Construction
 import Frex.Free.Construction.Combinators
 
+import Decidable.Equality
+import Frex.Free.Construction.Idris
+
 import Frexlet.Monoid
 import Frexlet.Monoid.Free
 import Frexlet.Monoid.Notation.Additive
@@ -45,3 +48,15 @@ Units = mkLemma (FreeMonoidOver $ cast $ Fin 1)
 
 units : (O1 .+. (X {k = 1} 0 .+. O1)) .+. O1 ~~ X 0
 units = byLemma Units
+
+tmp : String
+tmp = idris "" Trivial
+
+tmp2 : String
+tmp2 = idris "" Trivial2
+
+tmp3 : String
+tmp3 = idris "" Assoc
+
+tmp4 : String
+tmp4 = idris "" Units

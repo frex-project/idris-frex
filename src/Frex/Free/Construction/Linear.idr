@@ -244,6 +244,7 @@ cong t eq
     (bindTermMapFusion Right t (fromLeft rhs))
   $ cong' n (map Right t) eq
 
+export
 linearise : {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
             Maybe (DecEq (U a)) ->
@@ -274,11 +275,16 @@ namespace Focus
   Show Raw where show (MkRaw str) = str
 
   export
+  displayUsing : (Show a, Show (Op sig), HasPrecedence sig) =>
+                 Bool -> String -> Term sig (Maybe a) -> Doc ()
+  displayUsing b focus ctx = Term.display b (map (MkRaw . maybe focus show) ctx)
+
+  export
   display : (Show (U a), Show (Op sig), HasPrecedence sig) =>
             Bool -> Focus sig a -> Doc ()
   display b (MkFocus ctx t) =
     let focus = "[" ++ show t ++ "]" in
-    Term.display b (map (MkRaw . maybe focus show) ctx)
+    displayUsing b focus ctx
 
 record Printer where
   constructor MkPrinter
