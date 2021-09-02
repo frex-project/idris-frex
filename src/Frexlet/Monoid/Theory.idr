@@ -75,6 +75,21 @@ DecEq (Op Signature) where
   decEq (MkOp Product) (MkOp Neutral) = No absurd
 
 export
+Eq (Op Signature) where
+  MkOp Neutral == MkOp Neutral = True
+  MkOp Product == MkOp Product = True
+  _ == _ = False
+
+export
+Ord (Op Signature) where
+  compare (MkOp Neutral) (MkOp Neutral) = EQ
+  compare (MkOp Product) (MkOp Product) = EQ
+  compare (MkOp Neutral) _ = LT
+  compare _ (MkOp Neutral) = GT
+  compare (MkOp Product) _ = GT
+  compare _ (MkOp Product) = LT
+
+export
 Finite Axiom where
   enumerate = [ LftNeutrality
               , RgtNeutrality
