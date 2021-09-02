@@ -71,24 +71,26 @@ reverse f = reverseAcc f []
 
 export
 deloop : (Ord a, DecEq a) => RTList {a} r ~> RTList r
-deloop = go (singleton x [<]) where
+deloop = go empty (0, [<]) where
 
-  alreadySeen : SortedDMap a v -> (k : a) -> v k
-  alreadySeen acc k = case lookupPrecise k acc of
-    Just val => val
-    Nothing  => assert_total
-              $ idris_crash "The IMPOSSIBLE has happened in deloop"
-
-  -- Invariant: the accumulator already contains (the shortest) subproof
-  -- that `RTList r begin middle` holds
+  -- Invariant: the accumulator contains the shortest subproofs for all
+  -- of the values encountered on the way to middle.
+  -- The candidate witnesses the fact that we always have a proof for the
+  -- path we've already trodden from begin to middle. It is the shortest
+  -- currently known such proof.
   go : {begin, middle, end : a} ->
-       SortedDMap a (SnocRTList r begin) ->
+       SortedDMap a (\ end => (Nat, SnocRTList r begin end)) ->
+       (Nat, SnocRTList r begin middle) ->
        RTList r middle end -> RTList r begin end
-  go acc [] = alreadySeen acc middle <>> []
-  go acc ((r :: rs) {y = nextMiddle}) = case lookupPrecise nextMiddle acc of
-    -- we have a hit: we already know how to prove this!
-    Just {} => go acc rs
-    -- we don't have a hit: we need to record a proof!
-    Nothing =>
-      let prf = alreadySeen acc middle :< r in
-      go (insert nextMiddle prf acc) rs
+  go _ (_, prf) [] = prf <>> []
+  go acc (n, nprf) ((r :: rs) {y = nextMiddle}) =
+    let snprf := (S n, nprf :< r) in
+    case lookupPrecise nextMiddle acc of
+      -- We have a hit: is it a smaller proof?
+      -- We may have taken a different, shorter, path this time!
+      Just (m, mprf) =>
+        ifThenElse (m <= n)
+          (go acc (m, mprf) rs)
+          (go (insert nextMiddle snprf acc) snprf rs)
+      -- No hit: the current candidate is our best bet
+      Nothing => go (insert nextMiddle snprf acc) snprf rs
