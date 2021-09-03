@@ -1,9 +1,8 @@
 module Data.Relation.Closure.ReflexiveTransitive
 
-import Data.Maybe
 import Data.Relation
 import Decidable.Equality
-import Data.SnocList
+import Data.SnocList -- only for the (<>>) fixity declaration
 import Data.SortedMap.Dependent
 
 %default total
