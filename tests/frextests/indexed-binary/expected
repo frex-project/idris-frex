@@ -1,0 +1,5 @@
+1/3: Building VectReasoning (VectReasoning.idr)
+2/3: Building Binary (Binary.idr)
+3/3: Building Main (Main.idr)
+Main> ok
+Main> Bye for now!

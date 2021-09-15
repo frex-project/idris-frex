@@ -3,56 +3,27 @@
 ||| of Hardware Specifications with Dependent Types", by Edwin
 ||| C. Brady, James McKinna, Kevin Hammond, TFP2007.
 module Binary
--- Should probably be Data.Binary.Indexed or something
 
-import Data.List
-import Data.Vect
-import Data.Vect.Elem
-import Data.HVect
-import Data.Nat
-import Data.Nat.Division
 import Data.Fin
 
-import VectReasoning
-{-- rethink module hierarchy exports --}
-import Syntax.PreorderReasoning
-import Syntax.PreorderReasoning.Generic
-import Algebras
-import Models
-import CMonoids
-import Monoids
-import Frex
-
-import Free
-import CMonoids.Coproducts
-import CMonoids.Semiring
-import Decidable.Equality
-import Decidable.Order
+import Data.Nat
+import Data.Nat.Division
 import Data.Nat.Order
 import Data.Nat.Order.Properties
 import Data.Nat.Properties
 
+import Data.Vect
+import Data.Vect.Elem
+
+import Frex
+import Frex.Free
+
+import Frexlet.Monoid.Commutative
+import Frexlet.Monoid.Commutative.Nat
+
+import Syntax.PreorderReasoning
+
 import VectReasoning
-import Coproducts
-import Powers
-
-import CMonoids.Frex
-import Signatures
-import Presentations
-
-import Views
-
-import Util
-
---import Modular
-
-frexNat : {n : Nat} -> Free_extender CMonoid_Th Additive_Nat (Fin n)
-frexNat {n} = CMonoids.Frex.Frex Additive_Nat n
-
-public export
-(*:) : {a : Type} -> Nat -> Term CMonoid_Sig a -> Term CMonoid_Sig a
-(*:) 0 x = O_ 
-(*:) (S k) x = x :+: (k *: x)
 
 NZ2 : NonZero 2
 NZ2 = SIsNonZero
@@ -74,7 +45,7 @@ export
 keep : (0 prf : x ~=~ y) -> x ~=~ y
 keep Refl = Refl
 
--- Some artihmetic facts
+-- -- Some artihmetic facts
 
 export
 nonNegativeAddition : (b, c : Nat) -> b + c = 0 -> b = 0
@@ -85,8 +56,8 @@ multSucRightCancel : (a, b : Nat) -> (minusOne : Nat) -> a * (S minusOne) = b * 
 multSucRightCancel 0     b minusOne prf = sym $ nonNegativeAddition b (b * minusOne) $
   Calc $ 
   |~ b + (b * minusOne)
-  ~~ (1 * b) + (b * minusOne) ...(Frexify frexNat [b, b*minusOne] $
-                                  var 0 :+: var 1 =-= (1 *: var 0) :+: var 1)
+  ~~ (1 * b) + (b * minusOne) ...(Frex.solve 2 (Frex Nat.Additive) $
+                                  Dyn 0 .+. Dyn 1 =-= (the Nat 1 *. Dyn 0) .+. Dyn 1)
   ~~ (b * 1) + (b * minusOne) ...(cong (+ b*minusOne) $ multCommutative 1 b)
   ~~ b * (1 + minusOne)       ...(sym $ multDistributesOverPlusRight _ _ _)
   ~~ 0                        ...(sym prf)
@@ -128,10 +99,10 @@ modAffine a k n nz =
       mod_a_translated_decomposition = Calc $
         |~ n*k + a
         ~~ n*k + (r + (q*n)) ...(cong (n*k+) mod_a_decomposition)
-        ~~ (n*k + q*n) + r   ...(Frexify frexNat [n*k, q*n, r] $
-                                 var 0 :+: (var 2 :+: (var 1))
+        ~~ (n*k + q*n) + r   ...(Frex.solve 3 (Frex Nat.Additive) $
+                                 Dyn 0 :+: (Dyn 2 :+: (Dyn 1))
                                  =-=
-                                 (var 0 :+: var 1) :+: (var 2)
+                                 (Dyn 0 :+: Dyn 1) :+: (Dyn 2)
                                  )
         ~~ (k*n + q*n) + r   ...(cong (\u => (u + q*n) + r)
                                  $ multCommutative n k)
@@ -196,7 +167,6 @@ xor 0     (S k) = 1
 xor (S n) 0     = 1
 xor 0     0     = 0
   
-  
 andGate : Bit x -> Bit y -> Bit (x `and` y)
 andGate I I = I
 andGate O y = O
@@ -213,20 +183,21 @@ xorGate O I = I
 xorGate I O = I
 xorGate I I = O
 
------ a detour, teaching the type-check to brute-force binary arithmetic
--- Weird --- type cumulativity?
+-- ----- a detour, teaching the type-check to brute-force binary arithmetic
+-- -- Weird --- type cumulativity?
 mapVect : (f : a -> b) -> Vect n a -> Vect n b
-mapVect f xs = map f xs
+mapVect = map
 
 Tabulate : {n : Nat} -> {F : Fin n -> Type}
            -> (f : (i : Fin n) -> F i)
            -> HVect (mapVect F (range {len = n}))
 Tabulate {n = 0} f = []
 Tabulate {n = S k} f = 
-  let u = Tabulate {n = k} {F = F . FS } (\i => f (FS i)) -- `f . FS` doesn't work
-  in let 0 eq : ((mapVect (F . FS) $ range {len = k}) ~=~ (mapVect F (mapVect FS $ range {len = k})))
-         eq = sym $ mapFusionVect F FS $ range {len = k}
-      in ?hole --f FZ :: replace {p = HVect} eq u 
+  let u = Tabulate {n = k} {F = F . FS } (\i => f (FS i)) in
+  let eq : ((mapVect (F . FS) $ Data.Vect.Fin.tabulate Prelude.Basics.id {len = k}) ~=~ (mapVect F (Data.Vect.Fin.tabulate FS {len = k})))
+      eq = let y = sym (Data.Vect.Properties.Map.mapTabulate FS id)
+           in trans (sym (mapFusion F FS (tabulate id))) (cong (mapVect F) y) in
+     f FZ :: replace {p = HVect} eq u 
       
 ElemMap : (f : a -> b) -> x `Elem` xs -> f x `Elem` (mapVect f xs)
 ElemMap f  Here         = Here
@@ -246,33 +217,31 @@ TruthTableRows (S n) =
   let u = TruthTableRows n 
       result = map (\ row => (0 :: row)) u
              ++map (\ row => (1 :: row)) u
-      0 eq = Frexify frexNat [power 2 n]
-                     (var 0 :+: var 0 =-= var 0 :+: var 0 :+: sta 0)
-                     {prf = Refl}
-  in rewrite sym eq in result
+      eq : {n : Nat} -> (2 `power` n) + (0 * (2 `power` n)) = (2 `power` n)
+      eq = Frex.solve 1 (Frex Nat.Additive) $
+                     (Dyn 0 :+: Sta 0 =-= Dyn 0)
+  in rewrite eq {n} in result
 
 TruthTableCovers : {n : Nat} -> (env : Vect n (b : Nat ** Bit b)) -> map DPair.fst env `Elem` (TruthTableRows n)
 TruthTableCovers [] = Here
 TruthTableCovers {n = S n} ((MkDPair 0 O) :: xs) = 
-  --- A semiring frexlet would've been useful here!
-  let 0 u0 = multZeroLeftZero (power 2 n) in 
-  let 0 v0 =  Frexify frexNat [power 2 n] (var 0 :+: sta 0 =-= var 0) in
-  rewrite u0 in 
-  rewrite v0 in
-  ElemInLft {ys = map (1 ::) $ TruthTableRows n} $ ElemMap (0 ::) (TruthTableCovers xs)
+  let v0 : {n:Nat} -> (2 `power` n) + (0 * (2 `power` n)) = (2 `power` n)
+      v0 =  Frex.solve 1 (Frex Nat.Additive) $ (Dyn 0 :+: Sta 0 =-= Dyn 0) in
+  let result = ElemInLft {ys = map (1 ::) $ TruthTableRows n} $ ElemMap (0 ::) (TruthTableCovers xs) in
+  rewrite v0 {n} in
+  result
 
 TruthTableCovers {n = S n} ((MkDPair 1 I) :: xs) = 
-  -- A semiring frexlet would've been useful here!
-  let 0 u0 = multZeroLeftZero (power 2 n) in 
-  let 0 v0 =  Frexify frexNat [power 2 n] (var 0 :+: sta 0 =-= var 0) in
-  rewrite u0 in 
-  rewrite v0 in
-  ElemInRgt {ys = map (0 ::) $ TruthTableRows n} $ ElemMap (1 ::) (TruthTableCovers xs)
-
+  let v0 : {n:Nat} -> (2 `power` n) + (0 * (2 `power` n)) = (2 `power` n)
+      v0 =  Frex.solve 1 (Frex Nat.Additive) $ (Dyn 0 :+: Sta 0 =-= Dyn 0) in
+  let result = ElemInRgt {ys = map (0 ::) $ TruthTableRows n} $ ElemMap (1 ::) (TruthTableCovers xs) in
+  rewrite v0 {n} in
+  result
+  
 
 bruteForce : {n : Nat} -> (fg : Vect n Nat -> (Nat, Nat)) 
-          -> {auto prf : HVect $ Tabulate _ (\i => fst (fg (index i $ TruthTableRows n)) = 
-                                                   snd (fg (index i $ TruthTableRows n)))
+          -> {auto prf : HVect $ tabulate (\i => fst (fg (index i $ TruthTableRows n)) = 
+                                                 snd (fg (index i $ TruthTableRows n)))
              }
           -> (env : Vect n (b : Nat ** Bit b))
           -> fst (fg (map DPair.fst env)) 
@@ -280,12 +249,12 @@ bruteForce : {n : Nat} -> (fg : Vect n Nat -> (Nat, Nat))
 bruteForce fg {prf} env = 
   {- This is abominable. -}
   rewrite sym $ ElemToFinSpec (TruthTableCovers env) in 
-  rewrite sym $ index_Tabulate (power 2 n) (\i => fst (fg (index i $ TruthTableRows n)) = 
-                                                     snd (fg (index i $ TruthTableRows n)))
-                                              (ElemToFin $ TruthTableCovers env) in 
-  index (ElemToFin $ TruthTableCovers env) prf
+  rewrite sym $ indexTabulate (\i => fst (fg (index i $ TruthTableRows n)) = 
+                                     snd (fg (index i $ TruthTableRows n)))
+                              (elemToFin $ TruthTableCovers env) in 
+  index (elemToFin $ TruthTableCovers env) prf
 
------------------- end of detour --------------------------
+-- ------------------ end of detour --------------------------
 
 -- Not true for general c,x,y (e.g., for (0, 0, S k) we get (S k = 1)
 -- but true if we case split on l, r, and cIn
@@ -317,8 +286,8 @@ addBit cIn l r =
                                       )
           ) [(_ ** cIn), (_ ** l), (_ ** r)]}
 
--- Until we get a semiring frexlet, `little-endian` bits are probably going to be easier
--- The downside is that we will diverge from the paper
+-- -- Until we get a semiring frexlet, `little-endian` bits are probably going to be easier
+-- -- The downside is that we will diverge from the paper
 
 namespace Binary.BE
   public export
@@ -337,27 +306,23 @@ namespace Binary.LE
            -> Number (1 + width) val'
 
 
--- Smart constructors, flipping the indexing methods
+-- -- Smart constructors, flipping the indexing methods
 LENil : BE.Number 0 0
 LENil = []
 
+rightNeut : (p : Nat) -> p + 0 = p
+rightNeut p = Frex.solve 1 (Frex Nat.Additive) $ Dyn 0 :+: Sta 0 =-= Dyn 0
+
 LECons : Bit b -> BE.Number width val -> BE.Number (1 + width) (b + val + val)
 LECons bit [] = [bit] 
-LECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) 
-  = (::) bit' (LECons bit bits)
-  {valueFord = -- Again, a semi-ring frexlet would've been useful
-               rewrite multDistributesOverPlusLeft (power 2 width) ((power 2 width) + 0) b' in 
-               let u = Frexify frexNat [power 2 width] (var 0 :+: sta 0 =-= var 0) in
-               rewrite u in -- A bit bizzare we need to do this, but we get a type-checking error
-                            -- if we collapse the `let`
-    Frexify frexNat [(power 2 width)*b', b, val] (
-    let expWidth = var 0
-        b        = var 1
-        val      = var 2
-    in    (b :+: (expWidth :+: val)) :+: (expWidth :+: val) 
-      =-= (expWidth :+: expWidth) :+: ((b :+: val) :+: val))
-  }
-
+LECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
+   let r : {b, p, q, b', v : Nat} -> (b + (p * b' + v)) + (q * b' + v) = (p * b' + q * b') + ((b + v) + v) 
+       r = Frex.solve 4 (Frex Nat.Additive) $
+            (Dyn 0 :+: (Dyn 1 :+: Dyn 2)) :+: (Dyn 3 :+: Dyn 2) =-= (Dyn 1 :+: Dyn 3) :+: ((Dyn 0 :+: Dyn 2) :+: Dyn 2)
+    in
+  (::) bit' (LECons bit bits) { valueFord = rewrite rightNeut (power 2 width) in
+                                            rewrite multDistributesOverPlusLeft (power 2 width) (power 2 width) b' in
+                                            r {b,p=power 2 width,q=power 2 width,b',v=val} }
 
 LEtoBE : LE.Number w val -> BE.Number w val
 LEtoBE [] = LENil
@@ -368,18 +333,14 @@ BENil = []
 
 BECons : Bit b -> LE.Number width val -> LE.Number (1 + width) ((2 `power` width) * b + val)
 BECons bit [] = [bit]
-BECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) 
-  = (::) bit' (BECons bit bits)
-    {valueFord = -- again, these rewrites would become unnecessary with a ring frexlet
-                 rewrite multDistributesOverPlusLeft (power 2 width) ((power 2 width) + 0) b in 
-                 rewrite multDistributesOverPlusLeft (power 2 width) 0 b in 
-                 Frexify frexNat [(power 2 width) * b, b', val]
-                 let expWidth = var 0
-                     b'       = var 1
-                     val      = var 2
-                 in  (expWidth :+: (expWidth :+: sta 0)) :+: ((b' :+: val) :+: val) 
-                 =-= (b' :+: (expWidth :+: val)) :+: (expWidth :+: val) 
-                 }
+BECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
+  let r : {p, q, b, b', v : Nat} -> ((p + q) * b) + ((b' + v) + v) = (b' + ((p * b) + v)) + ((q * b) + v)
+      r {p, q, b, b', v} = rewrite multDistributesOverPlusLeft p q b in
+                           Frex.solve 4 (Frex Nat.Additive)
+                           $ ((Dyn 0 :+: Dyn 1)) :+: ((Dyn 2 :+: Dyn 3) :+: Dyn 3)
+                              =-= (Dyn 2 :+: (Dyn 0 :+: Dyn 3)) :+: (Dyn 1 :+: Dyn 3)
+   in
+   (::) bit' (BECons bit bits) { valueFord = rewrite rightNeut (power 2 width) in r }
 
 BEtoLE : BE.Number w val -> LE.Number w val
 BEtoLE [] = BENil
@@ -411,8 +372,10 @@ bitUnique : (x : Bit c_x) -> (y : Bit c_y) -> c_x = c_y -> x = y
 bitUnique O O Refl = Refl
 bitUnique I I Refl = Refl
 
-
-
+public export
+(*:) : Nat -> Term Theory.Signature (Either a (Fin n)) -> Term Theory.Signature (Either a (Fin n))
+(*:) 0 x = O2 
+(*:) (S k) x = x :+: (k *: x)
 
 uip : (eq1, eq2 : x ~=~ y) -> eq1 = eq2
 uip Refl Refl = Refl
@@ -427,15 +390,14 @@ bitsBound [] = LTESucc LTEZero
 bitsBound {width = S width} ((::) {b} {val} {val' = _} bit bits {valueFord = Refl}) = 
   CalcWith  $
   |~ 1 + ((b + val) + val)
-  ~~ (1 + b) + (2*val)       ...(Frexify frexNat [b, val] $
-                                 sta 1 :+: ((var 0 :+: var 1) :+: var 1)
+  ~~ (1 + b) + (2*val)       ...(Frex.solve 2 (Frex Nat.Additive) $
+                                 Sta 1 :+: ((Dyn 0 :+: Dyn 1) :+: Dyn 1)
                                  =-=
-                                 (sta 1 :+: var 0) :+: (2 *: var 1))
+                                 (Sta 1 :+: Dyn 0) :+: (2 *: Dyn 1))
   <~ 2 + (2*val)             ...(plusLteMonotoneRight (2*val) (1 + b) 2 $ bitBound bit)
   ~~ 2*(1 + val)             ...(sym $ multDistributesOverPlusRight 2 1 val)
   <~ (2 `power` (1 + width)) ...(multLteMonotoneRight 2 (1 + val) (2 `power` width)
                                 $ bitsBound bits)
-
 
 
 0 
@@ -448,28 +410,28 @@ numberUnique {width = S width}      -- coverage checker wants to replace `_` her
   ((::) {width = _} {b = b_x} {val = val_x} {val' = val'} bit_x bits_x {valueFord = valford_x})
   ((::) {width = _} {b = b_y} {val = val_y} {val' = _   } bit_y bits_y {valueFord = valford_y}) 
   Refl with (let 0 lemma : (a,b : Nat) -> (2*b + a = (a + b) + b)
-                 lemma a b = Frexify frexNat [b, a] $
-                           (2 *: (var 0)) :+: (var 1)
+                 lemma a b = Frex.solve 2 (Frex Nat.Additive) $
+                           (Dyn 1 :+: (Dyn 1 :+: Sta 0)) :+: Dyn 0 -- (2 *: (Dyn 0)) :+: (Dyn 1)
                                  =-=
-                           (var 1 :+: var 0) :+: var 0 in
+                           (Dyn 0 :+: Dyn 1) :+: Dyn 1 in
            let 
                0 w = Calc $                        
                   |~ b_x 
                   ~~ mod2 b_x ...(sym $ bitModulo (bit_x))
                   ~~ mod2 (2*val_x + b_x) ...(sym $ mod2Affine b_x val_x)
                   ~~ mod2 ((b_x + val_x) + val_x)
-                     ...(cong mod2 $ lemma b_x val_x) -- Frexify!
+                     ...(cong mod2 $ lemma b_x val_x) -- frexify!
                   ~~ mod2 val' ...(cong mod2 $ sym valford_x)
                   -- similarly, go backwards. TODO: refactor these steps into a lemma
                   ~~ mod2 ((b_y + val_y) + val_y)
                           ...(cong mod2 valford_y)
                   ~~ mod2 (2*val_y + b_y)
-                          ...(cong mod2 $ sym $ lemma b_y val_y) -- Frexify!
+                          ...(cong mod2 $ sym $ lemma b_y val_y) -- frexify!
                   ~~ mod2 b_y ...(mod2Affine b_y val_y)
                   ~~ b_y ...(bitModulo bit_y)
                0 u = bitUnique bit_x bit_y w
                0 v = Calc $ |~ 2*val_x + b_x
-                            ~~ (b_x + val_x) + val_x ...(lemma b_x val_x) -- Frexify!
+                            ~~ (b_x + val_x) + val_x ...(lemma b_x val_x) -- frexify!
                             ~~ val'                  ...(sym $ valford_x)
                             ~~ (b_y + val_y) + val_y ...(valford_y)
                             ~~ 2*val_y + b_y         ...(sym $ lemma b_y val_y) 
@@ -486,8 +448,8 @@ numberUnique {width = S width}      -- coverage checker wants to replace `_` her
    ((::) {width = _} {b = b} {val = val} {val' = val'} _ _ {valueFord = valueFord_y}) 
    Refl | (Refl, Refl, Refl) | Refl = rewrite uip valueFord_x valueFord_y in Refl 
 
--- Comes later in the paper, but since type-checking `addNumber` takes
--- so long, it's quicker to have it here
+-- -- Comes later in the paper, but since type-checking `addNumber` takes
+-- -- so long, it's quicker to have it here
 
 %unbound_implicits off
 partial 0
@@ -578,7 +540,7 @@ numCarryUniqueForded x y {ford = Refl} = numCarryUnique x y
 export
 addNumber : LE.Number width x -> LE.Number width y -> Bit c -> NumCarry width (x + y + c)
 addNumber []          []   carry = Carrying [] carry 
-  {valueFord = Frexify frexNat [c] (var 0 =-= var 0 :+: sta 0)} 
+  {valueFord = Frex.solve 1 (Frex Nat.Additive) $ (Dyn 0 =-= Dyn 0 :+: Sta 0)} 
     -- could also discharge by permuting the terms in the second index of `NumCarry`
 
 addNumber {c = c} {width = S width} 
@@ -607,12 +569,12 @@ addNumber {c = c} {width = S width}
                           |~ (((b_a + val_a) + val_a) + ((b_b + val_b) + val_b)) + c
                           -- rearrange terms so we can use `ford` on left summand
                           ~~ ((b_a + b_b) + c) + (val_a + val_a + val_b + val_b)
-                               ...(Frexify frexNat [b_a, b_b, c, val_a, val_b]
-                                   let b_a   = var 0
-                                       b_b   = var 1
-                                       c     = var 2
-                                       val_a = var 3
-                                       val_b = var 4
+                               ...(Frex.solve 5 (Frex Nat.Additive) $
+                                   let b_a   = Dyn 0
+                                       b_b   = Dyn 1
+                                       c     = Dyn 2
+                                       val_a = Dyn 3
+                                       val_b = Dyn 4
                                    in (((b_a :+: val_a) :+: val_a) :+: ((b_b :+: val_b) :+: val_b)) :+: c
                                     =-=((b_a :+: b_b) :+: c) :+: (((val_a :+: val_a) :+: val_b) :+: val_b)
                                   )
@@ -621,15 +583,15 @@ addNumber {c = c} {width = S width}
                                         ford)
                           -- rearrange terms again so we can use valueFord
                           ~~ c_s + 2*((val_a + val_b) + b_s)
-                               ...(Frexify frexNat [b_s, c_s, val_a, val_b]
-                                   let b_s   = var 0
-                                       c_s   = var 1
-                                       val_a = var 2
-                                       val_b = var 3
+                               ...(Frex.solve 4 (Frex Nat.Additive) $
+                                   let b_s   = Dyn 0
+                                       c_s   = Dyn 1
+                                       val_a = Dyn 2
+                                       val_b = Dyn 3
                                    in  ((b_s :+: b_s) :+: c_s) 
                                         :+: (((val_a :+: val_a) :+: val_b) :+: val_b)
                                    =-= c_s :+: (((val_a :+: val_b) :+: b_s) :+:
-                                               (((val_a :+: val_b) :+: b_s) :+: sta 0)))
+                                               (((val_a :+: val_b) :+: b_s) :+: Sta 0)))
                                                                    -- the `sta 0` comes from
                                                                    -- the definition of 2*x = x + (x + 0)
                           ~~ c_s + 2*(val_s + ((2 `power` width) * c0))
@@ -637,12 +599,12 @@ addNumber {c = c} {width = S width}
                                         valueFord)
                           -- rearrange terms to conclude
                           ~~ (((c_s + val_s) + val_s) + (2*((2 `power` width)*c0 )))
-                           ...(Frexify frexNat [c_s, val_s, (2 `power` width)*c0]
-                             let c_s   = var 0
-                                 val_s = var 1
-                                 expc0 = var 2
-                             in c_s :+: ((val_s :+: expc0) :+: ((val_s :+: expc0) :+: sta 0))
-                             =-= ((c_s :+: val_s) :+: val_s) :+: (expc0 :+: (expc0 :+: sta 0)) 
+                           ...(Frex.solve 3 (Frex Nat.Additive) $
+                             let c_s   = Dyn 0
+                                 val_s = Dyn 1
+                                 expc0 = Dyn 2
+                             in c_s :+: ((val_s :+: expc0) :+: ((val_s :+: expc0) :+: Sta 0))
+                             =-= ((c_s :+: val_s) :+: val_s) :+: (expc0 :+: (expc0 :+: Sta 0)) 
                            )
                          -- Since we don't have a semiring frexlet, we need another step
                          -- to associate brackets 
