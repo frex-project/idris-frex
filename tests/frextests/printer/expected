@@ -15,12 +15,6 @@ Axioms:
 
 [x] • ε
   ≡⟨ Left neutrality ]
-[ε • x] • ε
-  ≡⟨ Right neutrality ]
-((ε • x) • ε) • ε
-  ≡⟨ Associativity ]
-ε • x • [ε • ε]
-  ≡[ Left neutrality ⟩
 ([ε] • x) • ε
   ≡⟨ Left neutrality ]
 ((ε • ε) • x) • ε
@@ -52,34 +46,6 @@ x • ([ε • x] • ε)
   ≡[ Left neutrality ⟩
 ((ε • x) • ε) • (ε • x) • ε
   ≡⟨ Associativity ]
-ε • x • (ε • [(ε • x) • ε])
-  ≡⟨ Associativity ]
-ε • x • [ε • ε • x • ε]
-  ≡[ Associativity ⟩
-ε • x • [(ε • ε) • x • ε]
-  ≡[ Associativity ⟩
-ε • x • (([ε • ε] • x) • ε)
-  ≡[ Left neutrality ⟩
-ε • x • (([ε] • x) • ε)
-  ≡⟨ Left neutrality ]
-ε • x • [((ε • ε) • x) • ε]
-  ≡⟨ Associativity ]
-ε • x • [(ε • ε) • x • ε]
-  ≡⟨ Associativity ]
-ε • x • (ε • [ε • x • ε])
-  ≡[ Associativity ⟩
-(ε • x) • ε • (ε • x) • ε
-  ≡[ Associativity ⟩
-(ε • x) • ε • (([ε] • x) • ε)
-  ≡⟨ Left neutrality ]
-(ε • x) • ε • [((ε • ε) • x) • ε]
-  ≡⟨ Associativity ]
-(ε • x) • ε • [(ε • ε) • x • ε]
-  ≡⟨ Associativity ]
-(ε • x) • ε • (ε • [ε • x • ε])
-  ≡[ Associativity ⟩
-[(ε • x) • ε] • ε • (ε • x) • ε
-  ≡[ Right neutrality ⟩
 [ε • x] • ε • (ε • x) • ε
   ≡[ Left neutrality ⟩
 x • (ε • [(ε • x) • ε])
@@ -127,26 +93,6 @@ x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
   ≡[ Associativity ⟩
 (ε • x) • ε • (ε • y • (([ε • ε] • z) • (ε • a) • ε))
   ≡[ Left neutrality ⟩
-((ε • x) • ε) • (ε • y) • (ε • z) • (ε • a) • ε
-  ≡⟨ Associativity ]
-ε • x • (ε • [(ε • y) • (ε • z) • (ε • a) • ε])
-  ≡⟨ Associativity ]
-ε • x • [ε • ε • y • (ε • z) • (ε • a) • ε]
-  ≡[ Associativity ⟩
-ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
-  ≡[ Associativity ⟩
-ε • x • (([ε • ε] • y) • (ε • z) • (ε • a) • ε)
-  ≡[ Left neutrality ⟩
-ε • x • (([ε] • y) • (ε • z) • (ε • a) • ε)
-  ≡⟨ Left neutrality ]
-ε • x • [((ε • ε) • y) • (ε • z) • (ε • a) • ε]
-  ≡⟨ Associativity ]
-ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
-  ≡⟨ Associativity ]
-ε • x • (ε • [ε • y • (ε • z) • (ε • a) • ε])
-  ≡[ Associativity ⟩
-(ε • x) • ε • (ε • y) • (ε • z) • (ε • a) • ε
-  ≡[ Associativity ⟩
 (ε • x • [ε]) • (ε • y) • (ε • z) • (ε • a) • ε
   ≡⟨ Left neutrality ]
 [(ε • x) • ε • ε] • (ε • y) • (ε • z) • (ε • a) • ε

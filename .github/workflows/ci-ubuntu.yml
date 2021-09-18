@@ -12,7 +12,7 @@ on:
 ########################################################################
 
 env:
-  IDRIS2_COMMIT: 370a273b35950d8e2b9e0bfc8b565bc6fb91a647
+  IDRIS2_COMMIT: d62e45d8d86e724a7b8e3dc22b12944c20028d3a
   SCHEME: scheme
 
 jobs:

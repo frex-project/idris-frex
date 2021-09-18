@@ -436,7 +436,7 @@ namespace Derivation
 namespace Proof
 
   export
-  displayPerhapsWithDecEq :
+  displayPerhapsWithMagic :
             Printer ->
             {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
@@ -446,9 +446,19 @@ namespace Proof
             Show (Op pres.signature) =>
             HasPrecedence pres.signature =>
             Maybe (DecEq (U a)) ->
+            Maybe (Ord (U a)) ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayPerhapsWithDecEq printer @{showR} mdec
-    = Derivation.display printer @{showR} . linearise mdec
+  displayPerhapsWithMagic printer @{showR} mdec mord
+    = Derivation.display printer @{showR}
+    . optionalDeloop mdec mord
+    . linearise mdec
+
+    where
+
+      optionalDeloop : Maybe (DecEq ty) -> Maybe (Ord ty) ->
+                       RTList {a = ty} r ~> RTList r
+      optionalDeloop (Just dec) (Just ord) rs = deloop rs
+      optionalDeloop _ _ rs = rs
 
   export
   display : Printer ->
@@ -460,9 +470,10 @@ namespace Proof
             Show (Op pres.signature) =>
             HasPrecedence pres.signature =>
             {auto dec : DecEq (U a)} ->
+            {auto ord : Ord (U a)} ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display printer @{showR} {dec}
-    = displayPerhapsWithDecEq printer @{showR} (Just dec)
+  display printer @{showR} {dec} {ord}
+    = displayPerhapsWithMagic printer @{showR} (Just dec) (Just ord)
 
   export
   displayWithoutDecEq
@@ -476,4 +487,4 @@ namespace Proof
       HasPrecedence pres.signature =>
       {x, y : U a} -> (|-) {pres} a x y -> Doc ()
   displayWithoutDecEq printer @{showR}
-    = displayPerhapsWithDecEq printer @{showR} Nothing
+    = displayPerhapsWithMagic printer @{showR} Nothing Nothing
