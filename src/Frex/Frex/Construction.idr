@@ -23,6 +23,7 @@ import public Frex.Free.Construction
 import Data.Setoid
 
 import Decidable.Equality
+import Decidable.Decidable
 
 import Syntax.PreorderReasoning
 
@@ -88,6 +89,20 @@ export
   decEq (MkOp (Constant c1)) (MkOp (Constant c2)) = case decEq c1 c2 of
     Yes Refl  => Yes Refl
     No contra => No $ \Refl => contra Refl
+
+export
+(Eq (Op sig), Eq a) => Eq (Op (EvaluationSig sig a)) where
+  (MkOp (Op op1     )) == (MkOp (Op op2     )) = (MkOp op1) == (MkOp op2)
+  (MkOp (Op op1     )) == (MkOp (Constant c2)) = False
+  (MkOp (Constant c1)) == (MkOp (Op op2     )) = False
+  (MkOp (Constant c1)) == (MkOp (Constant c2)) = c1 == c2
+
+export
+(Ord (Op sig), Ord a) => Ord (Op (EvaluationSig sig a)) where
+  compare (MkOp (Op op1     )) (MkOp (Op op2     )) = (MkOp op1) `compare` (MkOp op2)
+  compare (MkOp (Op op1     )) (MkOp (Constant x )) = GT
+  compare (MkOp (Constant c )) (MkOp (Op x       )) = LT
+  compare (MkOp (Constant c1)) (MkOp (Constant c2)) = c1 `compare` c2
 
 
 public export
