@@ -325,6 +325,8 @@ latexPreamble
     \usepackage{newunicodechar}
     \newunicodechar{ε}{\ensuremath{\varepsilon}}
     \newunicodechar{•}{\ensuremath{\bullet}}
+    \newunicodechar{⟨}{\ensuremath{\langle}}
+    \newunicodechar{⟩}{\ensuremath{\rangle}}
     """#
 
 export
@@ -348,6 +350,8 @@ compactLatexPreamble = #"""
               \usepackage{newunicodechar}
               \newunicodechar{ε}{\ensuremath{\varepsilon}}
               \newunicodechar{•}{\ensuremath{\bullet}}
+              \newunicodechar{⟨}{\ensuremath{\langle}}
+              \newunicodechar{⟩}{\ensuremath{\rangle}}
               \usepackage{ifthen}
               \usepackage{mathpartir}
               \newboolean{explanation}

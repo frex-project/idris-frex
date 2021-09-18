@@ -1,624 +1,483 @@
-------------------------------------------------------------------------
--- Monoid Theory
-------------------------------------------------------------------------
-
-Operations:
-  ε : a
-  (•) : a -> a -> a (infixr 0)
-Axioms:
-  Left neutrality: ∀ x. ε • x ≡ x
-  Right neutrality: ∀ x. x • ε ≡ x
-  Associativity: ∀ x y z. x • (y • z) ≡ (x • y) • z
-------------------------------------------------------------------------
--- Simple proof
-------------------------------------------------------------------------
-
-[x] • ε
-  ≡⟨ Left neutrality ]
-([ε] • x) • ε
-  ≡⟨ Left neutrality ]
-((ε • ε) • x) • ε
-  ≡⟨ Associativity ]
-(ε • ε) • x • ε
-  ≡⟨ Associativity ]
-ε • [ε • x • ε]
-  ≡[ Associativity ⟩
-ε • [(ε • x) • ε]
-  ≡[ Right neutrality ⟩
-ε • [ε • x]
-  ≡[ Left neutrality ⟩
-ε • x
-------------------------------------------------------------------------
--- Proof with congruence
-------------------------------------------------------------------------
-
-x • ([x] • ε)
-  ≡⟨ Left neutrality ]
-x • ([ε • x] • ε)
-  ≡⟨ Right neutrality ]
-[x] • ((ε • x) • ε) • ε
-  ≡⟨ Left neutrality ]
-[ε • x] • ((ε • x) • ε) • ε
-  ≡⟨ Right neutrality ]
-(ε • x) • ε • [((ε • x) • ε) • ε]
-  ≡⟨ Associativity ]
-(ε • x) • ε • (ε • x • [ε • ε])
-  ≡[ Left neutrality ⟩
-((ε • x) • ε) • (ε • x) • ε
-  ≡⟨ Associativity ]
-[ε • x] • ε • (ε • x) • ε
-  ≡[ Left neutrality ⟩
-x • (ε • [(ε • x) • ε])
-  ≡[ Right neutrality ⟩
-x • (ε • [ε • x])
-  ≡[ Left neutrality ⟩
-x • ε • x
-------------------------------------------------------------------------
--- Proof with different congruences
-------------------------------------------------------------------------
-
-x • (y • (z • [a]))
-  ≡⟨ Left neutrality ]
-x • (y • (z • [ε • a]))
-  ≡⟨ Right neutrality ]
-x • (y • ([z] • (ε • a) • ε))
-  ≡⟨ Left neutrality ]
-x • (y • ([ε • z] • (ε • a) • ε))
-  ≡⟨ Right neutrality ]
-x • ([y] • ((ε • z) • ε) • (ε • a) • ε)
-  ≡⟨ Left neutrality ]
-x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
-  ≡⟨ Right neutrality ]
-[x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε
-  ≡⟨ Left neutrality ]
-[ε • x] • ((ε • y) • ε) • ((ε • z) • ε) • (ε • a) • ε
-  ≡⟨ Right neutrality ]
-(ε • x) • ε • ((ε • y) • ε • [((ε • z) • ε) • (ε • a) • ε])
-  ≡⟨ Associativity ]
-(ε • x) • ε • ((ε • y) • ε • (ε • z • (ε • [(ε • a) • ε])))
-  ≡⟨ Associativity ]
-(ε • x) • ε • ((ε • y) • ε • (ε • z • [ε • ε • a • ε]))
-  ≡[ Associativity ⟩
-(ε • x) • ε • ((ε • y) • ε • (ε • z • [(ε • ε) • a • ε]))
-  ≡[ Associativity ⟩
-(ε • x) • ε • ((ε • y) • ε • (ε • z • (([ε • ε] • a) • ε)))
-  ≡[ Left neutrality ⟩
-(ε • x) • ε • [((ε • y) • ε) • (ε • z) • (ε • a) • ε]
-  ≡⟨ Associativity ]
-(ε • x) • ε • (ε • y • (ε • [(ε • z) • (ε • a) • ε]))
-  ≡⟨ Associativity ]
-(ε • x) • ε • (ε • y • [ε • ε • z • (ε • a) • ε])
-  ≡[ Associativity ⟩
-(ε • x) • ε • (ε • y • [(ε • ε) • z • (ε • a) • ε])
-  ≡[ Associativity ⟩
-(ε • x) • ε • (ε • y • (([ε • ε] • z) • (ε • a) • ε))
-  ≡[ Left neutrality ⟩
-(ε • x • [ε]) • (ε • y) • (ε • z) • (ε • a) • ε
-  ≡⟨ Left neutrality ]
-[(ε • x) • ε • ε] • (ε • y) • (ε • z) • (ε • a) • ε
-  ≡[ Associativity ⟩
-((ε • x) • ε) • ε • (ε • y • (ε • z • (([ε] • a) • ε)))
-  ≡⟨ Left neutrality ]
-((ε • x) • ε) • ε • (ε • y • (ε • z • [((ε • ε) • a) • ε]))
-  ≡⟨ Associativity ]
-((ε • x) • ε) • ε • (ε • y • (ε • z • [(ε • ε) • a • ε]))
-  ≡⟨ Associativity ]
-((ε • x) • ε) • ε • (ε • y • (ε • z • (ε • [ε • a • ε])))
-  ≡[ Associativity ⟩
-((ε • x) • ε) • ε • (ε • y • [(ε • z) • ε • (ε • a) • ε])
-  ≡[ Associativity ⟩
-((ε • x) • ε) • ε • [(ε • y) • ((ε • z) • ε) • (ε • a) • ε]
-  ≡[ Associativity ⟩
-((ε • x) • ε) • ε • ((ε • y • (([ε] • z) • ε)) • (ε • a) • ε)
-  ≡⟨ Left neutrality ]
-((ε • x) • ε) • ε • ((ε • y • [((ε • ε) • z) • ε]) • (ε • a) • ε)
-  ≡⟨ Associativity ]
-((ε • x) • ε) • ε • ((ε • y • [(ε • ε) • z • ε]) • (ε • a) • ε)
-  ≡⟨ Associativity ]
-((ε • x) • ε) • ε • ((ε • y • (ε • [ε • z • ε])) • (ε • a) • ε)
-  ≡[ Associativity ⟩
-((ε • x) • ε) • ε • ([(ε • y) • ε • (ε • z) • ε] • (ε • a) • ε)
-  ≡[ Associativity ⟩
-([(ε • x) • ε] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε
-  ≡[ Right neutrality ⟩
-([ε • x] • ε) • (((ε • y) • ε) • (ε • z) • ε) • (ε • a) • ε
-  ≡[ Left neutrality ⟩
-x • ε • (([(ε • y) • ε] • (ε • z) • ε) • (ε • a) • ε)
-  ≡[ Right neutrality ⟩
-x • ε • (([ε • y] • (ε • z) • ε) • (ε • a) • ε)
-  ≡[ Left neutrality ⟩
-x • ε • ((y • [(ε • z) • ε]) • (ε • a) • ε)
-  ≡[ Right neutrality ⟩
-x • ε • ((y • [ε • z]) • (ε • a) • ε)
-  ≡[ Left neutrality ⟩
-x • ε • (y • z • [(ε • a) • ε])
-  ≡[ Right neutrality ⟩
-x • ε • (y • z • [ε • a])
-  ≡[ Left neutrality ⟩
-(x • ε) • (y • z) • a
-------------------------------------------------------------------------
--- Commutative Monoid Theory
-------------------------------------------------------------------------
-
-Operations:
-  ε : a
-  (•) : a -> a -> a (infixr 0)
-Axioms:
-  Left neutrality: ∀ x. ε • x ≡ x
-  Right neutrality: ∀ x. x • ε ≡ x
-  Associativity: ∀ x y z. x • (y • z) ≡ (x • y) • z
-------------------------------------------------------------------------
--- Simple proof
-------------------------------------------------------------------------
-
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{newunicodechar}
+\newunicodechar{ε}{\ensuremath{\varepsilon}}
+\newunicodechar{•}{\ensuremath{\bullet}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
+\begin{document}
+\subsection{myProof}
+\begin{align*}
 (x • 6) • y • (z • [2])
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (x • 6) • y • (z • (2 • [ε]))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • (z • (2 • (ε • [ε])))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • (z • (2 • (ε • (ε • [ε]))))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • ([z] • 2 • ε • ε • ε • ε)
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (x • 6) • y • ([z • ε] • 2 • ε • ε • ε • ε)
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • ((ε • [z • ε]) • 2 • ε • ε • ε • ε)
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • ((ε • (ε • [z • ε])) • 2 • ε • ε • ε • ε)
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (x • 6) • y • ([ε • ε • (z • ε) • ε] • 2 • ε • ε • ε • ε)
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6) • y • (([ε] • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε)
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 (x • 6 • [y]) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (x • 6 • [y • ε]) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6 • (ε • [y • ε])) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (x • 6 • (ε • (y • ε • [ε]))) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6 • [ε • (y • ε) • ε • ε]) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (x • 6 • ([ε] • ε • (y • ε) • ε • ε)) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 ((x • [6]) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 ((x • (6 • [ε])) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((x • (6 • (ε • [ε]))) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((x • (6 • (ε • (ε • [ε])))) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (([x] • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (([x • ε] • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Right neutrality ]
+  & \quad \text{=⟨ Right neutrality ]}\\
 (((x • ε • [ε]) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (((x • ε • (ε • [ε])) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (([(x • ε) • ε • ε • ε] • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((([ε] • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • (0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • [(0 • ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε]
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • [(ε • ε • (z • ε) • ε) • 2 • ε • ε • ε • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • ([(ε • ε • (z • ε) • ε) • 2] • ε • ε • ε • ε))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • [(2 • ε • ε • (z • ε) • ε) • ε • ε • ε • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • [0 • 2 • (ε • ε • (z • ε) • ε) • ε • ε • ε • ε]
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • [(ε • ε • (z • ε) • ε) • ε • ε • ε • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • [(ε • (z • ε) • ε) • ε • ε • ε • ε]))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ([(ε • (z • ε) • ε) • ε] • ε • ε • ε)))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • [(ε • ε • (z • ε) • ε) • ε • ε • ε]))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • [ε • ε • (ε • (z • ε) • ε) • ε • ε • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • [(ε • (z • ε) • ε) • ε • ε • ε]))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • [((z • ε) • ε) • ε • ε • ε])))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • ([((z • ε) • ε) • ε] • ε • ε))))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • [(ε • (z • ε) • ε) • ε • ε])))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • [ε • ε • ((z • ε) • ε) • ε • ε]))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • ε • ((z • ε) • ε • [ε • ε]))))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • ε • ([(z • ε) • ε] • ε))))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • (ε • ε • ((z • [ε • ε]) • ε))))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • (ε • ε • ([ε • ε] • (z • ε) • ε)))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • (0 • 2 • ([ε • ε] • ε • (z • ε) • ε))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε • ([0 • 2] • ε • ε • (z • ε) • ε)
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 ([(0 • (x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε] • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • [((x • ε) • ε • ε • ε) • 6 • ε • ε • ε • ε]) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ([((x • ε) • ε • ε • ε) • 6] • ε • ε • ε • ε)) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • [(6 • (x • ε) • ε • ε • ε) • ε • ε • ε • ε]) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ([0 • 6 • ((x • ε) • ε • ε • ε) • ε • ε • ε • ε] • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 6 • [((x • ε) • ε • ε • ε) • ε • ε • ε • ε]) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 6 • (x • ε • [(ε • ε • ε) • ε • ε • ε • ε])) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 6 • (x • ε • ([(ε • ε • ε) • ε] • ε • ε • ε))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • 6 • (x • ε • [(ε • ε • ε • ε) • ε • ε • ε])) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 6 • [(x • ε) • ε • (ε • ε • ε) • ε • ε • ε]) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 6 • ((x • ε) • ε • [(ε • ε • ε) • ε • ε • ε])) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 6 • ((x • ε) • ε • (ε • [(ε • ε) • ε • ε • ε]))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 6 • ((x • ε) • ε • (ε • ([(ε • ε) • ε] • ε • ε)))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 ((0 • 6 • ((x • ε) • ε • (ε • [(ε • ε • ε) • ε • ε]))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 6 • ((x • ε) • ε • [ε • ε • (ε • ε) • ε • ε])) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 6 • ((x • ε) • ε • (ε • ε • (ε • ε • [ε • ε])))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • 6 • ((x • ε) • ε • (ε • ε • ([ε • ε] • ε)))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • 6 • ((x • ε) • ε • ([ε • ε] • ε • ε))) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • 6 • ([(x • ε) • ε] • ε • ε • ε)) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 6 • ((x • [ε • ε]) • ε • ε • ε)) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (([0 • 6] • (x • ε) • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 [(6 • (x • ε) • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε] • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • [((x • ε) • ε • ε • ε) • 0 • ε • (y • ε) • ε • ε]) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • ([((x • ε) • ε • ε • ε) • 0] • ε • (y • ε) • ε • ε)) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 (6 • [(0 • (x • ε) • ε • ε • ε) • ε • (y • ε) • ε • ε]) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 [6 • 0 • ((x • ε) • ε • ε • ε) • ε • (y • ε) • ε • ε] • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • 0 • [((x • ε) • ε • ε • ε) • ε • (y • ε) • ε • ε]) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • 0 • (x • ε • [(ε • ε • ε) • ε • (y • ε) • ε • ε])) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • 0 • (x • ε • ([(ε • ε • ε) • ε] • (y • ε) • ε • ε))) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 (6 • 0 • (x • ε • [(ε • ε • ε • ε) • (y • ε) • ε • ε])) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • 0 • [(x • ε) • ε • (ε • ε • ε) • (y • ε) • ε • ε]) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • 0 • ((x • ε) • ε • [(ε • ε • ε) • (y • ε) • ε • ε])) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • 0 • ((x • ε) • ε • (ε • [(ε • ε) • (y • ε) • ε • ε]))) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • 0 • ((x • ε) • ε • (ε • ([(ε • ε) • y • ε] • ε • ε)))) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 (6 • 0 • ((x • ε) • ε • (ε • [((y • ε) • ε • ε) • ε • ε]))) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • 0 • ((x • ε) • ε • [ε • (y • ε) • (ε • ε) • ε • ε])) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (6 • 0 • ((x • ε) • ε • (ε • y • ε • (ε • ε • [ε • ε])))) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (6 • 0 • ((x • ε) • ε • (ε • y • ε • ([ε • ε] • ε)))) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (6 • 0 • ((x • ε) • ε • ([ε • y • ε] • ε • ε))) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (6 • 0 • ([(x • ε) • ε] • (y • ε) • ε • ε)) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (6 • 0 • ((x • [ε • ε]) • (y • ε) • ε • ε)) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ([6 • 0] • (x • ε) • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 (6 • (x • ε) • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • [((x • ε) • (y • ε) • ε • ε) • 2 • ε • ε • (z • ε) • ε]
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • ([((x • ε) • (y • ε) • ε • ε) • 2] • ε • ε • (z • ε) • ε)
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 6 • [(2 • (x • ε) • (y • ε) • ε • ε) • ε • ε • (z • ε) • ε]
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • (y • ε) • ε • ε) • ε • ε • (z • ε) • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • [((x • ε) • (y • ε) • ε • ε) • ε • ε • (z • ε) • ε]
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • (x • ε • [((y • ε) • ε • ε) • ε • ε • (z • ε) • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • (x • ε • ([((y • ε) • ε • ε) • ε] • ε • (z • ε) • ε))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 6 • 2 • (x • ε • [(ε • (y • ε) • ε • ε) • ε • (z • ε) • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • [(x • ε) • ε • ((y • ε) • ε • ε) • ε • (z • ε) • ε]
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • ((x • ε) • ε • [((y • ε) • ε • ε) • ε • (z • ε) • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • ε • (y • ε • [(ε • ε) • ε • (z • ε) • ε]))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • ((x • ε) • ε • (y • ε • ([(ε • ε) • ε] • (z • ε) • ε)))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 6 • 2 • ((x • ε) • ε • (y • ε • [(ε • ε • ε) • (z • ε) • ε]))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • ε • [(y • ε) • ε • (ε • ε) • (z • ε) • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • [(ε • ε) • (z • ε) • ε]))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • (ε • [ε • (z • ε) • ε])))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • (ε • ([ε • z • ε] • ε))))
-  ≡⟨ Commutativity ]
+  & \quad \text{=⟨ Commutativity ]}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • (ε • [((z • ε) • ε) • ε])))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • [ε • (z • ε) • ε • ε]))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • (ε • z • ε • [ε • ε])))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 6 • 2 • ((x • ε) • ε • ((y • ε) • ε • ([ε • z • ε] • ε)))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 6 • 2 • ((x • ε) • ε • ([(y • ε) • ε] • (z • ε) • ε))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • ε) • ε • ((y • [ε • ε]) • (z • ε) • ε))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 6 • 2 • ([(x • ε) • ε] • (y • ε) • (z • ε) • ε)
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 6 • 2 • ((x • [ε • ε]) • (y • ε) • (z • ε) • ε)
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 [6 • 2] • (x • ε) • (y • ε) • (z • ε) • ε
-  ≡[ Evaluate ⟩
+  & \quad \text{=[ Evaluate ⟩}\\
 [8] • (x • ε) • (y • ε) • (z • ε) • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 0 • 8 • ((x • [ε]) • (y • ε) • (z • ε) • ε)
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 0 • 8 • ([x • ε • ε] • (y • ε) • (z • ε) • ε)
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • ((x • ε) • ε • ((y • [ε]) • (z • ε) • ε))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 0 • 8 • ((x • ε) • ε • ([y • ε • ε] • (z • ε) • ε))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • ((x • ε) • ε • ((y • ε) • ε • ((z • [ε]) • ε)))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 0 • 8 • ((x • ε) • ε • ((y • ε) • ε • ([z • ε • ε] • ε)))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • ((x • ε) • ε • ((y • ε) • ε • ((z • ε) • ε • [ε])))
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 0 • 8 • ((x • ε) • ε • [((y • ε) • ε) • ((z • ε) • ε) • ε • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • 8 • ((x • ε) • ε • (y • ε • [ε • ((z • ε) • ε) • ε • ε]))
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • ((x • ε) • ε • (y • ε • ([ε • (z • ε) • ε] • ε • ε)))
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 0 • 8 • ((x • ε) • ε • (y • ε • [(((z • ε) • ε) • ε) • ε • ε]))
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • 8 • ((x • ε) • ε • [(y • ε) • ((z • ε) • ε) • ε • ε • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • [((x • ε) • ε) • ((y • ε) • (z • ε) • ε) • ε • ε • ε]
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • 8 • (x • ε • [ε • ((y • ε) • (z • ε) • ε) • ε • ε • ε])
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • 8 • (x • ε • ([ε • (y • ε) • (z • ε) • ε] • ε • ε • ε))
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 0 • 8 • (x • ε • [(((y • ε) • (z • ε) • ε) • ε) • ε • ε • ε])
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • 8 • [(x • ε) • ((y • ε) • (z • ε) • ε) • ε • ε • ε • ε]
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 8) • ((x • ε) • (y • ε) • (z • ε) • ε) • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • [8 • ((x • ε) • (y • ε) • (z • ε) • ε) • ε • ε • ε • ε]
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 0 • ([8 • (x • ε) • (y • ε) • (z • ε) • ε] • ε • ε • ε • ε)
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 0 • [(((x • ε) • (y • ε) • (z • ε) • ε) • 8) • ε • ε • ε • ε]
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 0 • ((x • ε) • (y • ε) • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ([0] • (x • ε) • (y • ε) • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 (0 • 0 • ((x • [ε]) • (y • ε) • (z • ε) • ε)) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (0 • 0 • ([x • ε • ε] • (y • ε) • (z • ε) • ε)) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • ((y • [ε]) • (z • ε) • ε))) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (0 • 0 • ((x • ε) • ε • ([y • ε • ε] • (z • ε) • ε))) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • ([z • ε] • ε)))) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • (ε • z • ε • [ε])))) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • [(ε • z • ε) • ε • ε]))) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • (ε • [(z • ε) • ε • ε])))) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • (ε • ([(z • ε) • ε] • ε))))) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • (ε • [(ε • z • ε) • ε])))) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • ((x • ε) • ε • ((y • ε) • ε • [ε • ε • (z • ε) • ε]))) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • [((y • ε) • ε) • (ε • ε) • (z • ε) • ε])) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • ((x • ε) • ε • (y • ε • [ε • (ε • ε) • (z • ε) • ε]))) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • (y • ε • ([ε • ε • ε] • (z • ε) • ε)))) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 (0 • 0 • ((x • ε) • ε • (y • ε • [((ε • ε) • ε) • (z • ε) • ε]))) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • ((x • ε) • ε • [(y • ε) • (ε • ε) • ε • (z • ε) • ε])) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • [((x • ε) • ε) • ((y • ε) • ε • ε) • ε • (z • ε) • ε]) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • (x • ε • [ε • ((y • ε) • ε • ε) • ε • (z • ε) • ε])) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • 0 • (x • ε • ([ε • (y • ε) • ε • ε] • ε • (z • ε) • ε))) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 (0 • 0 • (x • ε • [(((y • ε) • ε • ε) • ε) • ε • (z • ε) • ε])) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • 0 • [(x • ε) • ((y • ε) • ε • ε) • ε • ε • (z • ε) • ε]) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 [(0 • 0) • ((x • ε) • (y • ε) • ε • ε) • ε • ε • (z • ε) • ε] • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 (0 • [0 • ((x • ε) • (y • ε) • ε • ε) • ε • ε • (z • ε) • ε]) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (0 • ([0 • (x • ε) • (y • ε) • ε • ε] • ε • ε • (z • ε) • ε)) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 (0 • [(((x • ε) • (y • ε) • ε • ε) • 0) • ε • ε • (z • ε) • ε]) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 [0 • ((x • ε) • (y • ε) • ε • ε) • 0 • ε • ε • (z • ε) • ε] • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 (([0] • (x • ε) • (y • ε) • ε • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 ((0 • 0 • ([x • ε] • (y • ε) • ε • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • 0 • (ε • x • ε • ((y • [ε]) • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • 0 • (ε • x • ε • ([y • ε • ε] • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 0 • (ε • x • ε • ((y • ε) • ε • ([ε] • ε)))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • 0 • (ε • x • ε • ((y • ε) • ε • (ε • ε • [ε])))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • 0 • (ε • x • ε • [((y • ε) • ε) • (ε • ε) • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 0 • (ε • x • ε • (y • ε • [ε • (ε • ε) • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 0 • (ε • x • ε • (y • ε • ([ε • ε • ε] • ε • ε)))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • 0 • (ε • x • ε • (y • ε • [((ε • ε) • ε) • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 0 • (ε • x • ε • [(y • ε) • (ε • ε) • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 0 • [(ε • x • ε) • ((y • ε) • ε • ε) • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 0 • (ε • [(x • ε) • ((y • ε) • ε • ε) • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • 0 • (ε • ([(x • ε) • (y • ε) • ε • ε] • ε • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • 0 • (ε • [(((y • ε) • ε • ε) • x • ε) • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • 0 • [ε • ((y • ε) • ε • ε) • (x • ε) • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ([(0 • 0) • (ε • (y • ε) • ε • ε) • (x • ε) • ε • ε • ε] • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • [0 • (ε • (y • ε) • ε • ε) • (x • ε) • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ([0 • ε • (y • ε) • ε • ε] • (x • ε) • ε • ε • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • [((ε • (y • ε) • ε • ε) • 0) • (x • ε) • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ([0 • (ε • (y • ε) • ε • ε) • 0 • (x • ε) • ε • ε • ε] • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • ([0] • (x • ε) • ε • ε • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • [ε]) • ε • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ([x • ε • ε] • ε • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • ([ε] • ε • ε)))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • (ε • ε • ([ε] • ε))))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • (ε • ε • (ε • ε • [ε]))))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Left neutrality ]
+  & \quad \text{=⟨ Left neutrality ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • [(ε • ε) • (ε • ε) • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • (ε • [ε • (ε • ε) • ε • ε])))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • (ε • ([ε • ε • ε] • ε • ε))))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • (ε • [((ε • ε) • ε) • ε • ε])))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • ((x • ε) • ε • [ε • (ε • ε) • ε • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • [((x • ε) • ε) • (ε • ε • ε) • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • (x • ε • [ε • (ε • ε • ε) • ε • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • (x • ε • ([ε • ε • ε • ε] • ε • ε • ε)))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • (x • ε • [((ε • ε • ε) • ε) • ε • ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • 0 • [(x • ε) • (ε • ε • ε) • ε • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • [(0 • 0) • ((x • ε) • ε • ε • ε) • ε • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • [0 • ((x • ε) • ε • ε • ε) • ε • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • ([0 • (x • ε) • ε • ε • ε] • ε • ε • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Commutativity ⟩
+  & \quad \text{=[ Commutativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • [(((x • ε) • ε • ε • ε) • 0) • ε • ε • ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Associativity ]
+  & \quad \text{=⟨ Associativity ]}\\
 ((0 • ε • (y • ε) • ε • ε • [0 • ((x • ε) • ε • ε • ε) • 0 • ε • ε • ε • ε]) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Associativity ⟩
+  & \quad \text{=[ Associativity ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • (x • ε) • ε • ε • ε • ([0] • ε • ε • ε • ε))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • (x • ε) • ε • ε • ε • (ε • (ε • (ε • [ε • ε]))))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • (x • ε) • ε • ε • ε • (ε • (ε • [ε • ε])))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • (x • ε) • ε • ε • ε • (ε • [ε • ε]))) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((0 • ε • (y • ε) • ε • ε • (0 • (x • ε) • ε • ε • ε • [ε • ε])) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((([0] • ε • (y • ε) • ε • ε) • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 (([ε • ε • (y • ε) • ε • ε] • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (((ε • (y • ε • [ε • ε])) • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (((ε • [(y • ε) • ε]) • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 (([ε • y • ε] • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (([y • ε] • (0 • (x • ε) • ε • ε • ε) • ε) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 ((y • (([0] • (x • ε) • ε • ε • ε) • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 ((y • ([ε • (x • ε) • ε • ε • ε] • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((y • ((x • ε • (ε • [ε • ε])) • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((y • ((x • ε • [ε • ε]) • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 ((y • ([(x • ε) • ε] • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 ((y • ([x • ε] • ε)) • 0 • ε • ε • (z • ε) • ε) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 (y • x • ε • ([0] • ε • ε • (z • ε) • ε)) • 8 • ε • ε • ε • ε
-  ≡⟨ Evaluate ]
+  & \quad \text{=⟨ Evaluate ]}\\
 (y • x • ε • [ε • ε • ε • (z • ε) • ε]) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε • (ε • (ε • [(z • ε) • ε]))) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 (y • x • ε • (ε • [ε • z • ε])) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε • [ε • z • ε]) • 8 • ε • ε • ε • ε
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε • [z • ε]) • 8 • ε • ε • ε • ε
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 (y • x • ε) • z • (8 • (ε • (ε • [ε • ε])))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε) • z • (8 • (ε • [ε • ε]))
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε) • z • (8 • [ε • ε])
-  ≡[ Left neutrality ⟩
+  & \quad \text{=[ Left neutrality ⟩}\\
 (y • x • ε) • z • [8 • ε]
-  ≡[ Right neutrality ⟩
+  & \quad \text{=[ Right neutrality ⟩}\\
 ((y • x • ε) • z) • 8
+\end{align*}
+\end{document}
