@@ -45,7 +45,7 @@ export
 keep : (0 prf : x ~=~ y) -> x ~=~ y
 keep Refl = Refl
 
--- -- Some artihmetic facts
+-- Some artihmetic facts
 
 export
 nonNegativeAddition : (b, c : Nat) -> b + c = 0 -> b = 0
@@ -331,7 +331,8 @@ rightNeut p = Frex.solve 1 (Frex Nat.Additive) $ Dyn 0 :+: Sta 0 =-= Dyn 0
 
 LECons : Bit b -> BE.Number width val -> BE.Number (1 + width) (b + val + val)
 LECons bit [] = [bit]
-LECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
+LECons {b} bit ((bit' :: bits)
+                {b = b', width, val, valueFord = Refl}) =
    let r : {b, p, q, b', v : Nat} ->
            (b + (p * b' + v)) + (q * b' + v) =
            (p * b' + q * b') + ((b + v) + v)
@@ -339,7 +340,7 @@ LECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
             (Dyn 0 :+: (Dyn 1 :+: Dyn 2)) :+: (Dyn 3 :+: Dyn 2) =-=
             (Dyn 1 :+: Dyn 3) :+: ((Dyn 0 :+: Dyn 2) :+: Dyn 2)
     in
-  (::) bit' (LECons bit bits) { valueFord
+  (bit' :: LECons bit bits) { valueFord
     = rewrite rightNeut (power 2 width) in
       rewrite multDistributesOverPlusLeft
                 (power 2 width) (power 2 width) b' in
@@ -347,7 +348,7 @@ LECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
 
 LEtoBE : LE.Number w val -> BE.Number w val
 LEtoBE [] = LENil
-LEtoBE ((::) x xs {valueFord = Refl})  = x `LECons` (LEtoBE xs)
+LEtoBE ((x :: xs) {valueFord = Refl})  = x `LECons` (LEtoBE xs)
 
 BENil : LE.Number 0 0
 BENil = []
@@ -355,7 +356,8 @@ BENil = []
 BECons : Bit b -> LE.Number width val ->
   LE.Number (1 + width) ((2 `power` width) * b + val)
 BECons bit [] = [bit]
-BECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
+BECons {b} bit ((bit' :: bits)
+                {b = b', width, val, valueFord = Refl}) =
   let r : {p, q, b, b', v : Nat} ->
           ((p + q) * b) + ((b' + v) + v) =
           (b' + ((p * b) + v)) + ((q * b) + v)
@@ -365,12 +367,12 @@ BECons {b} bit ((::) {b = b'} {width} {val} bit' bits {valueFord = Refl}) =
           $   ((Dyn 0 :+: Dyn 1)) :+: ((Dyn 2 :+: Dyn 3) :+: Dyn 3)
           =-= (Dyn 2 :+: (Dyn 0 :+: Dyn 3)) :+: (Dyn 1 :+: Dyn 3)
    in
-   (::) bit' (BECons bit bits)
-        { valueFord = rewrite rightNeut (power 2 width) in r }
+   (bit' :: BECons bit bits)
+   {valueFord = rewrite rightNeut (power 2 width) in r}
 
 BEtoLE : BE.Number w val -> LE.Number w val
 BEtoLE [] = BENil
-BEtoLE ((::) bit bits {valueFord = Refl}) = bit `BECons` (BEtoLE bits)
+BEtoLE ((bit :: bits) {valueFord = Refl}) = bit `BECons` (BEtoLE bits)
 
 namespace Binary.LE
   public export
@@ -414,8 +416,8 @@ bitBound I = LTESucc $ LTESucc LTEZero
 0
 bitsBound : (x : LE.Number width val) -> val `LT` (2 `power` width)
 bitsBound [] = LTESucc LTEZero
-bitsBound {width = S width} ((::) {b} {val} {val' = _} bit bits
-          {valueFord = Refl}) =
+bitsBound {width = S width} ((bit :: bits)
+                             {b, val, val' = _, valueFord = Refl}) =
   CalcWith  $
   |~ 1 + ((b + val) + val)
   ~~ (1 + b) + (2*val)       ...(Frex.solve 2 (Frex Nat.Additive) $
@@ -437,8 +439,8 @@ numberUnique : (x : LE.Number width val_x)
             -> x = y
 numberUnique [] [] _ = Refl
 numberUnique {width = S width}      -- coverage checker wants to replace `_` here vvvvvvvv instead of `Refl`  --- bug?
-  ((::) {width = _} {b = b_x} {val = val_x} {val' = val'} bit_x bits_x {valueFord = valford_x})
-  ((::) {width = _} {b = b_y} {val = val_y} {val' = _   } bit_y bits_y {valueFord = valford_y})
+  ((bit_x :: bits_x) {width = _, b = b_x, val = val_x, val' = val', valueFord = valford_x})
+  ((bit_y :: bits_y) {width = _, b = b_y, val = val_y, val' = _   , valueFord = valford_y})
   Refl with (let 0 lemma : (a,b : Nat) -> (2*b + a = (a + b) + b)
                  lemma a b = Frex.solve 2 (Frex Nat.Additive) $
                            (Dyn 1 :+: (Dyn 1 :+: Sta 0)) :+: Dyn 0 -- (2 *: (Dyn 0)) :+: (Dyn 1)
@@ -472,12 +474,12 @@ numberUnique {width = S width}      -- coverage checker wants to replace `_` her
                0 q = multSucLeftCancel val_x val_y 1 z
           in (w, u, q))
  numberUnique {width = S width}
-  ((::) {width = _} {b} {val=val_x} {val'} bit bits_x {valueFord = valueFord_x})
-  ((::) {width = _} {b = b} {val = val_y} {val' = val'} _ bits_y {valueFord = valueFord_y})
+  ((bit :: bits_x) {width = _, b    , val = val_x, val'       , valueFord = valueFord_x})
+  ((_   :: bits_y) {width = _, b = b, val = val_y, val' = val', valueFord = valueFord_y})
   Refl | (Refl, Refl, q) with (numberUnique bits_x bits_y q)
   numberUnique {width = S width}
-   ((::) {width = _} {b} {val} {val'} bit bits {valueFord = valueFord_x})
-   ((::) {width = _} {b = b} {val = val} {val' = val'} _ _ {valueFord = valueFord_y})
+   ((bit :: bits) {width = _, b    , val      , val'       , valueFord = valueFord_x})
+   ((_   :: _   ) {width = _, b = b, val = val, val' = val', valueFord = valueFord_y})
    Refl | (Refl, Refl, Refl) | Refl = rewrite uip valueFord_x valueFord_y in Refl
 
 -- -- Comes later in the paper, but since type-checking `addNumber` takes
@@ -486,8 +488,9 @@ numberUnique {width = S width}      -- coverage checker wants to replace `_` her
 %unbound_implicits off
 0
 numCarryUnique : forall width, val . (x, y : NumCarry width val) -> x = y
-numCarryUnique (Carrying {c = c_x} {val = val_x} {val'       } num_x carry_x {valueFord = valueFord_x})
-               (Carrying {c = c_y} {val = val_y} {val' = val'} num_y carry_y {valueFord = valueFord_y})
+numCarryUnique
+  (Carrying num_x carry_x {c = c_x, val = val_x, val'       , valueFord = valueFord_x})
+  (Carrying num_y carry_y {c = c_y, val = val_y, val' = val', valueFord = valueFord_y})
   = let lemma : (a,b,c : Nat) -> (a * b + c = c + b*a)
         lemma a b c = Calc $ -- semiring frexlet would help here
             |~ a*b + c
@@ -528,8 +531,8 @@ numCarryUnique (Carrying {c = c_x} {val = val_x} {val'       } num_x carry_x {va
            0 carry_x_eq_carry_y : (carry_x = carry_y)
            carry_x_eq_carry_y = bitUnique carry_x carry_y c_x_eq_c_y
     in keep $ Calc $
-      |~ Carrying {c = c_x} {val = val_x} num_x carry_x {valueFord = valueFord_x}
-      ~~ Carrying {c = c_y} {val = val_y} num_y carry_y {valueFord = valueFord_y}
+      |~ Carrying num_x carry_x {c = c_x, val = val_x, valueFord = valueFord_x}
+      ~~ Carrying num_y carry_y {c = c_y, val = val_y, valueFord = valueFord_y}
       ...(cong5 (\ c : Nat , val : Nat , num : LE.Number width val, carry : Bit c,
                    valueFord : (val' = val + (2 `power` width) * c) =>
                    num `Carrying` carry)
@@ -579,26 +582,27 @@ addNumber []          []   carry = Carrying [] carry
     -- of `NumCarry`
 
 addNumber {c = c} {width = S width}
-          ((::) {b = b_a} {val = val_a} a aits {valueFord = Refl})
-          ((::) {b = b_b} {val = val_b} b bits {valueFord = Refl})
+          ((a :: aits) {b = b_a, val = val_a, valueFord = Refl})
+          ((b :: bits) {b = b_b, val = val_b, valueFord = Refl})
           carry
           with (addBit a b carry)
  addNumber
           {c = c} {width = S width}
-          ((::) {b = b_a} {val = val_a} a aits {valueFord = Refl})
-          ((::) {b = b_b} {val = val_b} b bits {valueFord = Refl})
+          ((a :: aits) {b = b_a, val = val_a, valueFord = Refl})
+          ((b :: bits) {b = b_b, val = val_b, valueFord = Refl})
           carry
-          | MkBitPair {b = b_s} {c = c_s}
-             carry0 s {ford} with (addNumber aits bits carry0)
+          | MkBitPair carry0 s
+             {b = b_s, c = c_s, ford}
+          with (addNumber aits bits carry0)
   addNumber
           {c = c} {width = S width}
-          ((::) {b = b_a} {val = val_a} a aits {valueFord = Refl})
-          ((::) {b = b_b} {val = val_b} b bits {valueFord = Refl})
+          ((a :: aits) {b = b_a, val = val_a, valueFord = Refl})
+          ((b :: bits) {b = b_b, val = val_b, valueFord = Refl})
           carry
-          | MkBitPair {b = b_s} {c = c_s} carry0 s {ford}
-          | Carrying {val = val_s} {c = c0} sits carry1 {valueFord}
+          | MkBitPair carry0 s {b = b_s, c = c_s, ford}
+          | Carrying sits carry1 {val = val_s, c = c0, valueFord}
             = Carrying
-                ((::) s sits)
+                (s :: sits)
                 carry1
                 {valueFord =
                   Calc $
