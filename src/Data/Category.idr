@@ -8,4 +8,5 @@
 ||| DOI:https://doi.org/10.1145/3437992.3439922
 module Data.Category
 
-public import Core
+import public Data.Category.Core
+import public Data.Category.Adjunction
