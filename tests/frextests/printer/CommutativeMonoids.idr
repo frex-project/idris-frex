@@ -62,17 +62,18 @@ main = do
   -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
+  let printer = withNesting $ withNames generic
   putStrLn $ banner "Commutative Monoid Theory"
-  printLn  $ display MonoidTheory
+  printLn  $ display MonoidTheory generic
   putStrLn $ banner "Simple proof"
-  printLn  $ display unicode @{BORING} myProof
+  printLn  $ Proof.display unicode printer @{BORING} myProof
 
   let output = #"\documentclass{article}"#
               :: latexPreamble
               ::
               [ #"\begin{document}"#
               , #"\subsection{myProof}"#
-              , show $ display latex @{BORING} myProof
+              , show $ display latex printer @{BORING} myProof
               , #"\end{document}"#
               ]
 
@@ -81,7 +82,7 @@ main = do
             ::
             [ #"\begin{document}"#
             , #"\subsection{myProof}"#
-            , show $ display compactLatex @{BORING} myProof
+            , show $ display compactLatex printer @{BORING} myProof
             , #"\end{document}"#
             ]
   -- latex

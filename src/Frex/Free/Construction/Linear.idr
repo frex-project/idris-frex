@@ -37,6 +37,21 @@ namespace Step
   display @{showR} (Include p) = pretty (show @{showR} p)
   display (ByAxiom eq env) = pretty (show eq)
 
+  export
+  displayNamed :
+            (applied : Bool) ->
+            {pres : Presentation} ->
+            Show pres.Axiom =>
+            Printer pres.signature () ->
+            {0 x, y : Term pres.signature (Fin n)} ->
+            Step pres (QuotientData pres (cast (Fin n))) x y -> Doc ()
+  displayNamed applied printer (Include p) = pretty (show p)
+  displayNamed applied printer (ByAxiom eq env) =
+    let ax = pretty (show eq) in
+    if not applied then ax else
+      let printer = withNames ({ topParens := True } printer) in
+      hsep (ax :: toList (tabulate (displayPrec printer App . env)))
+
 public export
 plug : (a : Algebra sig) ->
        (ctx : Term sig (Maybe (U a))) ->
@@ -271,20 +286,16 @@ record Focus (sig : Signature) (a : Algebra sig) where
 
 namespace Focus
 
-  data Raw = MkRaw String
-  Show Raw where show (MkRaw str) = str
-
   export
-  displayUsing : (Show a, Show (Op sig), HasPrecedence sig) =>
-                 Bool -> String -> Term sig (Maybe a) -> Doc ()
-  displayUsing b focus ctx = Term.display b (map (MkRaw . maybe focus show) ctx)
+  display : Printer sig (U a) -> Focus sig a -> Doc ()
+  display printer (MkFocus ctx t)
+     = Term.display ({ varShow := focused } printer) ctx
 
-  export
-  display : (Show (U a), Show (Op sig), HasPrecedence sig) =>
-            Bool -> Focus sig a -> Doc ()
-  display b (MkFocus ctx t) =
-    let focus = "[" ++ show t ++ "]" in
-    displayUsing b focus ctx
+    where
+
+    [focused] Show (Maybe (U a)) where
+      showPrec _ Nothing  = "[" ++ show @{printer.varShow} t ++ "]"
+      showPrec d (Just a) = showPrec @{printer.varShow} d a
 
 record Printer where
   constructor MkPrinter
@@ -391,16 +402,14 @@ namespace Derivation
   display : Printer ->
             {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
+            Printer pres.signature (U a) ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
-            Show (U a) =>
-            Show (Op pres.signature) =>
-            HasPrecedence pres.signature =>
             {x, y : U a} -> Derivation pres a x y -> Doc ()
-  display printer @{showR} prf = vcat $ concat {t = List}
+  display printer sigprinter @{showR} prf = vcat $ concat {t = List}
      [ toList (pretty <$> printer.beginProof)
      , [ vcat (steps prf)
-       , pretty (show y) ]
+       , pretty (show @{sigprinter.varShow} y) ]
      , toList (pretty <$> printer.endProof)
      ] where
 
@@ -416,7 +425,7 @@ namespace Derivation
            Either (U a) (Focus pres.signature a.algebra) ->
            Doc () -> Doc ()
     base b ctx p = hcat
-      [ either (pretty . show) (Focus.display True) ctx
+      [ either (pretty . show @{sigprinter.varShow}) (Focus.display sigprinter) ctx
       , printer.sepJustification
       , byProof b p
       ]
@@ -446,16 +455,14 @@ namespace Proof
             Printer ->
             {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
+            Printer pres.signature (U a) ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
-            Show (U a) =>
-            Show (Op pres.signature) =>
-            HasPrecedence pres.signature =>
             Maybe (DecEq (U a)) ->
             Maybe (Ord (U a)) ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayPerhapsWithMagic printer @{showR} mdec mord
-    = Derivation.display printer @{showR}
+  displayPerhapsWithMagic printer sigprinter @{showR} mdec mord
+    = Derivation.display printer sigprinter @{showR}
     . optionalDeloop mdec mord
     . linearise mdec
 
@@ -470,27 +477,23 @@ namespace Proof
   display : Printer ->
             {pres : Presentation} ->
             {a : PresetoidAlgebra pres.signature} ->
+            Printer pres.signature (U a) ->
             ({x, y : U a} -> Show (a.relation x y)) =>
             Show (pres .Axiom) =>
-            Show (U a) =>
-            Show (Op pres.signature) =>
-            HasPrecedence pres.signature =>
             {auto dec : DecEq (U a)} ->
             {auto ord : Ord (U a)} ->
             {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  display printer @{showR} {dec} {ord}
-    = displayPerhapsWithMagic printer @{showR} (Just dec) (Just ord)
+  display printer sigprinter @{showR} {dec} {ord}
+    = displayPerhapsWithMagic printer sigprinter @{showR} (Just dec) (Just ord)
 
   export
   displayWithoutDecEq
     : Printer ->
       {pres : Presentation} ->
       {a : PresetoidAlgebra pres.signature} ->
+      Printer pres.signature (U a) ->
       ({x, y : U a} -> Show (a.relation x y)) =>
       Show (pres .Axiom) =>
-      Show (U a) =>
-      Show (Op pres.signature) =>
-      HasPrecedence pres.signature =>
       {x, y : U a} -> (|-) {pres} a x y -> Doc ()
-  displayWithoutDecEq printer @{showR}
-    = displayPerhapsWithMagic printer @{showR} Nothing Nothing
+  displayWithoutDecEq printer sigprinter @{showR}
+    = displayPerhapsWithMagic printer sigprinter @{showR} Nothing Nothing

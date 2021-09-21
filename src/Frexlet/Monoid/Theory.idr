@@ -45,15 +45,6 @@ Prod : Op Signature
 Prod = MkOp Product
 
 export
-HasPrecedence Signature where
- OpPrecedence Product = Just (InfixR 0)
-
-export
-Show (Op Signature) where
-  show (MkOp Neutral) = "ε"
-  show (MkOp Product) = "•"
-
-export
 Finite (Op Signature) where
   enumerate = [Unit, Prod]
 
@@ -102,3 +93,37 @@ Show Axiom where
     LftNeutrality => "Left neutrality"
     RgtNeutrality => "Right neutrality"
     Associativity => "Associativity"
+
+export
+generic : Printer Signature Unit
+generic = MkPrinter
+  { varShow   = %search
+  , opShow    = genericShow
+  , opPrec    = genericPrec
+  , topParens = False
+  , opParens  = False
+  } where
+
+  [genericPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixR 0)
+
+  [genericShow] Show (Op Signature) where
+    show (MkOp Neutral) = "ε"
+    show (MkOp Product) = "•"
+
+export
+natPlus : Printer Signature Unit
+natPlus = MkPrinter
+  { varShow   = %search
+  , opShow    = natPlusShow
+  , opPrec    = natPlusPrec
+  , topParens = False
+  , opParens  = False
+  } where
+
+  [natPlusPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [natPlusShow] Show (Op Signature) where
+    show (MkOp Neutral) = "0"
+    show (MkOp Product) = "+"

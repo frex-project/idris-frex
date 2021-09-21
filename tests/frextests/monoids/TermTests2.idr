@@ -49,14 +49,24 @@ Units = mkLemma (FreeMonoidOver $ cast $ Fin 1)
 units : (O1 .+. (X {k = 1} 0 .+. O1)) .+. O1 ~~ X 0
 units = byLemma Units
 
+idris' : String -> Lemma MonoidTheory -> String
+idris' = idris @{ax} natPlus
+
+  where
+
+    [ax] Show (MonoidTheory .Axiom) where
+      show LftNeutrality = "plusZeroLeftNeutral"
+      show RgtNeutrality = "plusZeroRightNeutral"
+      show Associativity = "plusAssociative"
+
 tmp : String
-tmp = idris "" Trivial
+tmp = idris' "trivial" Trivial
 
 tmp2 : String
-tmp2 = idris "" Trivial2
+tmp2 = idris' "trivial2" Trivial2
 
 tmp3 : String
-tmp3 = idris "" Assoc
+tmp3 = idris' "assoc" Assoc
 
 tmp4 : String
-tmp4 = idris "" Units
+tmp4 = idris' "units" Units

@@ -5,6 +5,7 @@ import Data.Relation.Closure.Symmetric
 
 import Control.Relation
 import Data.Fin
+import Data.Name
 import Data.Relation
 import Data.Setoid
 import Decidable.Equality
@@ -24,15 +25,18 @@ export
 display : {n : Nat} ->
           {pres : Presentation} ->
           Show (pres .Axiom) =>
-          Show (Op pres.signature) =>
-          HasPrecedence pres.signature =>
+          Printer pres.signature () ->
           {lhs, rhs : Term pres.signature (Fin n)} ->
           Derivation pres (QuotientData pres (cast (Fin n))) lhs rhs ->
           Doc ()
-display @{showR} prf = vcat
-   [ "|~" <++> pretty (show lhs)
+display sigprinter @{showR} prf =
+   vcat
+   [ "|~" <++> display printer lhs
    , vcat (steps prf)
    ] where
+
+  printer : Printer pres.signature (Fin n)
+  printer = withNames sigprinter
 
   TM : Type
   TM = Term pres.signature (Fin n)
@@ -47,25 +51,27 @@ display @{showR} prf = vcat
   byProof False d
     = d
   byProof True  d
-    = "symmetric" <++> "$" <++> d
+    = "sym" <++> "$" <++> d
 
   base : Bool -> TM -> Doc () -> Doc ()
   base b t p = vcat
-    [ "<~" <++> pretty (show t)
+    [ "~~" <++> display printer t
     , "  ...(" <++> byProof b p <++> ")"
     ]
 
   focus : CTX -> Doc ()
-  focus ctx = hsep ["\\", "focus", "=>", displayUsing True "focus" ctx]
+  focus ctx = hsep
+    ["\\", "focus", "=>"
+    , display (withFocus "focus" $ withNesting printer) ctx]
 
   cong : {begin, end : TM} -> Bool ->
          Locate pres.signature (algebra PA) (Step pres PA) begin end ->
          Doc ()
   cong b (Here p)
-    = base b (if b then begin else end) $ display p
+    = base b (if b then begin else end) $ displayNamed True sigprinter p
   cong b (Cong t {lhs} {rhs} p)
     = base b (plug (algebra PA) t $ if b then lhs else rhs)
-    $ "cong" <++> parens (focus t) <++> "$" <++> display p
+    $ "cong" <++> parens (focus t) <++> "$" <++> displayNamed True sigprinter p
 
   step : {begin, end : TM} -> Closure pres PA begin end -> Doc ()
   step (Fwd p) = cong False p
@@ -78,12 +84,21 @@ display @{showR} prf = vcat
 export
 idris : {pres : Presentation} ->
         Show (pres .Axiom) =>
+        Ord (Op pres.signature) =>
         DecEq (Op pres.signature) =>
-        Show (Op pres.signature) =>
-        HasPrecedence pres.signature =>
+        Printer pres.signature () ->
         (name : String) -> Lemma pres -> String
-idris nm lemma = show $ vcat
-  [ pretty nm <++> ": (m : Monoid) -> (x1, ..., x_n : U m) -> m.rel lhs rhs"
-  , pretty nm <++> hsep ?a <++> "="
-  , indent 2 $ display $ linearise (Just %search) lemma.derivable
+idris printer nm lemma =
+  let xs : List (Doc ()) = map (pretty . show)
+                         $ take lemma.equation.support names
+  in show $ vcat
+  [ pretty nm <++> colon
+              <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
+                           <++> colon <++> "Nat")
+              <++> "->"
+              <++> display (withNames printer) lemma.equation.lhs
+              <++> "==="
+              <++> display (withNames printer) lemma.equation.rhs
+  , pretty nm <++> hsep xs <++> "= Calc $"
+  , indent 2 $ display printer $ deloop $ linearise (Just %search) lemma.derivable
   ]

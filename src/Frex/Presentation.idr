@@ -32,9 +32,8 @@ projectSignature pres = pres.signature
 namespace Equation
 
   export
-  display : (Show (Op sig), HasPrecedence sig) =>
-            Bool -> Equation sig -> Doc ()
-  display b (MkEq supp lhs rhs)
+  display : Printer sig () -> Equation sig -> Doc ()
+  display printer (MkEq supp lhs rhs)
     = concat {t = List} [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
@@ -43,11 +42,8 @@ namespace Equation
       tele Z = ""
       tele n = "∀" <++> hsep (map (pretty . show) (take n names)) <+> ". "
 
-      prettyName : Term sig (Fin supp) -> Term sig Name
-      prettyName = map (\ k => index (cast k) names)
-
       scoped : Term sig (Fin supp) -> Doc ()
-      scoped = display b . prettyName
+      scoped = display (withNames printer)
 
 namespace Presentation
 
@@ -56,12 +52,12 @@ namespace Presentation
             Finite (p .Axiom) =>
             Show (p .Axiom) =>
             Finite (Op p.signature) =>
-            Show (Op p.signature) =>
-            HasPrecedence p.signature =>
+            Printer p.signature () ->
             Doc ()
-  display p = vcat
+  display p printer = vcat
             $ "Operations:"
-            :: indent 2 (display p.signature)
+            :: indent 2 (Signature.display p.signature
+                           @{(%search, printer.opPrec, printer.opShow)})
             :: "Axioms:"
             :: map (indent 2 . showAxiom) enumerate
 
@@ -69,7 +65,7 @@ namespace Presentation
 
     showAxiom : p .Axiom -> Doc ()
     showAxiom ax = concat {t = List}
-                 [pretty (show ax), ": ", display True (p.axiom ax)]
+                 [pretty (show ax), ": ", display printer (p.axiom ax)]
 
 %hint
 public export

@@ -56,25 +56,26 @@ main = do
   -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
+  let printer = withParens $ withNesting $ withNames generic
   putStrLn $ banner "Monoid Theory"
-  printLn  $ display MonoidTheory
+  printLn  $ display MonoidTheory (withParens generic)
   putStrLn $ banner "Simple proof"
-  printLn  $ display unicode @{BORING} myProof
+  printLn  $ Proof.display unicode printer @{BORING} myProof
   putStrLn $ banner "Proof with congruence"
-  printLn  $ display unicode @{BORING} myProof2
+  printLn  $ display unicode printer @{BORING} myProof2
   putStrLn $ banner "Proof with different congruences"
-  printLn  $ display unicode @{BORING} myProof3
+  printLn  $ display unicode printer @{BORING} myProof3
 
   let output = #"\documentclass{article}"#
               :: latexPreamble
               ::
               [ #"\begin{document}"#
               , #"\subsection{myProof}"#
-              , show $ display latex @{BORING} myProof
+              , show $ display latex printer @{BORING} myProof
               , #"\subsection{myProof2}"#
-              , show $ display latex @{BORING} myProof2
+              , show $ display latex printer @{BORING} myProof2
               , #"\subsection{myProof3}"#
-              , show $ display latex @{BORING} myProof3
+              , show $ display latex printer @{BORING} myProof3
               , #"\end{document}"#
               ]
 
@@ -83,11 +84,11 @@ main = do
             ::
             [ #"\begin{document}"#
             , #"\subsection{myProof}"#
-            , show $ display compactLatex @{BORING} myProof
+            , show $ display compactLatex printer @{BORING} myProof
             , #"\subsection{myProof2}"#
-            , show $ display compactLatex @{BORING} myProof2
+            , show $ display compactLatex printer @{BORING} myProof2
             , #"\subsection{myProof3}"#
-            , show $ display compactLatex @{BORING} myProof3
+            , show $ display compactLatex printer @{BORING} myProof3
             , #"\end{document}"#
             ]
   -- latex
