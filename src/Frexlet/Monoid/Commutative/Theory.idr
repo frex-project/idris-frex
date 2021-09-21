@@ -51,3 +51,9 @@ Zero = MkOp Neutral
 public export
 Plus : Op Signature
 Plus = MkOp Product
+
+export
+Show Commutative.Theory.Axiom where
+  show = \case
+    Mon ax => show ax
+    Commutativity => "Commutativity"

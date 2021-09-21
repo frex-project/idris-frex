@@ -115,6 +115,39 @@ export
       decEq (Call f xs) (Call f ys) | Yes Refl | Yes eq = Yes (cong (Call f) eq)
       decEq (Call f xs) (Call f ys) | Yes Refl | No noargeq = No (\ Refl => noargeq Refl)
 
+export
+(Eq (Op sig), Eq a) => Eq (Term sig a) where
+  Done x == Done y = x == y
+  Call f xs == Call g ys = f == g && eqArgs xs ys where
+
+    eqArgs : Vect m (Term sig a) -> Vect n (Term sig a) -> Bool
+    eqArgs [] [] = True
+    eqArgs (x :: xs) (y :: ys) = x == y && eqArgs xs ys
+    eqArgs _ _ = False
+
+  _ == _ = False
+
+export
+(Ord (Op sig), Ord a) => Ord (Term sig a) where
+  compare (Done x) (Done y) = compare x y
+  compare (Done _) (Call _ _) = LT
+  compare (Call _ _) (Done _) = GT
+  compare (Call f xs) (Call g ys) = case compare f g of
+    EQ => compareArgs xs ys
+    res => res
+
+     where
+
+    compareArgs : Vect m (Term sig a) -> Vect n (Term sig a) -> Ordering
+    compareArgs [] [] = EQ
+    compareArgs (x :: xs) (y :: ys) = case compare x y of
+      EQ => compareArgs xs ys
+      res => res
+    -- these last two should be impossible given that we only use compareArgs
+    -- whenever f == g
+    compareArgs [] (_ :: _) = LT
+    compareArgs (_ :: _) [] = GT
+
 namespace Term
 
   export

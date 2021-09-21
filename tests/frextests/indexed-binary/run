@@ -1,0 +1,3 @@
+$1 --no-banner --no-color --console-width 0 -p frex -p contrib Main.idr < input
+
+rm -rf build

@@ -3,17 +3,13 @@
 \usepackage{newunicodechar}
 \newunicodechar{ε}{\ensuremath{\varepsilon}}
 \newunicodechar{•}{\ensuremath{\bullet}}
+\newunicodechar{⟨}{\ensuremath{\langle}}
+\newunicodechar{⟩}{\ensuremath{\rangle}}
 \begin{document}
 \subsection{myProof}
 \begin{align*}
 [x] • ε
   & \quad \text{=⟨ Left neutrality ]}\\
-[ε • x] • ε
-  & \quad \text{=⟨ Right neutrality ]}\\
-((ε • x) • ε) • ε
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • [ε • ε]
-  & \quad \text{=[ Left neutrality ⟩}\\
 ([ε] • x) • ε
   & \quad \text{=⟨ Left neutrality ]}\\
 ((ε • ε) • x) • ε
@@ -44,34 +40,6 @@ x • ([ε • x] • ε)
   & \quad \text{=[ Left neutrality ⟩}\\
 ((ε • x) • ε) • (ε • x) • ε
   & \quad \text{=⟨ Associativity ]}\\
-ε • x • (ε • [(ε • x) • ε])
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • [ε • ε • x • ε]
-  & \quad \text{=[ Associativity ⟩}\\
-ε • x • [(ε • ε) • x • ε]
-  & \quad \text{=[ Associativity ⟩}\\
-ε • x • (([ε • ε] • x) • ε)
-  & \quad \text{=[ Left neutrality ⟩}\\
-ε • x • (([ε] • x) • ε)
-  & \quad \text{=⟨ Left neutrality ]}\\
-ε • x • [((ε • ε) • x) • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • [(ε • ε) • x • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • (ε • [ε • x • ε])
-  & \quad \text{=[ Associativity ⟩}\\
-(ε • x) • ε • (ε • x) • ε
-  & \quad \text{=[ Associativity ⟩}\\
-(ε • x) • ε • (([ε] • x) • ε)
-  & \quad \text{=⟨ Left neutrality ]}\\
-(ε • x) • ε • [((ε • ε) • x) • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-(ε • x) • ε • [(ε • ε) • x • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-(ε • x) • ε • (ε • [ε • x • ε])
-  & \quad \text{=[ Associativity ⟩}\\
-[(ε • x) • ε] • ε • (ε • x) • ε
-  & \quad \text{=[ Right neutrality ⟩}\\
 [ε • x] • ε • (ε • x) • ε
   & \quad \text{=[ Left neutrality ⟩}\\
 x • (ε • [(ε • x) • ε])
@@ -118,26 +86,6 @@ x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
   & \quad \text{=[ Associativity ⟩}\\
 (ε • x) • ε • (ε • y • (([ε • ε] • z) • (ε • a) • ε))
   & \quad \text{=[ Left neutrality ⟩}\\
-((ε • x) • ε) • (ε • y) • (ε • z) • (ε • a) • ε
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • (ε • [(ε • y) • (ε • z) • (ε • a) • ε])
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • [ε • ε • y • (ε • z) • (ε • a) • ε]
-  & \quad \text{=[ Associativity ⟩}\\
-ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
-  & \quad \text{=[ Associativity ⟩}\\
-ε • x • (([ε • ε] • y) • (ε • z) • (ε • a) • ε)
-  & \quad \text{=[ Left neutrality ⟩}\\
-ε • x • (([ε] • y) • (ε • z) • (ε • a) • ε)
-  & \quad \text{=⟨ Left neutrality ]}\\
-ε • x • [((ε • ε) • y) • (ε • z) • (ε • a) • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • [(ε • ε) • y • (ε • z) • (ε • a) • ε]
-  & \quad \text{=⟨ Associativity ]}\\
-ε • x • (ε • [ε • y • (ε • z) • (ε • a) • ε])
-  & \quad \text{=[ Associativity ⟩}\\
-(ε • x) • ε • (ε • y) • (ε • z) • (ε • a) • ε
-  & \quad \text{=[ Associativity ⟩}\\
 (ε • x • [ε]) • (ε • y) • (ε • z) • (ε • a) • ε
   & \quad \text{=⟨ Left neutrality ]}\\
 [(ε • x) • ε • ε] • (ε • y) • (ε • z) • (ε • a) • ε

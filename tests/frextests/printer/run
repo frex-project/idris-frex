@@ -3,3 +3,7 @@ rm -rf build
 $1 --exec main -p frex -p contrib Monoids.idr
 diff equations-expected.tex build/equations-output.tex &>> output
 diff equations-compact-expected.tex build/equations-output-compact.tex &>> output
+
+$1 --exec main -p frex -p contrib CommutativeMonoids.idr
+diff commutative-equations-expected.tex build/commutative-equations-output.tex &>> output
+diff commutative-equations-expected-compact.tex build/commutative-equations-output-compact.tex &>> output

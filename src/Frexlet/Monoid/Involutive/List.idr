@@ -11,7 +11,7 @@ import Data.List
 public export
 List : {A: Setoid} -> InvolutiveMonoid
 List = MkModel (MkInvolutiveMonoidStructure ((ListMonoid {A}) .Algebra)
-                 (MkSetoidHomomorphism Data.List.reverse reverseHomomorphic))
+                 (MkSetoidHomomorphism List.reverse reverseHomomorphic))
   $ \case
      (Mon LftNeutrality) => ListMonoid .Validate LftNeutrality
      (Mon RgtNeutrality) => ListMonoid .Validate RgtNeutrality

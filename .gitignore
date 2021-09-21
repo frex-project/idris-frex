@@ -9,6 +9,7 @@
 
 /build
 /tests/build
+/tests/**/build
 
 /tests/failures
 

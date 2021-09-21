@@ -31,7 +31,7 @@ PropListMonoid = MkModel
 
 PropListInvolutiveMonoid : {A: Type} -> InvolutiveMonoid
 PropListInvolutiveMonoid = MkModel (MkInvolutiveMonoidStructure ((PropListMonoid {A=A}) .Algebra)
-  (MkSetoidHomomorphism Data.List.reverse (\_,_,Refl => Refl)))
+  (MkSetoidHomomorphism List.reverse (\_,_,Refl => Refl)))
   $ \case
      (Mon LftNeutrality) => PropListMonoid .Validate LftNeutrality
      (Mon RgtNeutrality) => PropListMonoid .Validate RgtNeutrality

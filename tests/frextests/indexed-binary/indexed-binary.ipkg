@@ -1,0 +1,5 @@
+package printer
+
+depends = contrib, frex
+
+main = Main
