@@ -77,6 +77,8 @@ modules = Frex
         , Data.Setoid.List
         , Data.Unit
         , Data.Vect.Extra1
+        , Data.Category
+        , Data.Category.Core
 
 
 depends = contrib
