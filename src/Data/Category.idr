@@ -7,3 +7,5 @@
 ||| Certified Programs and Proofs (CPP 2021).
 ||| DOI:https://doi.org/10.1145/3437992.3439922
 module Data.Category
+
+public import Core
