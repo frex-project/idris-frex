@@ -39,7 +39,7 @@ namespace Category
       , reflexive  = \f       => MkHomEq $ (cat.Arr a b).equivalence.reflexive (U f)
       , symmetric  = \f,g,prf => MkHomEq $ (cat.Arr a b).equivalence.symmetric (U f) (U g) prf.runEq
       , transitive = \f,g,h,f_eq_g,g_eq_h => MkHomEq $
-                       (cat.Arr a b).equivalence.transitive (U f) (U g) (U h) 
+                       (cat.Arr a b).equivalence.transitive (U f) (U g) (U h)
                          f_eq_g.runEq g_eq_h.runEq
       }
     }
@@ -65,7 +65,7 @@ namespace Category
       (Cat .HomSet a b).equivalence.relation
         (Id . f)
         f
-    associativity : {a,b,c,d : Obj} -> 
+    associativity : {a,b,c,d : Obj} ->
       (f : Cat .Hom c d) -> (g : Cat .Hom b c) -> (h : Cat .Hom a b) ->
       (Cat .HomSet a d).equivalence.relation
         ( f . (g . h))
@@ -86,6 +86,13 @@ cat.HomSet a b = cat.structure.HomSet a b
 public export
 (.Hom) : (cat : Category) -> (a, b : cat.Obj) -> Type
 cat.Hom a b = cat.structure.Hom a b
+
+public export
+(.cong) : (cat : Category) -> {a,b,c : cat.Obj} ->
+  SetoidHomomorphism (cat.HomSet b c `Pair` cat.HomSet a b) (cat.HomSet a c)
+    (\uv => fst uv . snd uv)
+cat.cong (u1,u2) (v1,v2) prf = MkHomEq $ cat.structure.compArr.homomorphic
+  (U u1, U u2) (U v1, U v2) (MkAnd prf.fst.runEq prf.snd.runEq)
 
 namespace Functor
   public export
@@ -121,7 +128,7 @@ namespace Functor
   public export
   (.mapSetoid) : {c,d : Category} -> (f : c ~> d) -> {a,b : c.Obj} -> c.HomSet a b ~> d.HomSet (f !! a) (f !! b)
   f.mapSetoid = f.structure.mapHom
-  
+
   public export
   (.map) : {c,d : Category} -> (f : c ~> d) -> {a,b : c.Obj} -> c.Hom a b -> d.Hom (f !! a) (f !! b)
   f.map = f.mapSetoid.H
@@ -205,16 +212,69 @@ namespace NatTrans
       |~ ((alpha ^ _) . ( beta ^ _)) . f.map u
       <~ ( alpha ^ _) . ((beta ^ _)  . f.map u)  ...((d.HomSet _ _).equivalence.symmetric _ _ $
                                                      d.laws.associativity _ _ _)
-      <~ ( alpha ^ _) . ((g.map u) . (beta ^ _)) ...(?h91)
-      <~ ((alpha ^ _) . (g.map u)) . (beta ^ _)  ...(?h92)
-      <~ (h.map u . ( alpha ^ _)) . (beta ^ _)   ...(?h93)
-      <~ (h.map u . ((alpha ^ _) . ( beta ^ _))) ...(?h390)
+      <~ ( alpha ^ _) . ((g.map u) . (beta ^ _)) ...(d.cong (_,_) (_,_) $
+                                                     MkAnd
+                                                       ((d.HomSet _ _).equivalence.reflexive _)
+                                                       $ beta.naturality u)
+      <~ ((alpha ^ _) . (g.map u)) . (beta ^ _)  ...(d.laws.associativity _ _ _)
+      <~ (h.map u . ( alpha ^ _)) . (beta ^ _)   ...(d.cong (_,_) (_,_) $
+                                                     MkAnd
+                                                       (alpha.naturality u)
+                                                       $ (d.HomSet _ _).equivalence.reflexive _)
+      <~ (h.map u . ((alpha ^ _) . ( beta ^ _))) ...((d.HomSet _ _).equivalence.symmetric _ _ $
+                                                     d.laws.associativity _ _ _)
     }
 
+  public export 0
+  NatTransEq : {c,d : Category} -> (f,g : c ~> d) -> Rel (f ~> g)
+  NatTransEq f g alpha beta = (a : c.Obj) -> (d.HomSet _ _).equivalence.relation
+                       (alpha ^ a) (beta ^ a)
 
+  public export
+  (~~>) : {c,d : Category} -> (f,g : c ~> d) -> Setoid
+  f ~~> g = MkSetoid
+    { U = f ~> g
+      -- Might be easier had we showed Setoids have dependent products
+      -- but we haven't yet, so we'll just do it directly
+    , equivalence = MkEquivalence
+        { relation = NatTransEq f g
+        , reflexive = \alpha,a => (d.HomSet _ _).equivalence.reflexive _
+        , symmetric = \alpha,beta,prf,a => (d.HomSet _ _).equivalence.symmetric _ _ $
+                      prf a
+        , transitive = \alpha,beta,gamma,a_eq_b,b_eq_c,a =>
+                       (d.HomSet _ _).equivalence.transitive _ _ _
+                       (a_eq_b a) (b_eq_c a)
+        }
+    }
+
+  public export
+  compose : {c,d : Category} -> {f,g,h : c ~> d} ->
+    (g ~~> h `Pair` f ~~> g) ~> (f ~~> h)
+  compose = MkSetoidHomomorphism
+    { H = uncurry (.)
+    , homomorphic = \(alpha1, beta1),(alpha2,beta2),prf,a =>
+        d.cong (alpha1 ^ a , beta1 ^ a) (alpha2 ^ a , beta2 ^ a) $
+        MkAnd (prf.fst a) (prf.snd a)
+    }
+
+  public export
+  Functor : (c,d : Category) -> Category
+  Functor c d = MkCategory
+    { Obj = c ~> d
+    , structure = MkStructure
+        { Arr = (~~>)
+        , idArr = Id
+        , compArr = compose
+        }
+    , laws = Check
+        { idRgtNeutral = \alpha => MkHomEq $ \a => d.laws.idRgtNeutral _
+        , idLftNeutral = \alpha => MkHomEq $ \a => d.laws.idLftNeutral _
+        , associativity = \alpha,beta,gamma => MkHomEq $ \a => d.laws.associativity _ _ _
+        }
+    }
 
 public export
-record Isomorphism {cat : Category} {a,b : cat.Obj} 
+record Isomorphism {cat : Category} {a,b : cat.Obj}
   (into : cat.Hom a b) (from : cat.Hom b a) where
   constructor MutuallyInverse
   IntoFromId : (cat.HomSet _ _).equivalence.relation
@@ -223,4 +283,3 @@ record Isomorphism {cat : Category} {a,b : cat.Obj}
   FromIntoId : (cat.HomSet _ _).equivalence.relation
     (from . into)
     Id
-
