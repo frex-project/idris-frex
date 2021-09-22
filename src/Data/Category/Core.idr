@@ -5,6 +5,7 @@ import Data.Setoid.Pair
 
 import Control.Relation
 import Data.Nat
+import Data.Vect
 
 import Syntax.PreorderReasoning.Generic
 
@@ -169,6 +170,22 @@ namespace Functor
       }
     }
 
+public export
+data Composable : {cat : Category} -> Vect (S n) (cat.Obj) -> Type where
+  Nil : {cat : Category} -> {a : cat.Obj}-> Composable {cat} [a]
+  (::) : {cat : Category} -> {bs : Vect (S n) cat.Obj} ->
+         {a : cat.Obj} -> cat.Hom a (head bs) ->
+         Composable {cat} bs -> Composable {cat} (a :: bs)
+
+
+
+append : Composable {cat} bs -> cat.Hom (head bs) (last bs)
+append [] = Id
+append [u] = u
+append (f :: gs@(_::_)) = append gs . f
+
+--(.functoriality) : {c,d : Category} -> (f : c ~> d) -> Composable
+
 namespace NatTrans
   public export 0
   Transformation : {c,d : Category} -> (f,g : c ~> d) -> Type
@@ -271,6 +288,25 @@ namespace NatTrans
         , idLftNeutral = \alpha => MkHomEq $ \a => d.laws.idLftNeutral _
         , associativity = \alpha,beta,gamma => MkHomEq $ \a => d.laws.associativity _ _ _
         }
+    }
+
+  ||| Horizontal composition of natural transformations
+  public export
+  (*) : {b,c,d : Category} -> {f1,f2 : c ~> d} -> {g1,g2 : b ~> c} ->
+        f1 ~> f2 -> g1 ~> g2 -> (f1 . g1) ~> (f2 . g2)
+  alpha * beta = MkNatTrans
+    { transformation = \a => (alpha ^ (g2 !! a)) . f1.map (beta ^ a)
+      {-           /----(alpha * beta ^ a)-----v
+            f1 g1 a      def                 f2 g2 b
+              |   `--------> f1 g2 a ----------^|
+              | f1.functoriality|               |
+              |  (beta.nat)     |  alpha.nat    |
+              |                 v               |
+              v  /--------->  f1 g2 b --------v v
+            f1 g1 b           def           f2 g2 b
+                 `-----------------------------^
+      -}
+    , naturality = \u => ?h2
     }
 
 public export
