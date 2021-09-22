@@ -57,3 +57,7 @@ Show Commutative.Theory.Axiom where
   show = \case
     Mon ax => show ax
     Commutativity => "Commutativity"
+
+export
+Finite Commutative.Theory.Axiom where
+  enumerate = map Mon enumerate ++ [Commutativity]

@@ -21,10 +21,6 @@ import System.File
 
 %default total
 
-record Erase a where
-  constructor MkErase
-  0 val : a
-
 [BORING] Show a where
   show _ = "boring"
 
@@ -54,17 +50,14 @@ myProof
           $ (Dyn FZ .+. Sta 6) .+. Dyn 1 .+. (Dyn 2 .+. Sta 2) =-=
             Dyn 1 .+. ((the Nat 1) *. Dyn 0) .+. Dyn 2 .+. Sta 8
 
-Show (Fin n) where
-  show = show . cast {to = Nat}
-
 main : IO Builtin.Unit
 main = do
   -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
-  let printer = withNesting $ withNames generic
+  let printer = withNesting $ withEvaluation $ withNames generic
   putStrLn $ banner "Commutative Monoid Theory"
-  printLn  $ display MonoidTheory generic
+  printLn  $ display CommutativeMonoidTheory $ withParens generic
   putStrLn $ banner "Simple proof"
   printLn  $ Proof.display unicode printer @{BORING} myProof
 

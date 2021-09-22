@@ -44,7 +44,8 @@ level (InfixR lvl) = lvl
 
 public export
 interface HasPrecedence (0 sig : Signature) where
-  OpPrecedence : (f : sig.OpWithArity (S n)) -> Maybe (Precedence (S n))
+  OpPrecedence : {0 n : Nat} -> (f : sig.OpWithArity (S n)) ->
+                 Maybe (Precedence (S n))
 
 export
 precedence : HasPrecedence sig => (f : Op sig) ->
