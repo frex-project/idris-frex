@@ -7,8 +7,6 @@ import Control.Relation
 import Data.Nat
 import Data.Vect
 
-import Syntax.PreorderReasoning.Generic
-
 %default total
 
 namespace Category
@@ -156,19 +154,26 @@ namespace Functor
       }
     , functoriality = Check
       { id = \a =>
-        CalcWith @{cast $ c.HomSet _ _} $
+        CalcWith (c.HomSet _ _) $
         |~ f.map (g.map Id)
-        <~ f.map Id ...(f.mapSetoid.homomorphic _ Id $
+        ~~ f.map Id ...(f.mapSetoid.homomorphic _ Id $
                         g.functoriality.id _)
-        <~ Id       ...(f.functoriality.id _)
+        ~~ Id       ...(f.functoriality.id _)
       , comp = \u,v =>
-        CalcWith @{cast $ c.HomSet _ _} $
+        CalcWith (c.HomSet _ _) $
         |~ f.map (g.map (u . v))
-        <~ f.map (g.map u . g.map v)         ...(f.mapSetoid.homomorphic (g.map (u . v)) _ $
+        ~~ f.map (g.map u . g.map v)         ...(f.mapSetoid.homomorphic (g.map (u . v)) _ $
                                                  g.functoriality.comp u v)
-        <~ f.map (g.map u) . f.map (g.map v) ...(f.functoriality.comp _ _)
+        ~~ f.map (g.map u) . f.map (g.map v) ...(f.functoriality.comp _ _)
       }
     }
+
+{-
+public export
+data Composable : {cat : Category} -> (src,tgt : cat.Obj) -> Type where
+  Nil : Composable a a
+  ConsMorphism : cat.Hom b c -> Composable {cat} a b -> Composable {cat} a c
+  ConsNested   : Composable {cat}
 
 public export
 data Composable : {cat : Category} -> Vect (S n) (cat.Obj) -> Type where
@@ -183,7 +188,7 @@ append : Composable {cat} bs -> cat.Hom (head bs) (last bs)
 append [] = Id
 append [u] = u
 append (f :: gs@(_::_)) = append gs . f
-
+-}
 --(.functoriality) : {c,d : Category} -> (f : c ~> d) -> Composable
 
 namespace NatTrans
@@ -214,32 +219,29 @@ namespace NatTrans
   Id : {c, d : Category} -> {f : c ~> d} -> f ~> f
   Id = MkNatTrans
     { transformation = \a => Id
-    , naturality = \u => CalcWith @{cast $ d.HomSet _ _} $
+    , naturality = \u => CalcWith (d.HomSet _ _) $
       |~ (Id . f.map u)
-      <~ f.map u        ...(d.laws.idLftNeutral _)
-      <~ (f.map u . Id) ...((d.HomSet _ _).equivalence.symmetric _ _ $
-                            d.laws.idRgtNeutral _)
+      ~~ f.map u        ...(d.laws.idLftNeutral _)
+      ~~ (f.map u . Id) ..<(d.laws.idRgtNeutral _)
     }
 
   public export
   (.) : {c, d : Category} -> {f,g,h : c ~> d} -> g ~> h -> f ~> g -> f ~> h
   (.) alpha beta = MkNatTrans
     { transformation = \a => (alpha ^ a) . (beta ^ a)
-    , naturality = \ u => CalcWith @{cast $ d.HomSet _ _} $
+    , naturality = \ u => CalcWith (d.HomSet _ _) $
       |~ ((alpha ^ _) . ( beta ^ _)) . f.map u
-      <~ ( alpha ^ _) . ((beta ^ _)  . f.map u)  ...((d.HomSet _ _).equivalence.symmetric _ _ $
-                                                     d.laws.associativity _ _ _)
-      <~ ( alpha ^ _) . ((g.map u) . (beta ^ _)) ...(d.cong (_,_) (_,_) $
+      ~~ ( alpha ^ _) . ((beta ^ _)  . f.map u)  ..<(d.laws.associativity _ _ _)
+      ~~ ( alpha ^ _) . ((g.map u) . (beta ^ _)) ...(d.cong (_,_) (_,_) $
                                                      MkAnd
                                                        ((d.HomSet _ _).equivalence.reflexive _)
                                                        $ beta.naturality u)
-      <~ ((alpha ^ _) . (g.map u)) . (beta ^ _)  ...(d.laws.associativity _ _ _)
-      <~ (h.map u . ( alpha ^ _)) . (beta ^ _)   ...(d.cong (_,_) (_,_) $
+      ~~ ((alpha ^ _) . (g.map u)) . (beta ^ _)  ...(d.laws.associativity _ _ _)
+      ~~ (h.map u . ( alpha ^ _)) . (beta ^ _)   ...(d.cong (_,_) (_,_) $
                                                      MkAnd
                                                        (alpha.naturality u)
                                                        $ (d.HomSet _ _).equivalence.reflexive _)
-      <~ (h.map u . ((alpha ^ _) . ( beta ^ _))) ...((d.HomSet _ _).equivalence.symmetric _ _ $
-                                                     d.laws.associativity _ _ _)
+      ~~ (h.map u . ((alpha ^ _) . ( beta ^ _))) ..<(d.laws.associativity _ _ _)
     }
 
   public export 0

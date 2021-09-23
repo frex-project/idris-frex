@@ -2,6 +2,7 @@
 module Data.Setoid
 
 import public Data.Setoid.Definition
+import public Data.Setoid.Reasoning
 import public Data.Setoid.Either
 import public Data.Setoid.Pair
 import public Data.Setoid.Vect
