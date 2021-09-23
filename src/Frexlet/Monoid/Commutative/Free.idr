@@ -25,6 +25,7 @@ import public Data.Vect.Extra
 import Data.Vect.Extra1
 
 %default total
+%ambiguity_depth 4
 
 public export
 Model : (n : Nat) -> CommutativeMonoid

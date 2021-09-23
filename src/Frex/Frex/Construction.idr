@@ -27,6 +27,8 @@ import Decidable.Decidable
 
 import Syntax.PreorderReasoning
 
+%ambiguity_depth 4
+
 public export
 data EvaluationSigOperation : (sig : Signature) -> (0 a : Type) -> Nat -> Type where
   Op : sig.OpWithArity n -> EvaluationSigOperation sig a n

@@ -29,3 +29,4 @@ public export
     (d.HomSet (phi.lft !! a2) b2).equivalence.relation
       (f . phi.mate.Bwd.H u . phi.lft.map g)
       (phi.mate.Bwd.H (phi.rgt.map f . u . g))
+phi.naturalityInv f g u = ?naturalityInv_rhs

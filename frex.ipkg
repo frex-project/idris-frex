@@ -80,6 +80,9 @@ modules = Frex
         , Data.Vect.Extra1
         , Data.Category
         , Data.Category.Core
+        , Data.Category.Core.Category
+        , Data.Category.Core.Functor
+        , Data.Category.Core.NatTrans
         , Data.Category.Adjunction
 
 
