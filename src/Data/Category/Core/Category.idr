@@ -118,7 +118,7 @@ namespace CongSrc
   u . prf = cat.cong (u, v1) (u, v2)
           $ MkAnd ((cat.HomSet _ _).equivalence.reflexive _) prf
 
-infix 9 .:.
+infixr 9 .:.
 
 namespace CongBoth
   public export

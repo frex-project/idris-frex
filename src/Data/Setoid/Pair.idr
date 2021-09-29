@@ -113,3 +113,19 @@ pairIso : {a,b,c,d : Setoid} -> (a <~> c) -> (b <~> d) -> (Pair a b <~> Pair c d
 pairIso ac bd = MkIsomorphism (bimap ac.Fwd bd.Fwd) (bimap ac.Bwd bd.Bwd)
                   (IsIsomorphism (\(x,y) => MkAnd (ac.Iso.BwdFwdId x) (bd.Iso.BwdFwdId y))
                                  (\(x,y) => MkAnd (ac.Iso.FwdBwdId x) (bd.Iso.FwdBwdId y)))
+
+namespace Data.Pair
+  public export
+  swap : (a,b) -> (b,a)
+  swap (x,y) = (y,x)
+
+public export
+swap : (a `Pair` b) ~> (b `Pair` a)
+swap = MkSetoidHomomorphism
+  { H = swap
+  , homomorphic = \(_,_),(_,_),prf => MkAnd prf.snd prf.fst
+  }
+
+public export
+flip : {a,b,c : Setoid} -> (a `Pair` b) ~> c -> (b `Pair` a) ~> c
+flip f = f . swap
