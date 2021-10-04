@@ -6,3 +6,5 @@ import public Data.Setoid.Either
 import public Data.Setoid.Pair
 import public Data.Setoid.Vect
 import public Data.Setoid.List
+
+import public Syntax.PreorderReasoning.Setoid

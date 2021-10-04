@@ -44,12 +44,12 @@ eqPreservation : {sig : Signature} -> (eq : (Term sig x, Term sig x)) ->
   b.equivalence.relation
     (b.Sem (fst eq) (h.H.H . env))
     (b.Sem (snd eq) (h.H.H . env))
-eqPreservation eq env h prf = CalcWith @{cast b} $
+eqPreservation eq env h prf = CalcWith (cast b) $
   |~ b.Sem (fst eq) (h.H.H . env)
-  <~ h.H.H (a.Sem (fst eq) env) ...(b.equivalence.symmetric _ _ $
+  :~ h.H.H (a.Sem (fst eq) env) ...(b.equivalence.symmetric _ _ $
                                   homoPreservesSem h (fst eq) env)
-  <~ h.H.H (a.Sem (snd eq) env) ...(h.H.homomorphic _ _ prf)
-  <~ b.Sem (snd eq) (h.H.H . env) ...(homoPreservesSem h (snd eq) env)
+  :~ h.H.H (a.Sem (snd eq) env) ...(h.H.homomorphic _ _ prf)
+  :~ b.Sem (snd eq) (h.H.H . env) ...(homoPreservesSem h (snd eq) env)
 
 ||| States: `pres.signature`-algebra `a` satisfies the given equation.
 public export 0
@@ -70,19 +70,19 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
     b.equivalence.relation
       (bindTerm {a = b.algebra} t env)
       (iso.Iso.Fwd.H $ a.Sem t (iso.Iso.Bwd.H . env))
-  semPreservation {x} t env = CalcWith @{cast b} $
+  semPreservation {x} t env = CalcWith (cast b) $
     let id_b' : cast b ~> cast b
         id_b' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
     in
     |~ b.Sem t env
-    <~ b.Sem t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
+    :~ b.Sem t (iso.Iso.Fwd.H . (iso.Iso.Bwd.H . env))
              ...((eval {a = b, x = irrelevantCast x} t).homomorphic
                    (mate env)
                    (iso.Iso.Fwd . (iso.Iso.Bwd . mate env))
                 $ \i => (cast {to = Setoid} b ~~> cast b).equivalence.symmetric id_b' (id b).H
                          iso.Iso.Iso.FwdBwdId
                          (env i))
-    <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env))
+    :~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} t (iso.Iso.Bwd.H . env))
              ...(b.equivalence.symmetric _ _ $
                    homoPreservesSem (cast {to = a ~> b} iso) t (iso.Iso.Bwd.H . env))
 
@@ -90,14 +90,14 @@ parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   public export
   isoPreservesEq : (eq : Equation sig) ->
     (env : Fin eq.support -> U b)  -> eq =| (a ** iso.Iso.Bwd.H . env) -> eq =| (b ** env)
-  isoPreservesEq eq env prf = CalcWith @{cast b} $
+  isoPreservesEq eq env prf = CalcWith (cast b) $
     let env' : Fin eq.support -> U a
         env' = iso.Iso.Bwd.H . env
     in
     |~ b.Sem eq.lhs env
-    <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.lhs env') ...(semPreservation eq.lhs env)
-    <~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.rhs env') ...(_.homomorphic _ _ prf)
-    <~ b.Sem eq.rhs env                                     ...(b.equivalence.symmetric _ _
+    :~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.lhs env') ...(semPreservation eq.lhs env)
+    :~ iso.Iso.Fwd.H (bindTerm {a = a.algebra} eq.rhs env') ...(_.homomorphic _ _ prf)
+    :~ b.Sem eq.rhs env                                     ...(b.equivalence.symmetric _ _
                                                               $ semPreservation eq.rhs env)
 
 ||| Algebra isomorphisms preserve transport models

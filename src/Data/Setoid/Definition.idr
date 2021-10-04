@@ -1,7 +1,6 @@
 ||| Basic definition and notation for setoids
 module Data.Setoid.Definition
 
-import public Syntax.PreorderReasoning.Generic
 import public Control.Relation
 import public Control.Order
 
