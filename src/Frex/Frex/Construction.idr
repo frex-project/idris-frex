@@ -214,12 +214,12 @@ namespace Model
     Model (EvaluationPresentation pres a) -> (Model pres)
   castEval ea = MkModel
     { Algebra = castEval ea.Algebra
-    , Validate = \ax,env => CalcWith @{cast ea} $
+    , Validate = \ax,env => CalcWith (cast ea) $
       |~ (castEval ea.Algebra).Sem (pres.axiom ax).lhs env
       ~~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).lhs) env
           ...(sym $ coherence ea.Algebra _ _)
-      <~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+      :~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).rhs) env
           ...(ea.Validate (Axiom ax) env)
       ~~ (castEval ea.Algebra).Sem (pres.axiom ax).rhs env
@@ -246,15 +246,14 @@ freeAsExtension fs = MkExtension
         , homomorphic = \x,y,prf => fs.Data.Model.validate (Assumption prf) []
         }
       , preserves = \(MkOp op),xs =>
-        CalcWith @{cast fs.Data.Model} $
+        CalcWith (cast fs.Data.Model) $
         |~ (fs.Data.Model.sem (Constant $ a.Sem (MkOp op) xs))
-        <~ fs.Data.Model.Sem (Call
+        ~: fs.Data.Model.Sem (Call
                     {sig = (EvaluationPresentation pres a.Algebra).signature, a = Fin 0}
                   (MkOp (Construction.Op op))
                   (map (\x => Call (MkOp $ Constant x) []) xs))
                   (flip index Vect.Nil)
-           ...(fs.Data.Model.equivalence.symmetric _ _ $
-                 fs.Data.Model.validate (Evaluation op xs) [])
+           ...(fs.Data.Model.validate (Evaluation op xs) [])
         ~~ fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)
            (map (\i => fs.Data.Model.sem (Constant i)) xs)
            ...(cong (fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)) $
@@ -354,21 +353,21 @@ other.Over = MkModelOver
   { Model = MkModel
       { Algebra = other.OverAlgebra
       , Validate = \case
-          Axiom ax        => \env => CalcWith @{cast other.Model} $
+          Axiom ax        => \env => CalcWith (cast other.Model) $
             |~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).lhs) env
             ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).lhs env
                ...(irrelevantEq $ coherence other.OverAlgebra _ _)
             ~~ other.Model.Sem (pres.axiom ax).lhs env
                ...(other.OverAlgebraCoherence _ _)
-            <~ other.Model.Sem (pres.axiom ax).rhs env
+            :~ other.Model.Sem (pres.axiom ax).rhs env
                ...(other.Model.Validate ax env)
             ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).rhs env
                ...(sym $ other.OverAlgebraCoherence _ _)
             ~~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).rhs) env
                ...(sym $ irrelevantEq $ coherence other.OverAlgebra _ _)
-          Evaluation f cs => \env => CalcWith @{cast other.Model} $
+          Evaluation f cs => \env => CalcWith (cast other.Model) $
             |~ other.Model.Algebra.algebra.Semantics (MkOp f)
                  (bindTerms {a = other.OverAlgebra.algebra}
                    (map (\x => Call (MkOp (Constant x)) []) cs) env)
@@ -376,9 +375,8 @@ other.Over = MkModelOver
                  (map other.Embed.H.H cs)
                  ...(cong (other.Model.Algebra.algebra.Semantics (MkOp f)) $
                      OverAlgebraNop other _ _)
-            <~ other.Embed.H.H (a.Sem (MkOp f) cs)
-               ...(other.Model.equivalence.symmetric _ _ $
-                   other.Embed.preserves (MkOp f) _)
+            ~: other.Embed.H.H (a.Sem (MkOp f) cs)
+               ...(other.Embed.preserves (MkOp f) _)
           Assumption xyEq => \env => other.Embed.H.homomorphic _ _ xyEq
       }
   , Env   = other.Var
@@ -397,9 +395,9 @@ Extender fs other =
     , preserves = \case
         MkOp op => \xs => h.H.preserves (MkOp $ Construction.Op op) xs
     }
-  , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+  , PreserveEmbed = \i => CalcWith (cast other.Model) $
     |~ h.H.H.H (fs.Data.Model.sem (Constant i))
-    <~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
+    :~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
   , PreserveVar   = h.preserves
   }
 

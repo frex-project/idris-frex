@@ -144,19 +144,19 @@ FrexInvolutionIsInvolution a s =
       invInvMorphism : frex ~> doubleInvExtension
       invInvMorphism = MkExtensionMorphism
         { H = (FrexInvolution a s).rev . (FrexInvolution a s)
-        , PreserveEmbed = \i => CalcWith @{cast $ frex.Model.rev.rev} $
+        , PreserveEmbed = \i => CalcWith (cast $ frex.Model.rev.rev) $
           |~ (frexInv.rev.H.H $ frexInv.H.H $ frex.Embed.H.H i)
-          <~ (frexInv.rev.H.H $ frex.Embed.rev.H.H $ inv.H.H i)
+          :~ (frexInv.rev.H.H $ frex.Embed.rev.H.H $ inv.H.H i)
             ...(frexInv.rev.H.homomorphic _ _ $
                 (FrexInvolutionExtensionMorphism a s).PreserveEmbed _)
-          <~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H  $ inv.H.H i)
+          :~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H  $ inv.H.H i)
             ...((FrexInvolutionExtensionMorphism a s).PreserveEmbed _)
-        , PreserveVar   = \x => CalcWith @{cast $ frex.Model.rev.rev} $
+        , PreserveVar   = \x => CalcWith (cast $ frex.Model.rev.rev) $
           |~ (frexInv.rev.H.H $ frexInv.H.H $ frex.Var.H x)
-          <~ (frexInv.rev.H.H $ frex.Var.H $ bid.H x)
+          :~ (frexInv.rev.H.H $ frex.Var.H $ bid.H x)
             ...(frexInv.rev.H.homomorphic _ _ $
                 (FrexInvolutionExtensionMorphism a s).PreserveVar _)
-          <~ (frex.Var.H $ bid.H $ bid.H x)
+          :~ (frex.Var.H $ bid.H $ bid.H x)
             ...((FrexInvolutionExtensionMorphism a s).PreserveVar (bid.H x))
         }
       ||| The second extension morphism:
@@ -172,13 +172,12 @@ FrexInvolutionIsInvolution a s =
       jMorphism : frex ~> doubleInvExtension
       jMorphism = MkExtensionMorphism
         { H = jHomo
-        , PreserveEmbed = \i => CalcWith @{cast $ frex.Model.rev.rev} $
+        , PreserveEmbed = \i => CalcWith (cast $ frex.Model.rev.rev) $
           |~ (jHomo.H.H $ frex.Embed.H.H i)
-          <~ (frex.Embed.rev.rev.H.H $ inv.rev.H.H $ inv.H.H i)
+          ~: (frex.Embed.rev.rev.H.H $ inv.rev.H.H $ inv.H.H i)
              ...( frex.Embed.H.homomorphic _ _
-                $ a.equivalence.symmetric  _ _
                 $ a.validate Involutivity [_])
-        , PreserveVar   = \(b, x) => CalcWith @{cast $ frex.Model.rev.rev} $
+        , PreserveVar   = \(b, x) => CalcWith (cast $ frex.Model.rev.rev) $
           |~ (jHomo.H.H $ frex.Var.H (b, x))
           ~~ (frex.Var.H $ bid.H $ bid.H (b, x))
              ...( cong (\u => frex.Var.H (u, x))
@@ -382,28 +381,27 @@ ExtenderHomomorphism a s other =
       extendLHS = MkExtensionMorphism
         { H =  h.H.rev . FrexInvolution a s
         , PreserveEmbed = \i => other.Model.equivalence.reflexive _
-        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
+        , PreserveVar   = \bx => CalcWith (cast other.Model) $
             |~ h.H.H.H ((AuxFrexExtension a s).Var.H bx).inv
-            <~ h.H.H.H ((AuxFrexExtension a s).Var.H $ bid.H bx)
+            :~ h.H.H.H ((AuxFrexExtension a s).Var.H $ bid.H bx)
                ...(h.H.H.homomorphic _ _ $
                    (FrexInvolutionExtensionMorphism a s).PreserveVar _)
-            <~ otherIExt.MonoidExtension.Var.H (bid.H bx)
+            :~ otherIExt.MonoidExtension.Var.H (bid.H bx)
                ...(h.PreserveVar _)
          }
       extendRHS = MkExtensionMorphism
         { H = otherIExt.ModelInvolution.H . h.H
-        , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+        , PreserveEmbed = \i => CalcWith (cast other.Model) $
           |~ (h.H.H.H $ (AuxFrexExtension a s).Embed.H.H i ).inv
-          <~ (otherIExt.MonoidExtension.Embed.H.H i).inv
+          :~ (otherIExt.MonoidExtension.Embed.H.H i).inv
              ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveEmbed i])
-          <~ (otherIExt.MonoidExtension.Embed.H.H i.inv)
-            ...( other.Model.equivalence.symmetric _ _
-               $ other.Embed.preserves Involute [_])
-        , PreserveVar   = \bx => CalcWith @{cast other.Model} $
+          ~: (otherIExt.MonoidExtension.Embed.H.H i.inv)
+            ...( other.Embed.preserves Involute [_])
+        , PreserveVar   = \bx => CalcWith (cast other.Model) $
           |~ (h.H.H.H $ (AuxFrexExtension a s).Var.H bx).inv
-          <~ (otherIExt.MonoidExtension.Var.H bx).inv
+          :~ (otherIExt.MonoidExtension.Var.H bx).inv
              ...(other.Model.cong 1 (Dyn 0).inv [_] [_] [h.PreserveVar bx])
-          <~ (otherIExt.MonoidExtension.Var.H $ bid.H bx)
+          :~ (otherIExt.MonoidExtension.Var.H $ bid.H bx)
              ...(otherIExt.VarCompatibility _)
         }
   in MkSetoidHomomorphism
@@ -476,15 +474,14 @@ Uniqueness a s other =
                other.Model <------------------------------- (Bool,s)
                              otherIExt.MonoidExtension.Var
             -}
-            (True ,x) => CalcWith @{cast other.Model} $
+            (True ,x) => CalcWith (cast other.Model) $
               |~ extend.H.H.H ((AuxFrexExtension a s).Var.H (True, x))
-              <~  extend.H.H.H ((InvMonoidExtension a s).Var.H x ).inv
-                                      ...( other.Model.equivalence.symmetric _ _
-                                         $ extend.H.H.homomorphic _ _
+              ~:  extend.H.H.H ((InvMonoidExtension a s).Var.H x ).inv
+                                      ...( extend.H.H.homomorphic _ _
                                          $ (FrexInvolutionExtensionMorphism a s).PreserveVar (False, x))
-              <~ (extend.H.H.H ((InvMonoidExtension a s).Var.H x)).inv
+              :~ (extend.H.H.H ((InvMonoidExtension a s).Var.H x)).inv
                                       ...(extend.H.preserves Involute [_])
-              <~ (other.Var.H x).inv  ...(other.Model.cong 1 (Dyn 0).inv [_] [_]
+              :~ (other.Var.H x).inv  ...(other.Model.cong 1 (Dyn 0).inv [_] [_]
                                           [extend.PreserveVar _])
         }
   in \extend1,extend2 => (AuxFrex a s).UP.Unique otherIExt.MonoidExtension

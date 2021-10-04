@@ -34,11 +34,11 @@ indexHomomorphismLemma :  {0 sig : Signature} -> (n: Nat) -> (a: SetoidAlgebra s
   a.equivalence.relation
      (index i (map (a.Sem op) (transpose zss)))
      (a.algebra.Sem op (map (index i) zss))
-indexHomomorphismLemma n a i op zss = CalcWith @{cast a} $
+indexHomomorphismLemma n a i op zss = CalcWith (cast a) $
         |~ index i (map (a.Sem op) (transpose zss))
         ~~ a.Sem op (     index i $ transpose zss)
              ...(indexNaturality _ _ _)
-        <~ a.Sem op (map (index i)            zss)
+        :~ a.Sem op (map (index i)            zss)
              ...(a.congruence op _ _ $ reflect (VectSetoid _ $ cast a)
                  $ indexTranspose _ _)
 
@@ -52,21 +52,19 @@ FinPowerSetoidAlgebra n a =
               a.equivalence.relation
                 (index j (map (index i) xss))
                 (index j (map (index i) yss))
-      lemma j = CalcWith @{cast a} $
+      lemma j = CalcWith (cast a) $
         |~ (index j (map (index i)  xss))
         ~~ index i (index j xss)        ...(      indexNaturality _ _ _)
-        <~ index i (index j yss)        ...(prf j i)
+        :~ index i (index j yss)        ...(prf j i)
         ~~ index j (map (index i)  yss) ...(sym $ indexNaturality _ _ _)
-  in CalcWith @{cast a} $
+  in CalcWith (cast a) $
   |~ index i (map (a.Sem op) (transpose xss))
-  <~ a.Sem op (map (index i) xss) ...(indexHomomorphismLemma n a _ _ _)
-  <~ a.Sem op (map (index i) yss) ...(a.congruence op
+  :~ a.Sem op (map (index i) xss) ...(indexHomomorphismLemma n a _ _ _)
+  :~ a.Sem op (map (index i) yss) ...(a.congruence op
                                        (map (index i) xss)
                                        (map (index i) yss) lemma)
-  <~ index i (map (a.Sem op)
-                  (transpose yss))         ...((cast a).equivalence.symmetric
-                                                _ _ $
-                                               indexHomomorphismLemma n a _ _ _)
+  ~: index i (map (a.Sem op)
+                  (transpose yss))         ...(indexHomomorphismLemma n a _ _ _)
 
 public export
 eval : {0 sig : Signature} -> {n : Nat} -> {a : SetoidAlgebra sig} ->
@@ -101,19 +99,19 @@ representation =
                 $ \xs,ys,prf => prf
       , Bwd = MkSetoidHomomorphism
                (\phi => tabulate phi.H)
-               $ \phis, psis, prf, i => CalcWith @{cast a} $
+               $ \phis, psis, prf, i => CalcWith (cast a) $
                  |~ index i (tabulate phis.H)
                  ~~ phis.H i ...(indexTabulate _ _)
-                 <~ psis.H i ...(prf i)
+                 :~ psis.H i ...(prf i)
                  ~~ index i (tabulate psis.H) ...(sym $ indexTabulate _ _)
       , Iso = IsIsomorphism
           { BwdFwdId = \x, i => reflect (cast a) $ indexTabulate _ _
           , FwdBwdId = \i, x => reflect (cast a) $ indexTabulate _ _
           }
       }
-  , FwdHomo = \op, xss, i => CalcWith @{cast a} $
+  , FwdHomo = \op, xss, i => CalcWith (cast a) $
       |~ index i ((n `FinPowerSetoidAlgebra` a).Sem op xss)
-      <~ a.Sem op (map (index i) xss)
+      :~ a.Sem op (map (index i) xss)
            ...((eval i).preserves op xss)
       ~~ a.Sem op (map (\xs => (fwd xs).H i)      xss)
            ...(Refl)
