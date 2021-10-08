@@ -1,0 +1,5 @@
+package certificates
+
+depends = contrib, frex
+
+main = Monoids

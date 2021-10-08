@@ -9,6 +9,7 @@ tests = MkTestPool "Frex tests" [] Nothing
   [ "monoids"
   , "commutative-monoids"
   , "printer"
+  , "certificates"
   , "involutive-monoids"
   , "indexed-binary"
   ]

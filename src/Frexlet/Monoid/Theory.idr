@@ -91,7 +91,7 @@ export
 [Raw] Show Axiom where
   show = \case
     LftNeutrality => "LftNeutrality"
-    RgtNeutrality => "RghtNeutrality"
+    RgtNeutrality => "RgtNeutrality"
     Associativity => "Associativity"
 
 export
