@@ -4,27 +4,22 @@ import Data.Category.Core
 
 public export
 (.op) : Category -> Category
-cat.op =
-  let Arr' : cat.Obj -> cat.Obj -> Setoid
-      Arr' a b = cat.HomSet b a
-      compose : {a,b,c : cat.Obj} -> (U $ Arr' b c, U $ Arr' a b) -> U $ Arr' a c
-      compose (f,g) = g . f
-  in MkCategory
+cat.op = MkCategory
   { Obj = cat.Obj
   , structure = MkStructure
-    { Arr = Arr'
-    , idArr = Id
+    { Arr = \a, b => cat.structure.Arr b a
+    , idArr = U Id
     , compArr = MkSetoidHomomorphism
-        { H = compose
+        { H = \fg => cat.structure.compArr.H (snd fg, fst fg)
         , homomorphic = \(f1,g1),(f2,g2),prf =>
-            cat.cong (_,_) (_,_) (MkAnd prf.snd prf.fst)
+            cat.structure.compArr.homomorphic _ _ (MkAnd prf.snd prf.fst)
         }
     }
   , laws = Check
-    { idLftNeutral = \f => MkHomEq $ cat.laws.idRgtNeutral _
-    , idRgtNeutral = \f => MkHomEq $ cat.laws.idLftNeutral _
+    { idLftNeutral = \f => MkHomEq $ (cat.laws.idRgtNeutral (MkHom $ U f)).runEq
+    , idRgtNeutral = \f => MkHomEq $ (cat.laws.idLftNeutral (MkHom $ U f)).runEq
     , associativity = \f,g,h => MkHomEq $
-         (cat.HomSet _ _).equivalence.symmetric _ _ $
-         cat.laws.associativity (U h) (U g) (U f)
+         ((cat.HomSet _ _).equivalence.symmetric _ _ $
+         (cat.laws.associativity (MkHom $ U h) (MkHom $ U g) (MkHom $ U f))).runEq
     }
   }
