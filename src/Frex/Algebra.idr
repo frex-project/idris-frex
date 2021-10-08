@@ -147,20 +147,6 @@ export
     compareArgs [] (_ :: _) = LT
     compareArgs (_ :: _) [] = GT
 
-public export
-record Printer (sig : Signature) (a : Type) where
-  constructor MkPrinter
-  ||| Variable printing
-  varShow   : Show a
-  ||| Operator printing
-  opShow    : Show (Op sig)
-  ||| Operator precedences
-  opPrec    : HasPrecedence sig
-  ||| Should all infix operators be wrapped in parens
-  opParens  : Bool
-  ||| Should we wrap a term in parens at the toplevel
-  topParens : Bool
-
 ||| Print parens (but not at the toplevel)
 export
 withParens : Printer sig a -> Printer sig a

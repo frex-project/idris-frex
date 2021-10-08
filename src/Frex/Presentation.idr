@@ -29,6 +29,22 @@ public export %hint
 projectSignature : Presentation -> Signature
 projectSignature pres = pres.signature
 
+public export
+record Printer (pres : Presentation) (a : Type) where
+  constructor MkPrinter
+  axiomShow  : Show pres.Axiom
+  sigPrinter : Printer pres.signature a
+
+||| Used to print a definition corresponding to an axiom
+export
+withLower : Presentation.Printer pres a -> Printer pres a
+withLower p = { axiomShow := lowerAxiom } p where
+
+  [lowerAxiom] Show pres.Axiom where
+    show ax = case unpack (show @{p.axiomShow} ax) of
+      [] => ""
+      (x :: xs) => pack $ toLower x :: xs
+
 namespace Equation
 
   export
@@ -48,24 +64,24 @@ namespace Equation
 namespace Presentation
 
   export
-  display : (p : Presentation) ->
-            Finite (p .Axiom) =>
-            Show (p .Axiom) =>
-            Finite (Op p.signature) =>
-            Printer p.signature () ->
+  display : (pres : Presentation) ->
+            Finite (pres .Axiom) =>
+            Finite (Op pres.signature) =>
+            Printer pres () ->
             Doc ()
-  display p printer = vcat
+  display pres p = vcat
             $ "Operations:"
-            :: indent 2 (Signature.display p.signature
-                           @{(%search, printer.opPrec, printer.opShow)})
+            :: indent 2 (Signature.display pres.signature p.sigPrinter)
             :: "Axioms:"
             :: map (indent 2 . showAxiom) enumerate
 
     where
 
-    showAxiom : p .Axiom -> Doc ()
-    showAxiom ax = concat {t = List}
-                 [pretty (show ax), ": ", display printer (p.axiom ax)]
+    showAxiom : pres .Axiom -> Doc ()
+    showAxiom ax = hcat
+                 [ pretty (show @{p.axiomShow} ax)
+                 , ": "
+                 , display p.sigPrinter (pres.axiom ax)]
 
 %hint
 public export

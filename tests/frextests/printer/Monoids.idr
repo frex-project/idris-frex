@@ -56,9 +56,9 @@ main = do
   -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
-  let printer = withParens $ withNesting $ withNames generic
+  let printer = withWords $ withParens $ withNesting $ withNames generic
   putStrLn $ banner "Monoid Theory"
-  printLn  $ display MonoidTheory (withParens generic)
+  printLn  $ display MonoidTheory (withWords $ withParens generic)
   putStrLn $ banner "Simple proof"
   printLn  $ Proof.display unicode printer @{BORING} myProof
   putStrLn $ banner "Proof with congruence"

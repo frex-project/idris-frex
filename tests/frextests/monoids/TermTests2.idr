@@ -50,7 +50,7 @@ units : (O1 .+. (X {k = 1} 0 .+. O1)) .+. O1 ~~ X 0
 units = byLemma Units
 
 idris' : String -> Lemma MonoidTheory -> String
-idris' = idris @{ax} natPlus
+idris' = idris (MkPrinter ax natPlus)
 
   where
 

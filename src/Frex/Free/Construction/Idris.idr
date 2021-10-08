@@ -24,19 +24,18 @@ import Text.PrettyPrint.Prettyprinter
 export
 display : {n : Nat} ->
           {pres : Presentation} ->
-          Show (pres .Axiom) =>
-          Printer pres.signature () ->
+          Printer pres () ->
           {lhs, rhs : Term pres.signature (Fin n)} ->
           Derivation pres (QuotientData pres (cast (Fin n))) lhs rhs ->
           Doc ()
-display sigprinter @{showR} prf =
+display p prf =
    vcat
    [ "|~" <++> display printer lhs
    , vcat (steps prf)
    ] where
 
   printer : Printer pres.signature (Fin n)
-  printer = withNames sigprinter
+  printer = withNames p.sigPrinter
 
   TM : Type
   TM = Term pres.signature (Fin n)
@@ -67,11 +66,11 @@ display sigprinter @{showR} prf =
   cong : {begin, end : TM} -> Bool ->
          Locate pres.signature (algebra PA) (Step pres PA) begin end ->
          Doc ()
-  cong b (Here p)
-    = base b (if b then begin else end) $ displayNamed True sigprinter p
-  cong b (Cong t {lhs} {rhs} p)
+  cong b (Here prf)
+    = base b (if b then begin else end) $ displayNamed True p prf
+  cong b (Cong t {lhs} {rhs} prf)
     = base b (plug (algebra PA) t $ if b then lhs else rhs)
-    $ "cong" <++> parens (focus t) <++> "$" <++> displayNamed True sigprinter p
+    $ "cong" <++> parens (focus t) <++> "$" <++> displayNamed True p prf
 
   step : {begin, end : TM} -> Closure pres PA begin end -> Doc ()
   step (Fwd p) = cong False p
@@ -83,12 +82,11 @@ display sigprinter @{showR} prf =
 
 export
 idris : {pres : Presentation} ->
-        Show (pres .Axiom) =>
         Ord (Op pres.signature) =>
         DecEq (Op pres.signature) =>
-        Printer pres.signature () ->
+        Printer pres () ->
         (name : String) -> Lemma pres -> String
-idris printer nm lemma =
+idris p nm lemma =
   let xs : List (Doc ()) = map (pretty . show)
                          $ take lemma.equation.support names
   in show $ vcat
@@ -96,9 +94,11 @@ idris printer nm lemma =
               <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
                            <++> colon <++> "Nat")
               <++> "->"
-              <++> display (withNames printer) lemma.equation.lhs
+              <++> Term.display (withNames $ p.sigPrinter) lemma.equation.lhs
               <++> "==="
-              <++> display (withNames printer) lemma.equation.rhs
+              <++> Term.display (withNames $ p.sigPrinter) lemma.equation.rhs
   , pretty nm <++> hsep xs <++> "= Calc $"
-  , indent 2 $ display printer $ deloop $ linearise (Just %search) lemma.derivable
+  , indent 2 $ display p
+             $ deloop
+             $ linearise (Just %search) lemma.derivable
   ]

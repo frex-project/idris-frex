@@ -120,7 +120,7 @@ data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> T
   Assumption : {x,y : U a} -> a.equivalence.relation x y -> EvaluationAxiom sig axioms a
 
 export
-Show axioms => Show (EvaluationAxiom sig axioms a) where
+[Eval] Show axioms => Show (EvaluationAxiom sig axioms a) where
   show (Axiom ax) = show ax
   show (Evaluation f cs) = "Evaluate"
   show (Assumption x)    = "Assumption"

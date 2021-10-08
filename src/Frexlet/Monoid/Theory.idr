@@ -88,7 +88,14 @@ Finite Axiom where
               ]
 
 export
-Show Axiom where
+[Raw] Show Axiom where
+  show = \case
+    LftNeutrality => "LftNeutrality"
+    RgtNeutrality => "RghtNeutrality"
+    Associativity => "Associativity"
+
+export
+[Words] Show Axiom where
   show = \case
     LftNeutrality => "Left neutrality"
     RgtNeutrality => "Right neutrality"
@@ -127,3 +134,45 @@ natPlus = MkPrinter
   [natPlusShow] Show (Op Signature) where
     show (MkOp Neutral) = "0"
     show (MkOp Product) = "+"
+
+export
+additive1 : Printer Signature Unit
+additive1 = MkPrinter
+  { varShow   = %search
+  , opShow    = additive1Show
+  , opPrec    = additive1Prec
+  , topParens = False
+  , opParens  = False
+  } where
+
+  [additive1Prec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [additive1Show] Show (Op Signature) where
+    show (MkOp Neutral) = "O1"
+    show (MkOp Product) = ".+."
+
+export
+additive2 : Printer Signature Unit
+additive2 = MkPrinter
+  { varShow   = %search
+  , opShow    = additive2Show
+  , opPrec    = additive2Prec
+  , topParens = False
+  , opParens  = False
+  } where
+
+  [additive2Prec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [additive2Show] Show (Op Signature) where
+    show (MkOp Neutral) = "O2"
+    show (MkOp Product) = ":+:"
+
+export
+withRaw : Printer Signature a -> Printer MonoidTheory a
+withRaw = MkPrinter Raw
+
+export
+withWords : Printer Signature a -> Printer MonoidTheory a
+withWords = MkPrinter Words
