@@ -1,8 +1,7 @@
 module Syntax.PreorderReasoning.Setoid
 
 import Data.Setoid.Definition
-import Control.Relation
-import Control.Order
+
 infixl 0  ~~, :~, ~:
 prefix 1  |~
 infix  1  ...
