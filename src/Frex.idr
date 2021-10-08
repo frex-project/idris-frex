@@ -59,15 +59,15 @@ frexify : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
      (ext2.Model.Sem (snd eq) (extEnv {x} ext2).H)
 frexify h eq prf = CalcWith (cast ext2.Model) $
   |~ ext2.Model.Sem (fst eq) (extEnv ext2).H
-  ~: ext2.Model.Sem (fst eq) (h.H.H . extEnv ext1).H
-       ...((eval {x = (cast a) `Either` x}
+  ~~ ext2.Model.Sem (fst eq) (h.H.H . extEnv ext1).H
+       ..<((eval {x = (cast a) `Either` x}
                {a = ext2.Model.Algebra} (fst eq)).homomorphic
                       (h.H.H . (extEnv ext1))
                       (extEnv ext2)
                       $ extensionLemma h)
-  :~ ext2.Model.Sem (snd eq) (h.H.H . extEnv ext1).H
+  ~~ ext2.Model.Sem (snd eq) (h.H.H . extEnv ext1).H
        ...(eqPreservation eq (extEnv ext1).H h.H prf)
-  :~ ext2.Model.Sem (snd eq) (extEnv ext2).H
+  ~~ ext2.Model.Sem (snd eq) (extEnv ext2).H
        ...((eval {x = (cast a) `Either` x}
                  {a = ext2.Model.Algebra} (snd eq)).homomorphic
                       (h.H.H . (extEnv ext1))
@@ -176,8 +176,8 @@ simplifyGeneral frex env t =
       h = frex.UP.Exists Other
   in a.equivalence.symmetric _ _ $ CalcWith (cast a) $
   |~ h.H.H.H (frex.Data.Sem t (frexEnv frex).H)
-  :~ a.Sem t (h.H.H . (frexEnv frex)).H ...(homoPreservesSem h.H _ _)
-  :~ a.Sem t (extEnv Other).H           ...((eval {x = (cast a) `Either` x}
+  ~~ a.Sem t (h.H.H . (frexEnv frex)).H ...(homoPreservesSem h.H _ _)
+  ~~ a.Sem t (extEnv Other).H           ...((eval {x = (cast a) `Either` x}
                                                   {a = a.Algebra} t).homomorphic
                                                   (h.H.H . (frexEnv frex)) (extEnv Other) $
                                                   extensionLemma h)

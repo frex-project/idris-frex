@@ -24,8 +24,8 @@ parameters {pres : Presentation} {x : Setoid} {a : Model pres}
   (.) {param1, param2, param3} u v = MkParameterisationMorphism (u.H . v.H)
     $ \phi, i => CalcWith (cast a) $
       |~ (the _ $ param3.Eval.H i).H.H ((u.H . v.H).H.H phi)
-      :~ (the _ $ param2.Eval.H i).H.H (v.H.H.H phi) ...(u.preserve _ _)
-      :~ (the _ $ param1.Eval.H i).H.H phi           ...(v.preserve _ _)
+      ~~ (the _ $ param2.Eval.H i).H.H (v.H.H.H phi) ...(u.preserve _ _)
+      ~~ (the _ $ param1.Eval.H i).H.H phi           ...(v.preserve _ _)
 
   ||| Transport a parameterisation across an isomorphism
   public export
@@ -83,11 +83,9 @@ transport power iso
             f
       in CalcWith (cast b) $
         |~ extend1.H.H.H f
-        :~ (iso.Iso.Fwd.H . iso.Iso.Bwd.H) (extend1.H.H.H f)
-              ...((cast b).equivalence.symmetric _ _  $
-                   iso.Iso.Iso.FwdBwdId _)
-        :~ (iso.Iso.Fwd.H . iso.Iso.Bwd.H) (extend2.H.H.H f)
-              ...(iso.Iso.Fwd.homomorphic _ _ bwdExtendEq)
-        :~ extend2.H.H.H f  ...(iso.Iso.Iso.FwdBwdId _)
+        ~~ (iso.Iso.Fwd.H . iso.Iso.Bwd.H) (extend1.H.H.H f) ..<(iso.Iso.Iso.FwdBwdId _)
+        ~~ (iso.Iso.Fwd.H . iso.Iso.Bwd.H) (extend2.H.H.H f) ...(iso.Iso.Fwd.homomorphic _ _
+                                                                   bwdExtendEq)
+        ~~ extend2.H.H.H f                                   ...(iso.Iso.Iso.FwdBwdId _)
     }
   }

@@ -36,15 +36,15 @@ freeSolve : {pres : Presentation} -> {s : Setoid} ->
      (mod2.Model.Sem (snd eq) mod2.Env.H)
 freeSolve h eq prf = CalcWith (cast mod2.Model) $
   |~ mod2.Model.Sem (fst eq) mod2.Env.H
-  ~: mod2.Model.Sem (fst eq) (h.H.H . mod1.Env).H
-       ...((eval {x = s}
+  ~~ mod2.Model.Sem (fst eq) (h.H.H . mod1.Env).H
+       ..<((eval {x = s}
                {a = mod2.Model.Algebra} (fst eq)).homomorphic
                       (h.H.H . mod1.Env)
                       mod2.Env
                       $ extensionLemma h)
-  :~ mod2.Model.Sem (snd eq) (h.H.H . mod1.Env).H
+  ~~ mod2.Model.Sem (snd eq) (h.H.H . mod1.Env).H
        ...(eqPreservation eq mod1.Env.H h.H prf)
-  :~ mod2.Model.Sem (snd eq) mod2.Env.H
+  ~~ mod2.Model.Sem (snd eq) mod2.Env.H
        ...((eval {x = s}
                  {a = mod2.Model.Algebra} (snd eq)).homomorphic
                       (h.H.H . mod1.Env)
@@ -127,8 +127,8 @@ simplifyGeneral free env t =
       h = free.UP.Exists Other
   in a.equivalence.symmetric _ _ $ CalcWith (cast a) $
   |~ h.H.H.H (free.Data.Sem t free.Data.Env.H)
-  :~ a.Sem t (h.H.H . free.Data.Env).H ...(homoPreservesSem h.H _ _)
-  :~ a.Sem t env.H                     ...((eval {x} {a = a.Algebra} t).homomorphic
+  ~~ a.Sem t (h.H.H . free.Data.Env).H ...(homoPreservesSem h.H _ _)
+  ~~ a.Sem t env.H                     ...((eval {x} {a = a.Algebra} t).homomorphic
                                            (h.H.H . free.Data.Env) (Other).Env $
                                            extensionLemma h)
 public export

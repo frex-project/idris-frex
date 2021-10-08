@@ -1,43 +1,54 @@
+||| Like Syntax.PreorderReasoning.Generic, but optimised for setoids
 module Syntax.PreorderReasoning.Setoid
 
 import Data.Setoid.Definition
 
-infixl 0  ~~, :~, ~:
+infixl 0  ~~
 prefix 1  |~
-infix  1  ...
-
-%default total
+infix  1  ...,..<,..>,.=.,.=<,.=>
 
 public export
-data Step : (eq : (x, y : a) -> Type) -> (x, y : a) -> Type where
-  (...) : {0 x : a} -> (y : a) ->
-          x `eq` y -> Step eq x y
+data Step : (a : Setoid) -> (lhs,rhs : U a) -> Type where
+  (...) : {0 a : Setoid} -> (0 y : U a) -> {0 x : U a} ->
+    a.equivalence.relation x y -> Step a x y
 
 public export
-data FastDerivation : (s : Setoid) -> (x, y : s.U) -> Type where
-  (|~) : {0 s : Setoid} -> (x : s.U) -> FastDerivation s x x
-  (:~) : {x, y : s.U}
-         -> FastDerivation s x y -> {z : s.U}
-         -> (step : Step s.equivalence.relation y z)
-         -> FastDerivation s x z
-  (~:) : {x, y : s.U}
-         -> FastDerivation s x y -> {z : s.U}
-         -> (step : Step (flip s.equivalence.relation) y z)
-         -> FastDerivation s x z
+data FastDerivation : (a : Setoid) -> (x, y : U a) -> Type where
+  (|~) : {0 a : Setoid} -> (x : U a) -> FastDerivation a x x
+  (~~) : {0 a : Setoid} -> {x, y : U a}
+         -> FastDerivation a x y -> {z : U a} -> (step : Step a y z)
+         -> FastDerivation a x z
 
 public export
-CalcWith : (s : Setoid) ->
-           {0 x, y : s.U} -> FastDerivation s x y ->
-           s.equivalence.relation x y
-CalcWith s (|~ x) = s.equivalence.reflexive x
-CalcWith s ((:~) der (z ... step))
-  = s.equivalence.transitive ? ? ? (CalcWith s der) step
-CalcWith s ((~:) der (z ... step))
-  = s.equivalence.transitive ? ? ? (CalcWith s der)
-  $ s.equivalence.symmetric ? ? step
+CalcWith : (a : Setoid) -> {0 x : U a} -> {0 y : U a} -> FastDerivation a x y ->
+  a.equivalence.relation x y
+CalcWith a (|~ x) = a.equivalence.reflexive x
+CalcWith a ((~~) der (z ... step)) = a.equivalence.transitive _ _ _
+    (CalcWith a der) step
+
+-- Smart constructors
+public export
+(..<) : {a : Setoid} -> (y : U a) -> {x : U a} ->
+    a.equivalence.relation y x -> Step a x y
+(y ..<(prf)) {x} = (y ...(a.equivalence.symmetric _ _ prf))
 
 public export
-(~~) : {s : Setoid} -> {0 x, y : s.U}
-         -> FastDerivation s x y -> {z : s.U} -> (step : Step Equal y z)
-         -> FastDerivation s x z
-(~~) der (z ... Refl) = der
+(..>) : {0 a : Setoid} -> (0 y : U a) -> {0 x : U a} ->
+    a.equivalence.relation x y -> Step a x y
+(..>) = (...)
+
+public export
+(.=.) : {a : Setoid} -> (y : U a) -> {x : U a} ->
+    x === y -> Step a x y
+(y .=.(Refl)) = (y ...(a.equivalence.reflexive y))
+
+public export
+(.=>) : {a : Setoid} -> (y : U a) -> {x : U a} ->
+    x === y -> Step a x y
+(.=>) = (.=.)
+
+public export
+(.=<) : {a : Setoid} -> (y : U a) -> {x : U a} ->
+    y === x -> Step a x y
+(y .=<(Refl)) = (y ...(a.equivalence.reflexive y))
+
