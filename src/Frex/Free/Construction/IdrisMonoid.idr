@@ -38,11 +38,10 @@ display : {n : Nat} ->
           {lhs, rhs : Term Signature (Fin n)} ->
           Proof MonoidTheory lhs rhs ->
           Doc Unit
-display prf =
-   vcat
-   [ "|~" <++> display tmPrinter lhs
-   , vcat (steps prf)
-   ] where
+display prf = vcat $ ("|~" <++> display tmPrinter lhs)
+                   :: steps prf
+
+  where
 
   TM : Type
   TM = Term Signature (Fin n)
@@ -138,10 +137,6 @@ import Notation.Hints
 %hide Frex.Axiom.lftNeutrality
 %hide Frex.Axiom.rgtNeutrality
 
-export
-cast : Term sig (Maybe a) -> Term sig (Either a (Fin 1))
-cast = map (maybe (Right FZ) Left)
-
 parameters (m : Model MonoidTheory)
 
   infix 0 =~=
@@ -171,7 +166,6 @@ parameters (m : Model MonoidTheory)
          f .asContext x =~= f .asContext y
   Cong f {x, y} eq = m.cong 1 (cast $ f (Done Nothing)) [x] [y] [eq]
 
-
   lftNeutrality : (x : U m) -> O1 .+. x =~= x
   lftNeutrality x = m.Validate LftNeutrality (\ _ => x)
 
@@ -180,4 +174,6 @@ parameters (m : Model MonoidTheory)
 
   associativity : (x, y, z : U m) -> x .+. (y .+. z) =~= (x .+. y) .+. z
   associativity x y z = m.Validate Associativity (\ k => index k [x,y,z])
+
+
 """#

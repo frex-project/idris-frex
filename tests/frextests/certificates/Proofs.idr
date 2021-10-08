@@ -9,10 +9,6 @@ import Notation.Hints
 %hide Frex.Axiom.lftNeutrality
 %hide Frex.Axiom.rgtNeutrality
 
-export
-cast : Term sig (Maybe a) -> Term sig (Either a (Fin 1))
-cast = map (maybe (Right FZ) Left)
-
 parameters (m : Model MonoidTheory)
 
   infix 0 =~=
@@ -42,7 +38,6 @@ parameters (m : Model MonoidTheory)
          f .asContext x =~= f .asContext y
   Cong f {x, y} eq = m.cong 1 (cast $ f (Done Nothing)) [x] [y] [eq]
 
-
   lftNeutrality : (x : U m) -> O1 .+. x =~= x
   lftNeutrality x = m.Validate LftNeutrality (\ _ => x)
 
@@ -51,15 +46,14 @@ parameters (m : Model MonoidTheory)
 
   associativity : (x, y, z : U m) -> x .+. (y .+. z) =~= (x .+. y) .+. z
   associativity x y z = m.Validate Associativity (\ k => index k [x,y,z])
+
   trivial : (x : U m) -> x =~= x
   trivial x = CalcWith (cast m) $
     |~ x
 
-
   trivial2 : (x, y : U m) -> x .+. y =~= x .+. y
   trivial2 x y = CalcWith (cast m) $
     |~ x .+. y
-
 
   assoc : (x, y, z : U m) -> x .+. (y .+. z) =~= x .+. y .+. z
   assoc x y z = CalcWith (cast m) $
@@ -69,23 +63,23 @@ parameters (m : Model MonoidTheory)
     ~: x .+. (y .+. (O1 .+. z .+. O1))
       ...( Cong (\ focus => Val x :+: (Val y :+: focus)) $ rgtNeutrality (O1 .+. z) )
     ~: x .+. (O1 .+. y .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: (Val z) :+: O2))) $ lftNeutrality y )
+      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ lftNeutrality y )
     ~: x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: (Val z) :+: O2))) $ rgtNeutrality (O1 .+. y) )
+      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ rgtNeutrality (O1 .+. y) )
     ~: O1 .+. x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => focus :+: (O2 :+: (Val y) :+: O2 :+: (O2 :+: (Val z) :+: O2))) $ lftNeutrality x )
+      ...( Cong (\ focus => focus :+: (O2 :+: Val y :+: O2 :+: (O2 :+: Val z :+: O2))) $ lftNeutrality x )
     :~ O1 .+. x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
       ...( associativity (O1 .+. x) (O1 .+. y .+. O1) (O1 .+. z .+. O1) )
     :~ x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
-      ...( Cong (\ focus => focus :+: (O2 :+: (Val y) :+: O2) :+: (O2 :+: (Val z) :+: O2)) $ lftNeutrality x )
+      ...( Cong (\ focus => focus :+: (O2 :+: Val y :+: O2) :+: (O2 :+: Val z :+: O2)) $ lftNeutrality x )
     :~ x .+. (O1 .+. y) .+. (O1 .+. z .+. O1)
-      ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: (Val z) :+: O2)) $ rgtNeutrality (O1 .+. y) )
+      ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: Val z :+: O2)) $ rgtNeutrality (O1 .+. y) )
     :~ x .+. y .+. (O1 .+. z .+. O1)
-      ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: (Val z) :+: O2)) $ lftNeutrality y )
+      ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: Val z :+: O2)) $ lftNeutrality y )
     :~ x .+. y .+. (O1 .+. z)
-      ...( Cong (\ focus => Val x :+: (Val y) :+: focus) $ rgtNeutrality (O1 .+. z) )
+      ...( Cong (\ focus => Val x :+: Val y :+: focus) $ rgtNeutrality (O1 .+. z) )
     :~ x .+. y .+. z
-      ...( Cong (\ focus => Val x :+: (Val y) :+: focus) $ lftNeutrality z )
+      ...( Cong (\ focus => Val x :+: Val y :+: focus) $ lftNeutrality z )
 
   units : (x : U m) -> O1 .+. (x .+. O1) .+. O1 =~= x
   units x = CalcWith (cast m) $
@@ -99,11 +93,11 @@ parameters (m : Model MonoidTheory)
     :~ O1 .+. O1 .+. x .+. O1 .+. O1
       ...( Cong (\ focus => focus :+: O2) $ associativity (O1 .+. O1) x O1 )
     :~ O1 .+. x .+. O1 .+. O1
-      ...( Cong (\ focus => focus :+: (Val x) :+: O2 :+: O2) $ lftNeutrality O1 )
+      ...( Cong (\ focus => focus :+: Val x :+: O2 :+: O2) $ lftNeutrality O1 )
     ~: O1 .+. x .+. (O1 .+. O1)
       ...( associativity (O1 .+. x) O1 O1 )
     :~ O1 .+. x .+. O1
-      ...( Cong (\ focus => O2 :+: (Val x) :+: focus) $ lftNeutrality O1 )
+      ...( Cong (\ focus => O2 :+: Val x :+: focus) $ lftNeutrality O1 )
     :~ O1 .+. x
       ...( rgtNeutrality (O1 .+. x) )
     :~ x

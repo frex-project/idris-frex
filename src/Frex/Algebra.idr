@@ -184,7 +184,7 @@ namespace Term
           in case precedence @{printer.opPrec} f of
                Nothing  => parens catchall
                Just lvl =>
-                 let n = level lvl; d = User n; d' = App in
+                 let n = level lvl; d = User n; d' = User (S n) in
                  parenthesise (b || c > d) $ case args of
                    [x]   => hsep [op, go printer.opParens d x]
                    [x,y] => case lvl of
@@ -262,6 +262,11 @@ X = Done
 public export
 Functor (Term sig) where
   map h t = (Free sig _).Sem t (Done . h)
+
+||| Converting a focus to a term with one free variable
+public export
+cast : Term sig (Maybe a) -> Term sig (Either a (Fin 1))
+cast = map (maybe (Right FZ) Left)
 
 public export
 Applicative (Term sig) where
