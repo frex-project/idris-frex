@@ -8,6 +8,8 @@ import Data.HVect
 import Data.Vect.Properties
 import Data.Setoid.Vect.Inductive
 import Control.Order
+import Syntax.PreorderReasoning.Setoid
+
 
 %default total
 
@@ -41,13 +43,13 @@ VectMap : {a, b : Setoid} -> (a ~~> b) ~> ((Functional.VectSetoid n a) ~~> (Func
 VectMap = MkSetoidHomomorphism
   (\f => MkSetoidHomomorphism
             (\xs => map f.H xs)
-            $ \xs, ys, prf, i  => CalcWith @{cast b} $
+            $ \xs, ys, prf, i  => CalcWith b $
               |~ index i (map f.H xs)
-              ~~ f.H (index i xs)     ...(indexNaturality _ _ _)
-              <~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
-              ~~ index i (map f.H ys) ...(sym $ indexNaturality _ _ _))
-  $ \f,g,prf,xs,i => CalcWith @{cast b} $
+              ~~ f.H (index i xs)     .=.(indexNaturality _ _ _)
+              ~~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
+              ~~ index i (map f.H ys) .=<(indexNaturality _ _ _))
+  $ \f,g,prf,xs,i => CalcWith b $
     |~ index i (map f.H xs)
-    ~~ f.H (index i xs) ...(indexNaturality _ _ _)
-    <~ g.H (index i xs) ...(prf _)
-    ~~ index i (map g.H xs) ...(sym $ indexNaturality _ _ _)
+    ~~ f.H (index i xs) .=.(indexNaturality _ _ _)
+    ~~ g.H (index i xs) ...(prf _)
+    ~~ index i (map g.H xs) .=<(indexNaturality _ _ _)

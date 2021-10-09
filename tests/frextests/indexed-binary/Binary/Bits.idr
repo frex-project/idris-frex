@@ -18,6 +18,7 @@ import Frexlet.Monoid.Commutative
 import Frexlet.Monoid.Commutative.Nat
 
 import Syntax.PreorderReasoning
+import Syntax.PreorderReasoning.Generic
 
 import VectReasoning
 

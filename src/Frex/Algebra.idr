@@ -20,7 +20,6 @@ import Data.String
 import Control.WellFounded
 
 import Syntax.PreorderReasoning
-import Syntax.PreorderReasoning.Generic
 
 import Text.PrettyPrint.Prettyprinter
 
@@ -357,17 +356,17 @@ namespace Setoid
   public export
   id : (a : SetoidAlgebra sig) -> a ~> a
   id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a) $
-          \f,xs => CalcWith @{cast a} $
+          \f,xs => CalcWith (cast a) $
           |~ a.Sem f xs
-          ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))
+          ~~ a.Sem f (map id xs) .=.(cong (a.Sem f) $ sym (mapId _))
 
   public export
   (.) : {a,b,c : SetoidAlgebra sig} -> b ~> c -> a ~> b -> a ~> c
-  g . f  = MkSetoidHomomorphism (H g . H f) $ \op, xs => CalcWith @{cast c} $
+  g . f  = MkSetoidHomomorphism (H g . H f) $ \op, xs => CalcWith (cast c) $
     |~ g.H.H (f.H.H (a.Sem op xs))
-    <~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
-    <~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
-    ~~ c.Sem op (map (\x => g.H.H (f.H.H x)) xs) ...(cong (c.Sem op)
+    ~~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
+    ~~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
+    ~~ c.Sem op (map (\x => g.H.H (f.H.H x)) xs) .=.(cong (c.Sem op)
                                                             $ mapFusion _ _ _)
 
 -- Back to (non-setoid) Algebra
@@ -490,10 +489,10 @@ namespace Term
   homoPreservesSemMap h (t :: ts) env (FS i) = homoPreservesSemMap h ts env i
 
   homoPreservesSem h (Done v    ) env = b.equivalence.reflexive _
-  homoPreservesSem h (Call op ts) env = CalcWith @{cast b} $
+  homoPreservesSem h (Call op ts) env = CalcWith (cast b) $
     |~ h.H.H (a.Sem op (bindTerms {a = a.algebra} ts env))
-    <~ b.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
-    <~ b.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
+    ~~ b.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
+    ~~ b.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
                                                                           $ homoPreservesSemMap {a,b}
                                                                               h ts env)
 public export
@@ -505,28 +504,28 @@ record (<~>) {0 sig : Signature} (a, b : SetoidAlgebra sig) where
 public export
 BwdHomo : {0 sig : Signature} -> (a, b : SetoidAlgebra sig) ->
   (iso : a <~> b) -> Homomorphism b a (iso.Iso).Bwd.H
-BwdHomo a b iso f xs = CalcWith @{cast a} $
+BwdHomo a b iso f xs = CalcWith (cast a) $
   let id' : cast b ~> cast b
       id' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
   in
   |~ iso.Iso.Bwd.H (b.Sem f xs)
-  <~ iso.Iso.Bwd.H (b.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)))
+  ~~ iso.Iso.Bwd.H (b.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)))
           ...((iso.Iso.Bwd . cast f).homomorphic _ _
-             $ CalcWith @{cast $ VectSetoid _ $ cast b}
+             $ CalcWith (VectSetoid _ $ cast b)
              $ |~ xs
-               <~ map (id b).H.H xs ...(\i => reflect (cast b) $ sym $ indexNaturality _ id _)
-               <~ map (iso.Iso.Fwd.H . iso.Iso.Bwd.H) xs
+               ~~ map (id b).H.H xs ...(\i => reflect (cast b) $ sym $ indexNaturality _ id _)
+               ~~ map (iso.Iso.Fwd.H . iso.Iso.Bwd.H) xs
                     ...(let id_eq_id' = (cast b ~~> cast b).equivalence.symmetric
                               id' (id b).H
                               (iso.Iso.Iso.FwdBwdId)
                         in (VectMap).homomorphic (id b).H id' id_eq_id' xs)
                ~~ map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)
-                    ...(sym $ mapFusion _ _ _))
-  <~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.Sem f (map iso.Iso.Bwd.H xs)))
+                    .=.(sym $ mapFusion _ _ _))
+  ~~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.Sem f (map iso.Iso.Bwd.H xs)))
                                             ...(iso.Iso.Bwd.homomorphic _ _
                                                $ b.equivalence.symmetric _ _
                                                $ iso.FwdHomo f _)
-  <~ a.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
+  ~~ a.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
 
 ||| Reverse an isomorphism
 public export
