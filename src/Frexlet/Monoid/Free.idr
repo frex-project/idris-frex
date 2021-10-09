@@ -52,10 +52,10 @@ FreeMonoidVoid = MkFree
         }
     , Unique = \other, extend1, extend2,() => CalcWith (cast other.Model) $
         |~ extend1.H.H.H ()
-        ~~ extend1.H.H.H ((TrivialMonoid).sem Neutral) ...(Refl)
-        :~ other.Model.sem Neutral                     ...(extend1.H.preserves (MkOp Neutral) [])
-        ~: extend2.H.H.H ((TrivialMonoid).sem Neutral) ...(extend2.H.preserves (MkOp Neutral) [])
-        ~~ extend2.H.H.H () ...(Refl)
+        ~~ extend1.H.H.H ((TrivialMonoid).sem Neutral) .=.(Refl)
+        ~~ other.Model.sem Neutral                     ...(extend1.H.preserves (MkOp Neutral) [])
+        ~~ extend2.H.H.H ((TrivialMonoid).sem Neutral) ..<(extend2.H.preserves (MkOp Neutral) [])
+        ~~ extend2.H.H.H ()                            .=.(Refl)
     }
   }
 

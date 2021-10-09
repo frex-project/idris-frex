@@ -27,9 +27,9 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
                            $ \u, v, prf => congruence A f _ _ $ \i =>
                              CalcWith (cast A) $
                              |~ index i (map (\phi => phi.H u) phis)
-                             ~~ (index i phis).H u ...(indexNaturality _ _ _)
-                             :~ (index i phis).H v ...((index i phis).homomorphic _ _ prf)
-                             ~~ index i (map (\phi => phi.H v) phis) ...(sym $ indexNaturality _ _ _)
+                             ~~ (index i phis).H u .=.(indexNaturality _ _ _)
+                             ~~ (index i phis).H v ...((index i phis).homomorphic _ _ prf)
+                             ~~ index i (map (\phi => phi.H v) phis) .=<(indexNaturality _ _ _)
 
   public export
   (~~>) : SetoidAlgebra Sig
@@ -42,9 +42,9 @@ parameters {0 Sig : Signature} (X : Setoid) (A : SetoidAlgebra Sig)
     $ \f, phis, psis, prf, this => (A).congruence f _ _
      $ \i => CalcWith (cast A) $
       |~ index i (map (\phi => phi.H this) phis)
-      ~~ (index i phis).H this ...(indexNaturality _ _ _)
-      :~ (index i psis).H this ...(prf i this)
-      ~~ index i (map (\phi => phi.H this) psis) ...(sym $ indexNaturality _ _ _)
+      ~~ (index i phis).H this .=.(indexNaturality _ _ _)
+      ~~ (index i psis).H this ...(prf i this)
+      ~~ index i (map (\phi => phi.H this) psis) .=.(sym $ indexNaturality _ _ _)
   %unbound_implicits on
 
 parameters {0 Sig : Signature} {X : Setoid} {A : SetoidAlgebra Sig}
@@ -76,9 +76,9 @@ namespace Model
     in MkModel X_to_A
               $ \ax, env, x => CalcWith (cast a) $
     |~ (X_to_A .Sem (pres.axiom ax).lhs env).H x
-    :~ a       .Sem (pres.axiom ax).lhs (\i => (env i).H x) ...(pointwiseBind _ _ _)
-    :~ a       .Sem (pres.axiom ax).rhs (\i => (env i).H x) ...(a.Validate _ _)
-    ~: (X_to_A .Sem (pres.axiom ax).rhs env).H x            ...(pointwiseBind _ _ _)
+    ~~ a       .Sem (pres.axiom ax).lhs (\i => (env i).H x) ...(pointwiseBind _ _ _)
+    ~~ a       .Sem (pres.axiom ax).rhs (\i => (env i).H x) ...(a.Validate _ _)
+    ~~ (X_to_A .Sem (pres.axiom ax).rhs env).H x            ..<(pointwiseBind _ _ _)
 
 
 public export
@@ -113,15 +113,15 @@ a ^ x = MkPower
                             ((other.Eval).H)) i
              in CalcWith (cast a) $
              |~ OtoA .H.H (other.Model.Sem op env)
-             :~ a.Sem op (map (OtoA .H.H) env) ...(OtoA .preserves op env)
+             ~~ a.Sem op (map (OtoA .H.H) env) ...(OtoA .preserves op env)
                                                                   -- vv too disgusting...
              ~~ a.Sem op (map (\phi : (x ~> cast a) => phi.H i) (map _ env))
-                              ...(cong (a.Sem op)
-                                 $ sym $ mapFusion _ _ env))
+                              .=<(cong (a.Sem op)
+                                 $ mapFusion _ _ env))
         $ \u,i => (cast a).equivalence.reflexive _
   , Unique = \other, extend1,extend2,u,i => CalcWith (cast a) $
       |~ (the _ $ extend1.H.H.H u).H i
-      :~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve u i)
-      ~: (the _ $ extend2.H.H.H u).H i  ...(extend2.preserve u i)
+      ~~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve u i)
+      ~~ (the _ $ extend2.H.H.H u).H i  ..<(extend2.preserve u i)
   }
 %unbound_implicits off

@@ -35,10 +35,10 @@ invNeutral a =
       notation = a.Notation1
   in CalcWith (cast a) $
   |~ (I1).inv
-  ~: (I1).inv .*.  I1          ...(a.validate (Mon RgtNeutrality) [_])
-  ~: (I1).inv .*. (I1).inv.inv ...(a.cong 1 (Sta (I1).inv .*. Dyn 0) [_] [_]
+  ~~ (I1).inv .*.  I1          ..<(a.validate (Mon RgtNeutrality) [_])
+  ~~ (I1).inv .*. (I1).inv.inv ..<(a.cong 1 (Sta (I1).inv .*. Dyn 0) [_] [_]
                                   [a.validate Involutivity [_]])
-  ~: ((I1).inv .*. I1).inv     ...(a.validate Antidistributivity [(I1).inv, I1])
-  :~ (I1).inv.inv              ...(a.cong 1 (Dyn 0).inv [_] [_]
+  ~~ ((I1).inv .*. I1).inv     ..<(a.validate Antidistributivity [(I1).inv, I1])
+  ~~ (I1).inv.inv              ...(a.cong 1 (Dyn 0).inv [_] [_]
                                   [a.validate (Mon RgtNeutrality) [_]])
-  :~ I1                        ...(a.validate Involutivity [_])
+  ~~ I1                        ...(a.validate Involutivity [_])
