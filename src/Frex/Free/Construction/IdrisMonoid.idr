@@ -66,8 +66,8 @@ display prf = vcat $ ("|~" <++> display tmPrinter lhs)
 
   base : Bool -> TM -> Doc () -> Doc ()
   base b t p = vcat
-    [ ifThenElse b "~:" ":~" <++> display tmPrinter t
-    , "  ...(" <++> p <++> ")"
+    [ "~~" <++> display tmPrinter t
+    , ifThenElse b "..<(" "  ...(" <++> p <++> ")"
     ]
 
   focus : CTX -> Doc ()

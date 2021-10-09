@@ -58,47 +58,47 @@ parameters (m : Model MonoidTheory)
   assoc : (x, y, z : U m) -> x .+. (y .+. z) =~= x .+. y .+. z
   assoc x y z = CalcWith (cast m) $
     |~ x .+. (y .+. z)
-    ~: x .+. (y .+. (O1 .+. z))
-      ...( Cong (\ focus => Val x :+: (Val y :+: focus)) $ lftNeutrality z )
-    ~: x .+. (y .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => Val x :+: (Val y :+: focus)) $ rgtNeutrality (O1 .+. z) )
-    ~: x .+. (O1 .+. y .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ lftNeutrality y )
-    ~: x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ rgtNeutrality (O1 .+. y) )
-    ~: O1 .+. x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
-      ...( Cong (\ focus => focus :+: (O2 :+: Val y :+: O2 :+: (O2 :+: Val z :+: O2))) $ lftNeutrality x )
-    :~ O1 .+. x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
+    ~~ x .+. (y .+. (O1 .+. z))
+    ..<( Cong (\ focus => Val x :+: (Val y :+: focus)) $ lftNeutrality z )
+    ~~ x .+. (y .+. (O1 .+. z .+. O1))
+    ..<( Cong (\ focus => Val x :+: (Val y :+: focus)) $ rgtNeutrality (O1 .+. z) )
+    ~~ x .+. (O1 .+. y .+. (O1 .+. z .+. O1))
+    ..<( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ lftNeutrality y )
+    ~~ x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
+    ..<( Cong (\ focus => Val x :+: (focus :+: (O2 :+: Val z :+: O2))) $ rgtNeutrality (O1 .+. y) )
+    ~~ O1 .+. x .+. (O1 .+. y .+. O1 .+. (O1 .+. z .+. O1))
+    ..<( Cong (\ focus => focus :+: (O2 :+: Val y :+: O2 :+: (O2 :+: Val z :+: O2))) $ lftNeutrality x )
+    ~~ O1 .+. x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
       ...( associativity (O1 .+. x) (O1 .+. y .+. O1) (O1 .+. z .+. O1) )
-    :~ x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
+    ~~ x .+. (O1 .+. y .+. O1) .+. (O1 .+. z .+. O1)
       ...( Cong (\ focus => focus :+: (O2 :+: Val y :+: O2) :+: (O2 :+: Val z :+: O2)) $ lftNeutrality x )
-    :~ x .+. (O1 .+. y) .+. (O1 .+. z .+. O1)
+    ~~ x .+. (O1 .+. y) .+. (O1 .+. z .+. O1)
       ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: Val z :+: O2)) $ rgtNeutrality (O1 .+. y) )
-    :~ x .+. y .+. (O1 .+. z .+. O1)
+    ~~ x .+. y .+. (O1 .+. z .+. O1)
       ...( Cong (\ focus => Val x :+: focus :+: (O2 :+: Val z :+: O2)) $ lftNeutrality y )
-    :~ x .+. y .+. (O1 .+. z)
+    ~~ x .+. y .+. (O1 .+. z)
       ...( Cong (\ focus => Val x :+: Val y :+: focus) $ rgtNeutrality (O1 .+. z) )
-    :~ x .+. y .+. z
+    ~~ x .+. y .+. z
       ...( Cong (\ focus => Val x :+: Val y :+: focus) $ lftNeutrality z )
 
   units : (x : U m) -> O1 .+. (x .+. O1) .+. O1 =~= x
   units x = CalcWith (cast m) $
     |~ O1 .+. (x .+. O1) .+. O1
-    ~: O1 .+. (O1 .+. x .+. O1) .+. O1
-      ...( Cong (\ focus => O2 :+: (focus :+: O2) :+: O2) $ lftNeutrality x )
-    ~: O1 .+. (O1 .+. (x .+. O1)) .+. O1
-      ...( Cong (\ focus => O2 :+: focus :+: O2) $ associativity O1 x O1 )
-    :~ O1 .+. O1 .+. (x .+. O1) .+. O1
+    ~~ O1 .+. (O1 .+. x .+. O1) .+. O1
+    ..<( Cong (\ focus => O2 :+: (focus :+: O2) :+: O2) $ lftNeutrality x )
+    ~~ O1 .+. (O1 .+. (x .+. O1)) .+. O1
+    ..<( Cong (\ focus => O2 :+: focus :+: O2) $ associativity O1 x O1 )
+    ~~ O1 .+. O1 .+. (x .+. O1) .+. O1
       ...( Cong (\ focus => focus :+: O2) $ associativity O1 O1 (x .+. O1) )
-    :~ O1 .+. O1 .+. x .+. O1 .+. O1
+    ~~ O1 .+. O1 .+. x .+. O1 .+. O1
       ...( Cong (\ focus => focus :+: O2) $ associativity (O1 .+. O1) x O1 )
-    :~ O1 .+. x .+. O1 .+. O1
+    ~~ O1 .+. x .+. O1 .+. O1
       ...( Cong (\ focus => focus :+: Val x :+: O2 :+: O2) $ lftNeutrality O1 )
-    ~: O1 .+. x .+. (O1 .+. O1)
-      ...( associativity (O1 .+. x) O1 O1 )
-    :~ O1 .+. x .+. O1
+    ~~ O1 .+. x .+. (O1 .+. O1)
+    ..<( associativity (O1 .+. x) O1 O1 )
+    ~~ O1 .+. x .+. O1
       ...( Cong (\ focus => O2 :+: Val x :+: focus) $ lftNeutrality O1 )
-    :~ O1 .+. x
+    ~~ O1 .+. x
       ...( rgtNeutrality (O1 .+. x) )
-    :~ x
+    ~~ x
       ...( lftNeutrality x )
