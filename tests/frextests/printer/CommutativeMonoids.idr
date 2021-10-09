@@ -21,10 +21,6 @@ import System.File
 
 %default total
 
-record Erase a where
-  constructor MkErase
-  0 val : a
-
 [BORING] Show a where
   show _ = "boring"
 
@@ -54,25 +50,23 @@ myProof
           $ (Dyn FZ .+. Sta 6) .+. Dyn 1 .+. (Dyn 2 .+. Sta 2) =-=
             Dyn 1 .+. ((the Nat 1) *. Dyn 0) .+. Dyn 2 .+. Sta 8
 
-Show (Fin n) where
-  show = show . cast {to = Nat}
-
 main : IO Builtin.Unit
 main = do
   -- unicode
   let separator : String := replicate 72 '-'
   let banner = \ str => unlines [separator, "-- " ++ str, separator]
+  let printer = MkPrinter (Eval @{Words}) $ withNesting $ withEvaluation $ withNames generic
   putStrLn $ banner "Commutative Monoid Theory"
-  printLn  $ display MonoidTheory
+  printLn  $ display CommutativeMonoidTheory $ MkPrinter Words $ withParens generic
   putStrLn $ banner "Simple proof"
-  printLn  $ display unicode @{BORING} myProof
+  printLn  $ Proof.display unicode printer @{BORING} myProof
 
   let output = #"\documentclass{article}"#
               :: latexPreamble
               ::
               [ #"\begin{document}"#
               , #"\subsection{myProof}"#
-              , show $ display latex @{BORING} myProof
+              , show $ display latex printer @{BORING} myProof
               , #"\end{document}"#
               ]
 
@@ -81,7 +75,7 @@ main = do
             ::
             [ #"\begin{document}"#
             , #"\subsection{myProof}"#
-            , show $ display compactLatex @{BORING} myProof
+            , show $ display compactLatex printer @{BORING} myProof
             , #"\end{document}"#
             ]
   -- latex

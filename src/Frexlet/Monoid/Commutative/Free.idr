@@ -311,7 +311,7 @@ uniqueExtender other extend xs =
         ...(sumTabulateExtensional other.Model _ _ $ \i =>
             multIsHomomorphism other.Model _ _ _ $
             extend.preserves i)
-  ~~ FreeExtenderFunction other xs 
+  ~~ FreeExtenderFunction other xs
         .=<(cong other.Model.sum $
             mapWithPosAsTabulate _ _)
 
@@ -328,6 +328,7 @@ Uniqueness other extend1 extend2 xs =
   |~ extend1.H.H.H xs
   ~~ FreeExtenderFunction other xs ...(uniqueExtender other extend1 xs)
   ~~ extend2.H.H.H xs              ..<(uniqueExtender other extend2 xs)
+
 public export
 Free : {n : Nat} -> Free CommutativeMonoidTheory (cast $ Fin n)
 Free = MkFree

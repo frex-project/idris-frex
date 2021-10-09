@@ -44,7 +44,8 @@ level (InfixR lvl) = lvl
 
 public export
 interface HasPrecedence (0 sig : Signature) where
-  OpPrecedence : (f : sig.OpWithArity (S n)) -> Maybe (Precedence (S n))
+  OpPrecedence : {0 n : Nat} -> (f : sig.OpWithArity (S n)) ->
+                 Maybe (Precedence (S n))
 
 export
 precedence : HasPrecedence sig => (f : Op sig) ->
@@ -52,22 +53,34 @@ precedence : HasPrecedence sig => (f : Op sig) ->
 precedence (MkOp {fst = S _} f) {eq = Refl} = OpPrecedence f
 
 
+public export
+record Printer (sig : Signature) (a : Type) where
+  constructor MkPrinter
+  ||| Variable printing
+  varShow   : Show a
+  ||| Operator printing
+  opShow    : Show (Op sig)
+  ||| Operator precedences
+  opPrec    : HasPrecedence sig
+  ||| Should all infix operators be wrapped in parens
+  opParens  : Bool
+  ||| Should we wrap a term in parens at the toplevel
+  topParens : Bool
+
 export
-display :
-  (sig : Signature) ->
-  (Finite (Op sig), HasPrecedence sig, Show (Op sig)) =>
-  Doc ()
-display sig = vcat $ map showOp enumerate where
+display : (sig : Signature) -> Finite (Op sig) =>
+          Printer sig () -> Doc ()
+display sig p = vcat $ map showOp enumerate where
 
   nary : Nat -> List String
   nary Z = ["a"]
   nary (S n) = "a" :: "->" :: nary n
 
   showOp : Op sig -> Doc ()
-  showOp op@(MkOp {fst = 0} _) = hsep [pretty (show op), ": a"]
+  showOp op@(MkOp {fst = 0} _) = hsep [pretty (show @{p.opShow} op), ": a"]
   showOp op@(MkOp {fst = n@(S _)} _) =
-    let base = [ parenthesise (n == 2) (pretty $ show op)
+    let base = [ parenthesise (n == 2) (pretty $ show @{p.opShow} op)
                , ":", pretty (unwords (nary n))]
-    in case precedence op of
+    in case precedence @{p.opPrec} op of
       Nothing   => hsep base
       Just prec => hsep (base ++ [parens (pretty $ show prec)])

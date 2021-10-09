@@ -125,6 +125,10 @@ data FreePresetoid
   : (sig : Signature) -> (x : Setoid) -> (u,v : Term sig (U x)) -> Type where
   Assume : x.equivalence.relation i j -> FreePresetoid sig x (Done i) (Done j)
 
+export
+Show (FreePresetoid sig x u v) where
+  show _ = "assume"
+
 ||| The algebra and relation over it to generate the equational
 ||| theorems of the theory
 public export

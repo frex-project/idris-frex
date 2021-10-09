@@ -19,6 +19,8 @@ modules = Frex
         , Frex.Free.Construction
         , Frex.Free.Construction.Combinators
         , Frex.Free.Construction.Linear
+        , Frex.Free.Construction.Idris
+        , Frex.Free.Construction.IdrisMonoid
         , Frex.Free.Construction.ByFrex
         , Frex.Frex
         , Frex.Frex.Construction

@@ -51,4 +51,3 @@ public export
 (.=<) : {a : Setoid} -> (y : U a) -> {x : U a} ->
     y === x -> Step a x y
 (y .=<(Refl)) = (y ...(a.equivalence.reflexive y))
-

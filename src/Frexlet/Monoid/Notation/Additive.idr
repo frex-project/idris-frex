@@ -8,6 +8,18 @@ import public Notation.Additive
 
 %default total
 
+namespace Algebra
+  public export
+  cast : (a : MonoidStructure) -> HVect [0 `ary` U a, 2 `ary` U a]
+  cast a = [ a.sem Neutral
+           , a.sem Product
+           ]
+
+namespace Model
+  public export
+  cast : (a : Monoid) -> HVect [0 `ary` U a, 2 `ary` U a]
+  cast a = cast (a.Algebra)
+
 public export
 (.Additive1) : (monoid : Monoid) -> Additive1 (U monoid)
 monoid.Additive1 = MkAdditive1 (monoid.sem Neutral) (monoid.sem Product)

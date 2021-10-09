@@ -147,31 +147,69 @@ export
     compareArgs [] (_ :: _) = LT
     compareArgs (_ :: _) [] = GT
 
+||| Print parens (but not at the toplevel)
+export
+withParens : Printer sig a -> Printer sig a
+withParens = { opParens := True }
+
+export
+withNames : Printer sig () -> Printer sig (Fin n)
+withNames = { varShow := named } where
+
+  [named] Show (Fin n) where
+    show k = show $ index (cast k) names
+
+export
+withFocus : String -> Printer sig a -> Printer sig (Maybe a)
+withFocus focus printer = { varShow := focused } printer where
+
+  [focused] Show (Maybe a) where
+    showPrec _ Nothing  = focus
+    showPrec p (Just v) = showPrec @{printer.varShow} p v
+
 namespace Term
 
   export
-  display : (Show a, Show (Op sig), HasPrecedence sig) =>
-            (b : Bool) -> Term sig a -> Doc ()
-  display b = go False Open where
+  displayPrec : Printer sig a -> Prec -> Term sig a -> Doc ()
+  displayPrec printer = go printer.topParens where
 
-    go : Bool -> Prec -> Term sig a -> Doc ()
-    go _ _ (Done v) = pretty (show v)
-    go b' c (Call f args) with (arity f) proof eq
-      go b' c (Call f args) | Z = pretty (show f)
-      go b' c (Call f args) | (S _)
-        = let op := pretty (show f)
+    go  : Bool -> Prec -> Term sig a -> Doc ()
+    go b c (Done v) = pretty (showPrec @{printer.varShow} c v)
+    go b c (Call f args) with (arity f) proof eq
+      _ | Z = pretty (showPrec @{printer.opShow} c f)
+      _ | (S _)
+        = let op := pretty (show @{printer.opShow} f)
               catchall : Lazy (Doc ())
-                := hsep (op :: assert_total (map (go b App) (toList args)))
-          in case precedence f of
+                := hsep (op :: assert_total (map (go printer.opParens App) (toList args)))
+          in case precedence @{printer.opPrec} f of
                Nothing  => parens catchall
                Just lvl =>
                  let n = level lvl; d = User n; d' = User (S n) in
-                 parenthesise (b' || c > d) $ case args of
-                   [x]   => hsep [op, go b d x]
+                 parenthesise (b || c > d) $ case args of
+                   [x]   => hsep [op, go printer.opParens d x]
                    [x,y] => case lvl of
-                     InfixL _ => hsep [go b d x, op, go b d' y]
-                     InfixR _ => hsep [go b d' x, op, go b d y]
+                     InfixL _ => hsep [ go printer.opParens d x
+                                      , op
+                                      , go printer.opParens d' y]
+                     InfixR _ => hsep [ go printer.opParens d' x
+                                      , op
+                                      , go printer.opParens d y]
                    _ => catchall
+
+  export
+  display : Printer sig a -> Term sig a -> Doc ()
+  display printer = displayPrec printer Open
+
+||| This printer assumes there's at least one layer of term above
+||| the nested one i.e. you can't have just `Done t`.
+export
+withNesting : Printer sig a -> Printer sig (Term sig a)
+withNesting printer = { varShow := term } printer where
+
+  [term] Show (Term sig a) where
+    showPrec p =
+      let printer' = { topParens := printer.opParens } printer in
+      show . displayPrec printer' p
 
 ------------------ Functor, Applicative, Monad -------------------------------------------
 
@@ -225,6 +263,11 @@ public export
 Functor (Term sig) where
   map h t = (Free sig _).Sem t (Done . h)
 
+||| Converting a focus to a term with one free variable
+public export
+cast : Term sig (Maybe a) -> Term sig (Either a (Fin 1))
+cast = map (maybe (Right FZ) Left)
+
 public export
 Applicative (Term sig) where
   pure = Done
@@ -235,10 +278,6 @@ Applicative (Term sig) where
 public export
 Monad (Term sig) where
   (>>=) = (Free sig _).Sem
-
-export
-(Show (Op sig), HasPrecedence sig) => Show (Term sig (Fin n)) where
-  show = show . display False . map (\ k => index (cast k) names)
 
 ||| Free `sig`-algebra over `n`-variables.
 public export

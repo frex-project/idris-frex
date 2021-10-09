@@ -36,14 +36,17 @@ public export
 EvaluationSig : (sig : Signature) -> (0 a : Type) -> Signature
 EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 
-export
-(Show (Op sig), Show a) => Show (Op $ EvaluationSig sig a) where
-  show (MkOp (Op op     )) = show (MkOp op)
-  show (MkOp (Constant c)) = show c
+[opPrec] HasPrecedence sig => HasPrecedence (EvaluationSig sig a) where
+  OpPrecedence (Op op) = OpPrecedence op
 
 export
-HasPrecedence sig => HasPrecedence (EvaluationSig sig a) where
-  OpPrecedence (Op op) = OpPrecedence op
+withEvaluation : Show c => Printer sig a -> Printer (EvaluationSig sig c) a
+withEvaluation printer =
+   { opShow := opShow, opPrec := opPrec @{printer.opPrec} } printer where
+
+  [opShow] Show (Op (EvaluationSig sig c)) where
+    showPrec p (MkOp (Op op))      = showPrec @{printer.opShow} p (MkOp op)
+    showPrec p (MkOp (Constant c)) = showPrec p c
 
 
 depCong : {0 p : a -> Type} -> (0 f : (x : a) -> p x) -> {0 x1, x2 : a} -> (prf : x1 = x2) ->
@@ -117,7 +120,7 @@ data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> T
   Assumption : {x,y : U a} -> a.equivalence.relation x y -> EvaluationAxiom sig axioms a
 
 export
-Show axioms => Show (EvaluationAxiom sig axioms a) where
+[Eval] Show axioms => Show (EvaluationAxiom sig axioms a) where
   show (Axiom ax) = show ax
   show (Evaluation f cs) = "Evaluate"
   show (Assumption x)    = "Assumption"

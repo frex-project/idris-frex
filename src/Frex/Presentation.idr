@@ -29,12 +29,27 @@ public export %hint
 projectSignature : Presentation -> Signature
 projectSignature pres = pres.signature
 
+public export
+record Printer (pres : Presentation) (a : Type) where
+  constructor MkPrinter
+  axiomShow  : Show pres.Axiom
+  sigPrinter : Printer pres.signature a
+
+||| Used to print a definition corresponding to an axiom
+export
+withLower : Presentation.Printer pres a -> Printer pres a
+withLower p = { axiomShow := lowerAxiom } p where
+
+  [lowerAxiom] Show pres.Axiom where
+    show ax = case unpack (show @{p.axiomShow} ax) of
+      [] => ""
+      (x :: xs) => pack $ toLower x :: xs
+
 namespace Equation
 
   export
-  display : (Show (Op sig), HasPrecedence sig) =>
-            Bool -> Equation sig -> Doc ()
-  display b (MkEq supp lhs rhs)
+  display : Printer sig () -> Equation sig -> Doc ()
+  display printer (MkEq supp lhs rhs)
     = concat {t = List} [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
@@ -43,33 +58,30 @@ namespace Equation
       tele Z = ""
       tele n = "∀" <++> hsep (map (pretty . show) (take n names)) <+> ". "
 
-      prettyName : Term sig (Fin supp) -> Term sig Name
-      prettyName = map (\ k => index (cast k) names)
-
       scoped : Term sig (Fin supp) -> Doc ()
-      scoped = display b . prettyName
+      scoped = display (withNames printer)
 
 namespace Presentation
 
   export
-  display : (p : Presentation) ->
-            Finite (p .Axiom) =>
-            Show (p .Axiom) =>
-            Finite (Op p.signature) =>
-            Show (Op p.signature) =>
-            HasPrecedence p.signature =>
+  display : (pres : Presentation) ->
+            Finite (pres .Axiom) =>
+            Finite (Op pres.signature) =>
+            Printer pres () ->
             Doc ()
-  display p = vcat
+  display pres p = vcat
             $ "Operations:"
-            :: indent 2 (display p.signature)
+            :: indent 2 (Signature.display pres.signature p.sigPrinter)
             :: "Axioms:"
             :: map (indent 2 . showAxiom) enumerate
 
     where
 
-    showAxiom : p .Axiom -> Doc ()
-    showAxiom ax = concat {t = List}
-                 [pretty (show ax), ": ", display True (p.axiom ax)]
+    showAxiom : pres .Axiom -> Doc ()
+    showAxiom ax = hcat
+                 [ pretty (show @{p.axiomShow} ax)
+                 , ": "
+                 , display p.sigPrinter (pres.axiom ax)]
 
 %hint
 public export
