@@ -99,15 +99,18 @@ idris : {pres : Presentation} ->
         List (String, Lemma pres) ->  -- results to print certificates for
         String
 idris printer is proofs = with [List.(++), Prelude.(.)] show $ vcat
-             $ (start ++)
-             . (imports ++)
+             $ (imports ++)
+             . (banner "Hiding definitions conflicting with axiom names" ++)
              . (hidingList ++)
+             . (pragmas ++)
+             . (parametersBlock ++)
+             . (banner "Boilerplate: equivalence & congruence combinator" ++)
              . (header ++)
              . (banner "Term combinators" ++)
              . (operations "m .Algebra .algebra .Semantics" tmPrinter ++)
              . (banner "Context combinators" ++)
              . (operations "Call" ctxPrinter ++)
-             . (banner "Proof the axioms hold" ++)
+             . (banner "Proofs the axioms hold in the model" ++)
              . (lemmas ++)
              . (banner "Lemmas" ++)
              $ intersperse ""
@@ -142,16 +145,9 @@ idris printer is proofs = with [List.(++), Prelude.(.)] show $ vcat
     ctxPrinter = { sigPrinter->carrier $= \ c => "Term Sig (Maybe (\{c}))" }
                  (withQuoted tmPrinter)
 
-    start : List (Doc ())
-    start = map pretty $ lines #"""
-import Data.Setoid
-
-import Frex
-"""#
-
     imports : List (Doc ())
-    imports = map (("import" <++>) . pretty) is
-           ++ ifThenElse (null is) [] [""]
+    imports = map (("import" <++>) . pretty) ("Frex" :: is)
+              ++ [""]
 
     hidingList : List (Doc ())
     hidingList =
@@ -174,14 +170,17 @@ import Frex
                      pure ("%hide Axiom." <+> pretty nm)
       in ifThenElse (null nms) nms (nms ++ [""])
 
+    pragmas : List (Doc ())
+    pragmas = ["%unbound_implicits off"]
+
+    parametersBlock : List (Doc ())
+    parametersBlock =
+      ["", pretty "parameters (m : Model \{tmPrinter.theoryName})", ""]
+
     header : List (Doc ())
     header = map pretty $ lines #"""
-%unbound_implicits off
-
-parameters (m : Model \#{tmPrinter.theoryName})
-
   infix 0 =~=
-  0 (=~=) : (x, y : U m) -> Type
+  0 (=~=) : U m -> U m -> Type
   x =~= y = (cast m).equivalence.relation x y
 
   Sig : Signature
@@ -190,15 +189,15 @@ parameters (m : Model \#{tmPrinter.theoryName})
   Val : U m -> Term Sig (Maybe (U m))
   Val v = Done (Just v)
 
-  (.asContext) :
-    (Term Signature (Maybe (U m)) -> Term Sig (Maybe (U m))) ->
-    U m -> U m
+  0 Context : Type
+  Context = Term Sig (Maybe (U m)) -> Term Sig (Maybe (U m))
+
+  (.asContext) : Context -> (U m -> U m)
   f .asContext x = m .Sem (cast $ f (Done Nothing))
                  $ either id (\ k => index k [x])
 
-  Cong : (f : Term Signature (Maybe (U m)) -> Term Sig (Maybe (U m))) ->
-         {x, y : U m} -> x =~= y ->
-         f .asContext x =~= f .asContext y
+  Cong : (f : Context) -> {x, y : U m} ->
+         x =~= y -> f .asContext x =~= f .asContext y
   Cong f {x, y} eq = m.cong 1 (cast $ f (Done Nothing)) [x] [y] [eq]
 
 

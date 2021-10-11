@@ -1,7 +1,8 @@
-import Data.Setoid
-
 import Frex
 import Frexlet.Monoid
+
+------------------------------------------------------------------------
+-- Hiding definitions conflicting with axiom names
 
 %hide Axiom.lftNeutrality
 %hide Axiom.rgtNeutrality
@@ -11,8 +12,11 @@ import Frexlet.Monoid
 
 parameters (m : Model MonoidTheory)
 
+------------------------------------------------------------------------
+-- Boilerplate: equivalence & congruence combinator
+
   infix 0 =~=
-  0 (=~=) : (x, y : U m) -> Type
+  0 (=~=) : U m -> U m -> Type
   x =~= y = (cast m).equivalence.relation x y
 
   Sig : Signature
@@ -21,15 +25,15 @@ parameters (m : Model MonoidTheory)
   Val : U m -> Term Sig (Maybe (U m))
   Val v = Done (Just v)
 
-  (.asContext) :
-    (Term Signature (Maybe (U m)) -> Term Sig (Maybe (U m))) ->
-    U m -> U m
+  0 Context : Type
+  Context = Term Sig (Maybe (U m)) -> Term Sig (Maybe (U m))
+
+  (.asContext) : Context -> (U m -> U m)
   f .asContext x = m .Sem (cast $ f (Done Nothing))
                  $ either id (\ k => index k [x])
 
-  Cong : (f : Term Signature (Maybe (U m)) -> Term Sig (Maybe (U m))) ->
-         {x, y : U m} -> x =~= y ->
-         f .asContext x =~= f .asContext y
+  Cong : (f : Context) -> {x, y : U m} ->
+         x =~= y -> f .asContext x =~= f .asContext y
   Cong f {x, y} eq = m.cong 1 (cast $ f (Done Nothing)) [x] [y] [eq]
 
 ------------------------------------------------------------------------
@@ -53,7 +57,7 @@ parameters (m : Model MonoidTheory)
   x :<> y = Call (MkOp  Product) [x, y]
 
 ------------------------------------------------------------------------
--- Proof the axioms hold
+-- Proofs the axioms hold in the model
 
   lftNeutrality : (x : U m) -> zero <> x =~= x
   lftNeutrality x = m.Validate LftNeutrality (\ k => index k [x])
