@@ -2,6 +2,7 @@
 module Frex.Signature
 
 import Data.Finite
+import Data.Maybe
 import Data.String
 import Text.PrettyPrint.Prettyprinter
 
@@ -21,7 +22,7 @@ record Op (Sig : Signature) where
   snd : (Sig).OpWithArity fst
 
 public export
-arity : {auto 0 sig : Signature} -> Op sig -> Nat
+arity : Op sig -> Nat
 arity = fst
 
 public export
@@ -29,6 +30,13 @@ data Precedence : Nat -> Type where
   Prefix : Nat -> Precedence 1
   InfixL : Nat -> Precedence 2
   InfixR : Nat -> Precedence 2
+
+namespace Precedence
+
+  export
+  isInfix : Precedence n -> Bool
+  isInfix (Prefix _) = False
+  isInfix _ = True
 
 export
 Show (Precedence n) where
@@ -49,38 +57,79 @@ interface HasPrecedence (0 sig : Signature) where
 
 export
 precedence : HasPrecedence sig => (f : Op sig) ->
-             {auto 0 eq : arity @{sig} f = S n} -> Maybe (Precedence (S n))
+             {auto 0 eq : arity f = S n} -> Maybe (Precedence (S n))
 precedence (MkOp {fst = S _} f) {eq = Refl} = OpPrecedence f
 
+export
+isInfix : HasPrecedence sig => Op sig -> Bool
+isInfix (MkOp {fst = S _} f) = maybe False isInfix (OpPrecedence f)
+isInfix _ = False
 
 public export
 record Printer (sig : Signature) (a : Type) where
   constructor MkPrinter
+  ||| Printing the carrier type
+  carrier    : String
   ||| Variable printing
-  varShow   : Show a
+  varShow    : Show a
+  ||| Patterns for operators
+  opPatterns : Show (Op sig)
   ||| Operator printing
-  opShow    : Show (Op sig)
+  opShow     : Show (Op sig)
   ||| Operator precedences
-  opPrec    : HasPrecedence sig
+  opPrec     : HasPrecedence sig
   ||| Should all infix operators be wrapped in parens
-  opParens  : Bool
+  opParens   : Bool
   ||| Should we wrap a term in parens at the toplevel
-  topParens : Bool
+  topParens  : Bool
 
+||| The modified names we are using when printing a context rather than
+||| a term (i.e. a term with an extra variable in scope: the focus).
 export
-display : (sig : Signature) -> Finite (Op sig) =>
-          Printer sig () -> Doc ()
-display sig p = vcat $ map showOp enumerate where
+withQuoted : Printer sig a -> Printer sig a
+withQuoted p = { opShow := opShow } p where
 
-  nary : Nat -> List String
-  nary Z = ["a"]
-  nary (S n) = "a" :: "->" :: nary n
+  [opShow] Show (Op sig) where
+    showPrec d op =
+      ifThenElse (isInfix @{p.opPrec} op)
+        (":" ++ show @{p.opShow} op)
+        (show @{p.opShow} op ++ "'")
 
-  showOp : Op sig -> Doc ()
-  showOp op@(MkOp {fst = 0} _) = hsep [pretty (show @{p.opShow} op), ": a"]
-  showOp op@(MkOp {fst = n@(S _)} _) =
-    let base = [ parenthesise (n == 2) (pretty $ show @{p.opShow} op)
-               , ":", pretty (unwords (nary n))]
-    in case precedence @{p.opPrec} op of
-      Nothing   => hsep base
-      Just prec => hsep (base ++ [parens (pretty $ show prec)])
+namespace Operators
+
+  export
+  display : Printer sig () ->
+            Op sig -> Doc ()
+  display p op@(MkOp {fst = 0} _)
+      = hsep [ pretty (show @{p.opShow} op)
+             , ":", pretty p.carrier
+             ]
+  display p op@(MkOp {fst = n@(S _)} _)
+      = hsep [ parenthesise (isJust (precedence @{p.opPrec} op))
+                    $ pretty $ show @{p.opShow} op
+             , ":", pretty (unwords (nary n))]
+
+    where
+
+    nary : Nat -> List String
+    nary Z = [p.carrier]
+    nary (S n) = p.carrier :: "->" :: nary n
+
+namespace Precedence
+
+  export
+  display : Printer sig () -> Op sig -> Maybe (Doc ())
+  display p (MkOp {fst = 0} _) = Nothing
+  display p op@(MkOp {fst = S _} _)
+      = case precedence @{p.opPrec} op of
+            Nothing => Nothing
+            Just prec => pure (pretty (show prec))
+
+namespace Signature
+
+  export
+  display : (sig : Signature) ->
+            Finite (Op sig) =>
+            Printer sig () -> Doc ()
+  display sig p = vcat $ enumerate <&> \ op =>
+    hsep $ display p op :: toList (parens <$> display p op)

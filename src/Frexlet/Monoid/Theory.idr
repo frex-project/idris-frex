@@ -45,6 +45,11 @@ Prod : Op Signature
 Prod = MkOp Product
 
 export
+Show (Op Signature) where
+  show (MkOp Neutral) = "Neutral"
+  show (MkOp Product) = "Product"
+
+export
 Finite (Op Signature) where
   enumerate = [Unit, Prod]
 
@@ -102,13 +107,34 @@ export
     Associativity => "Associativity"
 
 export
+ascii : Printer Signature Unit
+ascii = MkPrinter
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = asciiShow
+  , opPrec     = asciiPrec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [asciiPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [asciiShow] Show (Op Signature) where
+    show (MkOp Neutral) = "zero"
+    show (MkOp Product) = "<>"
+
+export
 generic : Printer Signature Unit
 generic = MkPrinter
-  { varShow   = %search
-  , opShow    = genericShow
-  , opPrec    = genericPrec
-  , topParens = False
-  , opParens  = False
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = genericShow
+  , opPrec     = genericPrec
+  , topParens  = False
+  , opParens   = False
   } where
 
   [genericPrec] HasPrecedence Signature where
@@ -121,11 +147,13 @@ generic = MkPrinter
 export
 natPlus : Printer Signature Unit
 natPlus = MkPrinter
-  { varShow   = %search
-  , opShow    = natPlusShow
-  , opPrec    = natPlusPrec
-  , topParens = False
-  , opParens  = False
+  { carrier    = "Nat"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = natPlusShow
+  , opPrec     = natPlusPrec
+  , topParens  = False
+  , opParens   = False
   } where
 
   [natPlusPrec] HasPrecedence Signature where
@@ -138,11 +166,13 @@ natPlus = MkPrinter
 export
 additive1 : Printer Signature Unit
 additive1 = MkPrinter
-  { varShow   = %search
-  , opShow    = additive1Show
-  , opPrec    = additive1Prec
-  , topParens = False
-  , opParens  = False
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = additive1Show
+  , opPrec     = additive1Prec
+  , topParens  = False
+  , opParens   = False
   } where
 
   [additive1Prec] HasPrecedence Signature where
@@ -155,11 +185,13 @@ additive1 = MkPrinter
 export
 additive2 : Printer Signature Unit
 additive2 = MkPrinter
-  { varShow   = %search
-  , opShow    = additive2Show
-  , opPrec    = additive2Prec
-  , topParens = False
-  , opParens  = False
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = additive2Show
+  , opPrec     = additive2Prec
+  , topParens  = False
+  , opParens   = False
   } where
 
   [additive2Prec] HasPrecedence Signature where
@@ -171,8 +203,8 @@ additive2 = MkPrinter
 
 export
 withRaw : Printer Signature a -> Printer MonoidTheory a
-withRaw = MkPrinter Raw
+withRaw = MkPrinter "MonoidTheory" Raw
 
 export
 withWords : Printer Signature a -> Printer MonoidTheory a
-withWords = MkPrinter Words
+withWords = MkPrinter "MonoidTheory" Words

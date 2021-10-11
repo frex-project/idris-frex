@@ -33,6 +33,7 @@ projectSignature pres = pres.signature
 public export
 record Printer (pres : Presentation) (a : Type) where
   constructor MkPrinter
+  theoryName : String
   axiomShow  : Show pres.Axiom
   sigPrinter : Printer pres.signature a
 
@@ -43,6 +44,11 @@ withLower p = { axiomShow := lowerAxiom } p where
 
   [lowerAxiom] Show pres.Axiom where
     show ax = uncapitalise (show @{p.axiomShow} ax)
+
+||| Used to print a context
+export
+withQuoted : Presentation.Printer pres a -> Printer pres a
+withQuoted = { sigPrinter $= withQuoted }
 
 ||| Used to print a definition corresponding to an axiom
 export
@@ -65,16 +71,15 @@ namespace Equation
       scoped : Term sig (Fin supp) -> Doc ()
       scoped = display (withNames printer)
 
-
   export
-  prettyEquation : Printer sig () ->
-                   String -> List (Doc ()) -> String ->
-                   Equation sig -> Doc ()
-  prettyEquation p nm xs ty eq =
+  pretty : Printer sig () ->
+           String -> List (Doc ()) ->
+           Equation sig -> Doc ()
+  pretty p nm xs eq =
         let tmPrinter = withNames p in
         pretty nm <++> colon
                   <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
-                               <++> colon <++> pretty ty)
+                               <++> colon <++> pretty p.carrier)
                   <++> "->"
                   <++> display tmPrinter eq.lhs
                   <++> "=~="
@@ -110,7 +115,7 @@ namespace Axiom
     let rawAx = show @{p.axiomShow} ax; nm = uncapitalise rawAx in
     let eq = pres .axiom ax in
     let xs = map (pretty . show) $ take eq.support names in
-      vcat [ prettyEquation p.sigPrinter nm xs "U m" eq
+      vcat [ pretty p.sigPrinter nm xs eq
            , pretty nm <++> hsep xs <++> "="
              <++> "m.Validate" <++> pretty rawAx
              <++> parens (#"\ k => index k"# <++> group (list xs))

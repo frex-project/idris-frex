@@ -70,8 +70,8 @@ Finite Commutative.Theory.Axiom where
 
 export
 withRaw : Printer Signature a -> Printer CommutativeMonoidTheory a
-withRaw = MkPrinter Raw
+withRaw = MkPrinter "CommutativeMonoidTheory" Raw
 
 export
 withWords : Printer Signature a -> Printer CommutativeMonoidTheory a
-withWords = MkPrinter Words
+withWords = MkPrinter "CommutativeMonoidTheory" Words

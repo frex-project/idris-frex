@@ -102,7 +102,7 @@ idris proofs = show $ vcat $ (header ++) . (lemmas ++)
        $ take lemma.equation.support names
 
   in indent 2 $ vcat
-  [ prettyEquation additive1 nm xs "U m" lemma.equation
+  [ pretty addPrinter nm xs lemma.equation
   , pretty nm <++> hsep xs <++> "= CalcWith (cast m) $"
   , indent 2 $ display
              $ deloop
@@ -111,8 +111,11 @@ idris proofs = show $ vcat $ (header ++) . (lemmas ++)
 
   where
 
+    addPrinter : Printer Signature ()
+    addPrinter = { carrier := "U m" } additive1
+
     tmPrinter : Printer Signature (Fin n)
-    tmPrinter = withNames additive1
+    tmPrinter = withNames addPrinter
 
     header : List (Doc ())
     header = map pretty $ lines #"""
@@ -161,4 +164,4 @@ parameters (m : Model MonoidTheory)
 
     lemmas : List (Doc ())
     lemmas = enumerate {a = Axiom} <&> \ ax =>
-      indent 2 $ display (withRaw additive1) ax
+      indent 2 $ display (withRaw addPrinter) ax
