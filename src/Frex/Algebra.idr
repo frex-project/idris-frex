@@ -167,6 +167,13 @@ withFocus focus printer = { varShow := focused } printer where
     showPrec _ Nothing  = focus
     showPrec p (Just v) = showPrec @{printer.varShow} p v
 
+export
+withVal : Signature.Printer sig a -> Printer sig a
+withVal p = { varShow := valVar } p where
+
+  [valVar] Show a where
+    showPrec d x = showCon d "Val" $ showArg @{varShow p} x
+
 namespace Term
 
   export

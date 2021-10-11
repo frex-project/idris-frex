@@ -9,6 +9,7 @@ import Data.Stream
 import Data.String
 import Frex.Signature
 import Frex.Algebra
+import Utils.String
 
 %default total
 
@@ -41,9 +42,12 @@ withLower : Presentation.Printer pres a -> Printer pres a
 withLower p = { axiomShow := lowerAxiom } p where
 
   [lowerAxiom] Show pres.Axiom where
-    show ax = case unpack (show @{p.axiomShow} ax) of
-      [] => ""
-      (x :: xs) => pack $ toLower x :: xs
+    show ax = uncapitalise (show @{p.axiomShow} ax)
+
+||| Used to print a definition corresponding to an axiom
+export
+withNames : Presentation.Printer pres () -> Printer pres (Fin n)
+withNames = { sigPrinter $= withNames }
 
 namespace Equation
 
@@ -60,6 +64,21 @@ namespace Equation
 
       scoped : Term sig (Fin supp) -> Doc ()
       scoped = display (withNames printer)
+
+
+  export
+  prettyEquation : Printer sig () ->
+                   String -> List (Doc ()) -> String ->
+                   Equation sig -> Doc ()
+  prettyEquation p nm xs ty eq =
+        let tmPrinter = withNames p in
+        pretty nm <++> colon
+                  <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
+                               <++> colon <++> pretty ty)
+                  <++> "->"
+                  <++> display tmPrinter eq.lhs
+                  <++> "=~="
+                  <++> display tmPrinter eq.rhs
 
 namespace Presentation
 
@@ -82,6 +101,21 @@ namespace Presentation
                  [ pretty (show @{p.axiomShow} ax)
                  , ": "
                  , display p.sigPrinter (pres.axiom ax)]
+
+namespace Axiom
+
+  export
+  display : {pres : _} -> Printer pres () -> pres .Axiom -> Doc ()
+  display p ax =
+    let rawAx = show @{p.axiomShow} ax; nm = uncapitalise rawAx in
+    let eq = pres .axiom ax in
+    let xs = map (pretty . show) $ take eq.support names in
+      vcat [ prettyEquation p.sigPrinter nm xs "U m" eq
+           , pretty nm <++> hsep xs <++> "="
+             <++> "m.Validate" <++> pretty rawAx
+             <++> parens (#"\ k => index k"# <++> group (list xs))
+           , ""
+           ]
 
 %hint
 public export

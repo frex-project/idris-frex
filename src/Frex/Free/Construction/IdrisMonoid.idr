@@ -5,6 +5,7 @@ import Data.Relation.Closure.Symmetric
 
 import Control.Relation
 import Data.Fin
+import Data.Finite
 import Data.List
 import Data.Name
 import Data.Relation
@@ -19,6 +20,7 @@ import Frex.Free.Construction.Linear
 
 import Data.String
 import Text.PrettyPrint.Prettyprinter
+import Utils.String
 
 import Frexlet.Monoid.Theory
 
@@ -27,17 +29,10 @@ import Frexlet.Monoid.Theory
 %hide Theory.Unit
 
 export
-withVal : Signature.Printer sig a -> Printer sig a
-withVal p = { varShow := valVar } p where
-
-  [valVar] Show a where
-    showPrec d x = showCon d "Val" $ showArg @{varShow p} x
-
-export
 display : {n : Nat} ->
           {lhs, rhs : Term Signature (Fin n)} ->
           Proof MonoidTheory lhs rhs ->
-          Doc Unit
+          Doc ()
 display prf = vcat $ ("|~" <++> display tmPrinter lhs)
                    :: steps prf
 
@@ -65,9 +60,9 @@ display prf = vcat $ ("|~" <++> display tmPrinter lhs)
   PA = QuotientData MonoidTheory (cast $ Fin n)
 
   base : Bool -> TM -> Doc () -> Doc ()
-  base b t p = vcat
+  base b t prf = vcat
     [ "~~" <++> display tmPrinter t
-    , ifThenElse b "..<(" "  ...(" <++> p <++> ")"
+    , indent 2 $ ifThenElse b "..<(" "...(" <++> prf <++> ")"
     ]
 
   focus : CTX -> Doc ()
@@ -78,11 +73,12 @@ display prf = vcat $ ("|~" <++> display tmPrinter lhs)
   cong : {begin, end : TM} -> Bool ->
          Locate Signature (algebra PA) (Step MonoidTheory PA) begin end ->
          Doc ()
-  cong b (Here p)
-    = base b (if b then begin else end) $ displayNamed True lemPrinter p
-  cong b (Cong t {lhs} {rhs} p)
+  cong b (Here prf)
+    = base b (if b then begin else end) $ displayNamed True lemPrinter prf
+  cong b (Cong t {lhs} {rhs} prf)
     = base b (plug (algebra PA) t $ if b then lhs else rhs)
-    $ "Cong" <++> parens (focus t) <++> "$" <++> displayNamed True lemPrinter p
+    $ "Cong" <++> parens (focus t)
+      <++> "$" <++> displayNamed True lemPrinter prf
 
   step : {begin, end : TM} -> Closure MonoidTheory PA begin end -> Doc ()
   step (Fwd p) = cong False p
@@ -94,28 +90,19 @@ display prf = vcat $ ("|~" <++> display tmPrinter lhs)
 
 export
 idris : List (String, Lemma MonoidTheory) -> String
-idris lemmas = show $ vcat $ (header ++)
+idris proofs = show $ vcat $ (header ++) . (lemmas ++)
              $ intersperse ""
-             $ lemmas <&> \ nmlemma =>
+             $ proofs <&> \ nmlemma =>
   let
     nm := fst nmlemma
     lemma := snd nmlemma
-
-    tmPrinter : Printer Signature (Fin lemma.equation.support)
-    tmPrinter = withNames additive1
 
     xs : List (Doc ())
     xs = map (pretty . show)
        $ take lemma.equation.support names
 
   in indent 2 $ vcat
-  [ pretty nm <++> colon
-              <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
-                           <++> colon <++> "U m")
-              <++> "->"
-              <++> display tmPrinter lemma.equation.lhs
-              <++> "=~="
-              <++> display tmPrinter lemma.equation.rhs
+  [ prettyEquation additive1 nm xs "U m" lemma.equation
   , pretty nm <++> hsep xs <++> "= CalcWith (cast m) $"
   , indent 2 $ display
              $ deloop
@@ -123,6 +110,9 @@ idris lemmas = show $ vcat $ (header ++)
   ]
 
   where
+
+    tmPrinter : Printer Signature (Fin n)
+    tmPrinter = withNames additive1
 
     header : List (Doc ())
     header = map pretty $ lines #"""
@@ -166,14 +156,9 @@ parameters (m : Model MonoidTheory)
          f .asContext x =~= f .asContext y
   Cong f {x, y} eq = m.cong 1 (cast $ f (Done Nothing)) [x] [y] [eq]
 
-  lftNeutrality : (x : U m) -> O1 .+. x =~= x
-  lftNeutrality x = m.Validate LftNeutrality (\ _ => x)
-
-  rgtNeutrality : (x : U m) -> x .+. O1 =~= x
-  rgtNeutrality x = m.Validate RgtNeutrality (\ _ => x)
-
-  associativity : (x, y, z : U m) -> x .+. (y .+. z) =~= (x .+. y) .+. z
-  associativity x y z = m.Validate Associativity (\ k => index k [x,y,z])
-
 
 """#
+
+    lemmas : List (Doc ())
+    lemmas = enumerate {a = Axiom} <&> \ ax =>
+      indent 2 $ display (withRaw additive1) ax
