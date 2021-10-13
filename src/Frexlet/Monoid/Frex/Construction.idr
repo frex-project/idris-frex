@@ -348,3 +348,7 @@ MonoidFrex a s = MkFrex
      , Unique = Uniqueness a s
      }
   }
+
+public export
+MonoidFrexlet : Frexlet {pres = MonoidTheory}
+MonoidFrexlet a {n} = MonoidFrex a (cast $ Fin n)

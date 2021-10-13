@@ -217,3 +217,7 @@ CoproductsAndFreeFrex : {pres : Presentation} ->
   (free : Free pres x) -> (a : Model pres) -> Frex a x
 CoproductsAndFreeFrex hasCoproducts free a =
   CoproductAlgebraWithFree free (hasCoproducts a free.Data.Model)
+
+public export
+Frexlet : {pres : Presentation} -> Type
+Frexlet {pres} = (a : Model pres) -> {n : Nat} -> Frex a (cast $ Fin n)

@@ -15,5 +15,5 @@ import public Frexlet.Monoid.Commutative.Free
 %default total
 
 public export
-Frex : (a : CommutativeMonoid) -> {n : Nat} -> Frex a (cast $ Fin n)
+Frex : Frexlet {pres = CommutativeMonoidTheory}
 Frex a = CoproductsAndFreeFrex CoproductCospan Frexlet.Monoid.Commutative.Free.Free a

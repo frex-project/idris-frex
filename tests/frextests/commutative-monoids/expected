@@ -1,4 +1,5 @@
-1/2: Building NatTests (NatTests.idr)
-2/2: Building CommutativeMonoids (CommutativeMonoids.idr)
+1/3: Building NatTests (NatTests.idr)
+2/3: Building MagicNatTests (MagicNatTests.idr)
+3/3: Building CommutativeMonoids (CommutativeMonoids.idr)
 Main> ok
 Main> Bye for now!
