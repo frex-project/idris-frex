@@ -42,7 +42,14 @@ EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 export
 withEvaluation : Show c => Printer sig a -> Printer (EvaluationSig sig c) a
 withEvaluation printer =
-   { opShow := opShow, opPrec := opPrec @{printer.opPrec} } printer where
+   { opPatterns := opPatterns
+   , opShow := opShow
+   , opPrec := opPrec @{printer.opPrec}
+   } printer where
+
+  [opPatterns] Show (Op (EvaluationSig sig c)) where
+    showPrec p (MkOp (Op op)) = showCon p "Op" $ showArg @{printer.opShow} (MkOp op)
+    showPrec p (MkOp (Constant c)) = showCon p "Constant" $ showArg c
 
   [opShow] Show (Op (EvaluationSig sig c)) where
     showPrec p (MkOp (Op op))      = showPrec @{printer.opShow} p (MkOp op)

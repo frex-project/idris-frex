@@ -8,6 +8,7 @@ import Frex.Free.Construction.Combinators
 
 import Decidable.Equality
 import Frex.Free.Construction.IdrisMonoid
+import Frex.Free.Construction.Idris
 
 import Frexlet.Monoid
 import Frexlet.Monoid.Free
@@ -53,7 +54,17 @@ units = byLemma Units
 
 main : IO Unit
 main = do
-  Right () <- writeFile "build/Proofs.idr" $ idris
+  Right () <- writeFile "build/Proofs.idr" $ IdrisMonoid.idris
+                [ ("trivial", Trivial)
+                , ("trivial2", Trivial2)
+                , ("assoc", Assoc)
+                , ("units", Units)
+                ]
+    | Left err => print err
+
+  Right () <- writeFile "build/GenericProofs.idr" $ Idris.idris
+                (withRaw ascii)
+                ["Frexlet.Monoid"]
                 [ ("trivial", Trivial)
                 , ("trivial2", Trivial2)
                 , ("assoc", Assoc)

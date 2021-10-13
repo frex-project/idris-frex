@@ -80,6 +80,7 @@ modules = Frex
         , Data.Unit
         , Data.Vect.Extra1
         , Syntax.PreorderReasoning.Setoid
+        , Utils.String
 
 
 depends = contrib
