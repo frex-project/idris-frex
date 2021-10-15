@@ -375,14 +375,17 @@ namespace Setoid
   ||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
   public export 0
   Preserves : {sig : Signature}
-           -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
+           -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b)
+           -> (f : Op sig) -> Type
   Preserves {sig} a b h f
     = (xs : Vect (arity f) (U a))
-      -> b.equivalence.relation (h $ a.Sem f xs) (b.Sem f (map h xs))
+      -> b.equivalence.relation (h $ a.Sem f xs)
+                                (b.Sem f (map h xs))
 
   ||| States: the function `h : U a -> U b` preserves all `sig`-operations
   public export 0
-  Homomorphism : {sig : Signature} -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> Type
+  Homomorphism : {sig : Signature} -> (a, b : SetoidAlgebra sig) ->
+    (h : U a -> U b) -> Type
   Homomorphism a b h = (f : Op sig) -> Preserves a b h f
 
   ||| Homomorphisms between Setoid `Sig`-algebras
