@@ -12,12 +12,12 @@ import public Data.Nat
 public export
 Additive : Monoid
 Additive = MkModel
-  { Algebra = cast {from = Algebra Signature} $ MkAlgebra
-        { U = Nat
-        , Sem = \case
-           Neutral => 0
-           Product => plus
-        }
+  { Algebra = cast {from = Algebra Signature} $
+              MkAlgebra { U = Nat
+                        , Sem = \case
+                           Neutral => 0
+                           Product => plus
+                        }
   , Validate = \case
       LftNeutrality => \env => Refl
       RgtNeutrality => \env => plusZeroRightNeutral _
