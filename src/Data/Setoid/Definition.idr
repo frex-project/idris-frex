@@ -14,17 +14,17 @@ infix 5 ~>, ~~>, <~>
 public export
 record Equivalence (A : Type) where
   constructor MkEquivalence
-  0 relation  : Rel A
+  0 relation: Rel A
   reflexive : (x : A)
-              ----------------
+              ------------
            -> relation x x
   symmetric : (x : A) -> (y : A)
               -> relation x y
-              --------------------
+              ---------------
               -> relation y x
   transitive: (x : A) -> (y : A) -> (z : A)
               -> relation x y -> relation y z
-              ------------------------------
+              -------------------------------
               -> relation x z
 
 public export
@@ -125,7 +125,8 @@ public export
   { relation
   , reflexive = \f,v => b.equivalence.reflexive (f.H v)
   , symmetric = \f,g,prf,w => b.equivalence.symmetric _ _ (prf w)
-  , transitive = \f,g,h,f_eq_g, g_eq_h, q => b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
+  , transitive = \f,g,h,f_eq_g, g_eq_h, q => b.equivalence.transitive
+                 _ _ _ (f_eq_g q) (g_eq_h q)
   }
 %unbound_implicits on
 
@@ -178,9 +179,7 @@ public export
 Quotient : (0 a : Type) -> {b : Setoid} -> (a -> U b) -> Setoid
 Quotient a {b} q = MkSetoid a $
   let 0 Relation : a -> a -> Type
-      Relation x y = b.equivalence.relation
-        (q x)
-        (q y)
+      Relation x y = b.equivalence.relation (q x) (q y)
   in MkEquivalence
     { relation = Relation
     , reflexive = \x => b.equivalence.reflexive (q x)
