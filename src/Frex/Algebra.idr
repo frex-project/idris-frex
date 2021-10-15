@@ -332,7 +332,8 @@ namespace Setoid
     ||| Equivalence relation making the carrier a setoid
     equivalence : Equivalence (U algebra)
     ||| All algebraic operations respect the equivalence relation
-    congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence) `CongruenceWRT` (algebra.Sem f)
+    congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence)
+                                 `CongruenceWRT` (algebra.Sem f)
 
   public export
   Semantic (SetoidAlgebra sig) (Op sig) where
