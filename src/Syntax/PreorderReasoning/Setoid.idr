@@ -1,12 +1,11 @@
 ||| Like Syntax.PreorderReasoning.Generic, but optimised for setoids
-module Data.Setoid.Reasoning
+module Syntax.PreorderReasoning.Setoid
 
 import Data.Setoid.Definition
 
 infixl 0  ~~
-infixl 0  <~
 prefix 1  |~
-infix  1  ...,..<,.=.,.=<
+infix  1  ...,..<,..>,.=.,.=<,.=>
 
 public export
 data Step : (a : Setoid) -> (lhs,rhs : U a) -> Type where
@@ -34,11 +33,21 @@ public export
 (y ..<(prf)) {x} = (y ...(a.equivalence.symmetric _ _ prf))
 
 public export
+(..>) : {0 a : Setoid} -> (0 y : U a) -> {0 x : U a} ->
+    a.equivalence.relation x y -> Step a x y
+(..>) = (...)
+
+public export
 (.=.) : {a : Setoid} -> (y : U a) -> {x : U a} ->
-    x = y -> Step a x y
+    x === y -> Step a x y
 (y .=.(Refl)) = (y ...(a.equivalence.reflexive y))
 
 public export
+(.=>) : {a : Setoid} -> (y : U a) -> {x : U a} ->
+    x === y -> Step a x y
+(.=>) = (.=.)
+
+public export
 (.=<) : {a : Setoid} -> (y : U a) -> {x : U a} ->
-    x = y -> Step a y x
+    y === x -> Step a x y
 (y .=<(Refl)) = (y ...(a.equivalence.reflexive y))

@@ -19,6 +19,8 @@ modules = Frex
         , Frex.Free.Construction
         , Frex.Free.Construction.Combinators
         , Frex.Free.Construction.Linear
+        , Frex.Free.Construction.Idris
+        , Frex.Free.Construction.IdrisMonoid
         , Frex.Free.Construction.ByFrex
         , Frex.Frex
         , Frex.Frex.Construction
@@ -69,7 +71,6 @@ modules = Frex
         , Data.Relation.Closure.Symmetric
         , Data.Setoid
         , Data.Setoid.Definition
-        , Data.Setoid.Reasoning
         , Data.Setoid.Either
         , Data.Setoid.Pair
         , Data.Setoid.Fun
@@ -85,7 +86,8 @@ modules = Frex
         , Data.Category.Core.Functor
         , Data.Category.Core.NatTrans
         , Data.Category.Adjunction
-
+        , Syntax.PreorderReasoning.Setoid
+        , Utils.String
 
 depends = contrib
 sourcedir = "src"

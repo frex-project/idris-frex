@@ -20,7 +20,6 @@ import Data.String
 import Control.WellFounded
 
 import Syntax.PreorderReasoning
-import Syntax.PreorderReasoning.Generic
 
 import Text.PrettyPrint.Prettyprinter
 
@@ -148,31 +147,76 @@ export
     compareArgs [] (_ :: _) = LT
     compareArgs (_ :: _) [] = GT
 
+||| Print parens (but not at the toplevel)
+export
+withParens : Printer sig a -> Printer sig a
+withParens = { opParens := True }
+
+export
+withNames : Printer sig () -> Printer sig (Fin n)
+withNames = { varShow := named } where
+
+  [named] Show (Fin n) where
+    show k = show $ index (cast k) names
+
+export
+withFocus : String -> Printer sig a -> Printer sig (Maybe a)
+withFocus focus printer = { varShow := focused } printer where
+
+  [focused] Show (Maybe a) where
+    showPrec _ Nothing  = focus
+    showPrec p (Just v) = showPrec @{printer.varShow} p v
+
+export
+withVal : Signature.Printer sig a -> Printer sig a
+withVal p = { varShow := valVar } p where
+
+  [valVar] Show a where
+    showPrec d x = showCon d "Val" $ showArg @{varShow p} x
+
 namespace Term
 
   export
-  display : (Show a, Show (Op sig), HasPrecedence sig) =>
-            (b : Bool) -> Term sig a -> Doc ()
-  display b = go False Open where
+  displayPrec : Printer sig a -> Prec -> Term sig a -> Doc ()
+  displayPrec printer = go printer.topParens where
 
-    go : Bool -> Prec -> Term sig a -> Doc ()
-    go _ _ (Done v) = pretty (show v)
-    go b' c (Call f args) with (arity f) proof eq
-      go b' c (Call f args) | Z = pretty (show f)
-      go b' c (Call f args) | (S _)
-        = let op := pretty (show f)
+    go  : Bool -> Prec -> Term sig a -> Doc ()
+    go b c (Done v) = pretty (showPrec @{printer.varShow} c v)
+    go b c (Call f args) with (arity f) proof eq
+      _ | Z = pretty (showPrec @{printer.opShow} c f)
+      _ | (S _)
+        = let op := pretty (show @{printer.opShow} f)
               catchall : Lazy (Doc ())
-                := hsep (op :: assert_total (map (go b App) (toList args)))
-          in case precedence f of
+                := hsep (op :: assert_total (map (go printer.opParens App) (toList args)))
+          in case precedence @{printer.opPrec} f of
                Nothing  => parens catchall
                Just lvl =>
                  let n = level lvl; d = User n; d' = User (S n) in
-                 parenthesise (b' || c > d) $ case args of
-                   [x]   => hsep [op, go b d x]
+                 parenthesise (b || c > d) $ case args of
+                   [x]   => hsep [op, go printer.opParens d x]
                    [x,y] => case lvl of
-                     InfixL _ => hsep [go b d x, op, go b d' y]
-                     InfixR _ => hsep [go b d' x, op, go b d y]
+                     InfixL _ => hsep [ go printer.opParens d x
+                                      , op
+                                      , go printer.opParens d' y]
+                     InfixR _ => hsep [ go printer.opParens d' x
+                                      , op
+                                      , go printer.opParens d y]
                    _ => catchall
+
+  export
+  display : Printer sig a -> Term sig a -> Doc ()
+  display printer = displayPrec printer Open
+
+||| This printer assumes there's at least one layer of term above
+||| the nested one i.e. you can't have just `Done t`.
+export
+withNesting : Printer sig a -> Printer sig (Term sig a)
+withNesting printer = { varShow := term } printer where
+
+  [term] Show (Term sig a) where
+    showPrec p =
+      let printer' = { topParens := printer.opParens } printer in
+      show . displayPrec printer' p
 
 ------------------ Functor, Applicative, Monad -------------------------------------------
 
@@ -226,6 +270,11 @@ public export
 Functor (Term sig) where
   map h t = (Free sig _).Sem t (Done . h)
 
+||| Converting a focus to a term with one free variable
+public export
+cast : Term sig (Maybe a) -> Term sig (Either a (Fin 1))
+cast = map (maybe (Right FZ) Left)
+
 public export
 Applicative (Term sig) where
   pure = Done
@@ -236,10 +285,6 @@ Applicative (Term sig) where
 public export
 Monad (Term sig) where
   (>>=) = (Free sig _).Sem
-
-export
-(Show (Op sig), HasPrecedence sig) => Show (Term sig (Fin n)) where
-  show = show . display False . map (\ k => index (cast k) names)
 
 ||| Free `sig`-algebra over `n`-variables.
 public export
@@ -287,7 +332,8 @@ namespace Setoid
     ||| Equivalence relation making the carrier a setoid
     equivalence : Equivalence (U algebra)
     ||| All algebraic operations respect the equivalence relation
-    congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence) `CongruenceWRT` (algebra.Sem f)
+    congruence : (f : Op Sig) -> (MkSetoid (U algebra) equivalence)
+                                 `CongruenceWRT` (algebra.Sem f)
 
   public export
   Semantic (SetoidAlgebra sig) (Op sig) where
@@ -329,14 +375,17 @@ namespace Setoid
   ||| States: the function `h : U a -> U b` preserves the `sig`-operation `f`
   public export 0
   Preserves : {sig : Signature}
-           -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> (f : Op sig) -> Type
+           -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b)
+           -> (f : Op sig) -> Type
   Preserves {sig} a b h f
     = (xs : Vect (arity f) (U a))
-      -> b.equivalence.relation (h $ a.Sem f xs) (b.Sem f (map h xs))
+      -> b.equivalence.relation (h $ a.Sem f xs)
+                                (b.Sem f (map h xs))
 
   ||| States: the function `h : U a -> U b` preserves all `sig`-operations
   public export 0
-  Homomorphism : {sig : Signature} -> (a, b : SetoidAlgebra sig) -> (h : U a -> U b) -> Type
+  Homomorphism : {sig : Signature} -> (a, b : SetoidAlgebra sig) ->
+    (h : U a -> U b) -> Type
   Homomorphism a b h = (f : Op sig) -> Preserves a b h f
 
   ||| Homomorphisms between Setoid `Sig`-algebras
@@ -357,17 +406,17 @@ namespace Setoid
   public export
   id : (a : SetoidAlgebra sig) -> a ~> a
   id a = MkSetoidHomomorphism (Setoid.Definition.id $ cast a) $
-          \f,xs => CalcWith @{cast a} $
+          \f,xs => CalcWith (cast a) $
           |~ a.Sem f xs
-          ~~ a.Sem f (map id xs) ...(cong (a.Sem f) $ sym (mapId _))
+          ~~ a.Sem f (map id xs) .=.(cong (a.Sem f) $ sym (mapId _))
 
   public export
   (.) : {a,b,c : SetoidAlgebra sig} -> b ~> c -> a ~> b -> a ~> c
-  g . f  = MkSetoidHomomorphism (H g . H f) $ \op, xs => CalcWith @{cast c} $
+  g . f  = MkSetoidHomomorphism (H g . H f) $ \op, xs => CalcWith (cast c) $
     |~ g.H.H (f.H.H (a.Sem op xs))
-    <~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
-    <~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
-    ~~ c.Sem op (map (\x => g.H.H (f.H.H x)) xs) ...(cong (c.Sem op)
+    ~~ g.H.H (b.Sem op (map (.H f.H) xs))        ...(g.H.homomorphic _ _ $ f.preserves op xs)
+    ~~ c.Sem op (map g.H.H (map f.H.H     xs))   ...(g.preserves op _)
+    ~~ c.Sem op (map (\x => g.H.H (f.H.H x)) xs) .=.(cong (c.Sem op)
                                                             $ mapFusion _ _ _)
 
 -- Back to (non-setoid) Algebra
@@ -490,10 +539,10 @@ namespace Term
   homoPreservesSemMap h (t :: ts) env (FS i) = homoPreservesSemMap h ts env i
 
   homoPreservesSem h (Done v    ) env = b.equivalence.reflexive _
-  homoPreservesSem h (Call op ts) env = CalcWith @{cast b} $
+  homoPreservesSem h (Call op ts) env = CalcWith (cast b) $
     |~ h.H.H (a.Sem op (bindTerms {a = a.algebra} ts env))
-    <~ b.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
-    <~ b.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
+    ~~ b.Sem op (map h.H.H $ bindTerms {a = a.algebra} ts env) ...(h.preserves op _)
+    ~~ b.Sem op (bindTerms {a = b.algebra} ts (h.H.H . env))   ...(b.congruence op _ _
                                                                           $ homoPreservesSemMap {a,b}
                                                                               h ts env)
 public export
@@ -505,28 +554,28 @@ record (<~>) {0 sig : Signature} (a, b : SetoidAlgebra sig) where
 public export
 BwdHomo : {0 sig : Signature} -> (a, b : SetoidAlgebra sig) ->
   (iso : a <~> b) -> Homomorphism b a (iso.Iso).Bwd.H
-BwdHomo a b iso f xs = CalcWith @{cast a} $
+BwdHomo a b iso f xs = CalcWith (cast a) $
   let id' : cast b ~> cast b
       id' = (iso.Iso.Fwd) . (iso.Iso.Bwd)
   in
   |~ iso.Iso.Bwd.H (b.Sem f xs)
-  <~ iso.Iso.Bwd.H (b.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)))
+  ~~ iso.Iso.Bwd.H (b.Sem f (map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)))
           ...((iso.Iso.Bwd . cast f).homomorphic _ _
-             $ CalcWith @{cast $ VectSetoid _ $ cast b}
+             $ CalcWith (VectSetoid _ $ cast b)
              $ |~ xs
-               <~ map (id b).H.H xs ...(\i => reflect (cast b) $ sym $ indexNaturality _ id _)
-               <~ map (iso.Iso.Fwd.H . iso.Iso.Bwd.H) xs
+               ~~ map (id b).H.H xs ...(\i => reflect (cast b) $ sym $ indexNaturality _ id _)
+               ~~ map (iso.Iso.Fwd.H . iso.Iso.Bwd.H) xs
                     ...(let id_eq_id' = (cast b ~~> cast b).equivalence.symmetric
                               id' (id b).H
                               (iso.Iso.Iso.FwdBwdId)
                         in (VectMap).homomorphic (id b).H id' id_eq_id' xs)
                ~~ map iso.Iso.Fwd.H (map iso.Iso.Bwd.H xs)
-                    ...(sym $ mapFusion _ _ _))
-  <~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.Sem f (map iso.Iso.Bwd.H xs)))
+                    .=.(sym $ mapFusion _ _ _))
+  ~~ iso.Iso.Bwd.H (iso.Iso.Fwd.H (a.Sem f (map iso.Iso.Bwd.H xs)))
                                             ...(iso.Iso.Bwd.homomorphic _ _
                                                $ b.equivalence.symmetric _ _
                                                $ iso.FwdHomo f _)
-  <~ a.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
+  ~~ a.Sem f (map iso.Iso.Bwd.H xs) ...(iso.Iso.Iso.BwdFwdId _)
 
 ||| Reverse an isomorphism
 public export

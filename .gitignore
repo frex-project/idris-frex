@@ -30,3 +30,6 @@ output
 
 # macOS
 .DS_Store
+
+# direnv
+.direnv/

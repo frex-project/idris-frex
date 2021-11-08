@@ -70,7 +70,7 @@ reverse f = reverseAcc f []
 
 export
 deloop : (Ord a, DecEq a) => RTList {a} r ~> RTList r
-deloop = go empty (0, [<]) where
+deloop = go {begin = x} (singleton x (0, [<])) (0, [<]) where
 
   -- Invariant: the accumulator contains the shortest subproofs for all
   -- of the values encountered on the way to middle.

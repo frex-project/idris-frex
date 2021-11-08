@@ -1,12 +1,22 @@
-module TermTests2
+module Monoids
+
+import Data.Unit
 
 import Frex
 import Frex.Free.Construction
 import Frex.Free.Construction.Combinators
 
+import Decidable.Equality
+import Frex.Free.Construction.IdrisMonoid
+import Frex.Free.Construction.Idris
+
 import Frexlet.Monoid
 import Frexlet.Monoid.Free
 import Frexlet.Monoid.Notation.Additive
+
+import Syntax.PreorderReasoning
+
+import System.File
 
 infix 0 ~~
 0 (~~) : Rel (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
@@ -41,3 +51,25 @@ Units = mkLemma (FreeMonoidOver $ cast $ Fin 1)
 
 units : (O1 .+. (X {k = 1} 0 .+. O1)) .+. O1 ~~ X 0
 units = byLemma Units
+
+main : IO Unit
+main = do
+  Right () <- writeFile "build/Proofs.idr" $ IdrisMonoid.idris
+                [ ("trivial", Trivial)
+                , ("trivial2", Trivial2)
+                , ("assoc", Assoc)
+                , ("units", Units)
+                ]
+    | Left err => print err
+
+  Right () <- writeFile "build/GenericProofs.idr" $ Idris.idris
+                (withRaw ascii)
+                ["Frexlet.Monoid"]
+                [ ("trivial", Trivial)
+                , ("trivial2", Trivial2)
+                , ("assoc", Assoc)
+                , ("units", Units)
+                ]
+    | Left err => print err
+
+  pure ()

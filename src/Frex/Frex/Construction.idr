@@ -38,14 +38,24 @@ public export
 EvaluationSig : (sig : Signature) -> (0 a : Type) -> Signature
 EvaluationSig sig a = MkSignature $ EvaluationSigOperation sig a
 
-export
-(Show (Op sig), Show a) => Show (Op $ EvaluationSig sig a) where
-  show (MkOp (Op op     )) = show (MkOp op)
-  show (MkOp (Constant c)) = show c
+[opPrec] HasPrecedence sig => HasPrecedence (EvaluationSig sig a) where
+  OpPrecedence (Op op) = OpPrecedence op
 
 export
-HasPrecedence sig => HasPrecedence (EvaluationSig sig a) where
-  OpPrecedence (Op op) = OpPrecedence op
+withEvaluation : Show c => Printer sig a -> Printer (EvaluationSig sig c) a
+withEvaluation printer =
+   { opPatterns := opPatterns
+   , opShow := opShow
+   , opPrec := opPrec @{printer.opPrec}
+   } printer where
+
+  [opPatterns] Show (Op (EvaluationSig sig c)) where
+    showPrec p (MkOp (Op op)) = showCon p "Op" $ showArg @{printer.opShow} (MkOp op)
+    showPrec p (MkOp (Constant c)) = showCon p "Constant" $ showArg c
+
+  [opShow] Show (Op (EvaluationSig sig c)) where
+    showPrec p (MkOp (Op op))      = showPrec @{printer.opShow} p (MkOp op)
+    showPrec p (MkOp (Constant c)) = showPrec p c
 
 
 depCong : {0 p : a -> Type} -> (0 f : (x : a) -> p x) -> {0 x1, x2 : a} -> (prf : x1 = x2) ->
@@ -119,7 +129,7 @@ data EvaluationAxiom : (sig : Signature) -> (axioms : Type) -> (a : Setoid) -> T
   Assumption : {x,y : U a} -> a.equivalence.relation x y -> EvaluationAxiom sig axioms a
 
 export
-Show axioms => Show (EvaluationAxiom sig axioms a) where
+[Eval] Show axioms => Show (EvaluationAxiom sig axioms a) where
   show (Axiom ax) = show ax
   show (Evaluation f cs) = "Evaluate"
   show (Assumption x)    = "Assumption"
@@ -216,16 +226,16 @@ namespace Model
     Model (EvaluationPresentation pres a) -> (Model pres)
   castEval ea = MkModel
     { Algebra = castEval ea.Algebra
-    , Validate = \ax,env => CalcWith @{cast ea} $
+    , Validate = \ax,env => CalcWith (cast ea) $
       |~ (castEval ea.Algebra).Sem (pres.axiom ax).lhs env
       ~~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).lhs) env
-          ...(sym $ coherence ea.Algebra _ _)
-      <~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
+          .=.(sym $ coherence ea.Algebra _ _)
+      ~~ ea.Algebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
             (pres.axiom ax).rhs) env
           ...(ea.Validate (Axiom ax) env)
       ~~ (castEval ea.Algebra).Sem (pres.axiom ax).rhs env
-          ...(irrelevantEq $ coherence ea.Algebra _ _)
+          .=.(irrelevantEq $ coherence ea.Algebra _ _)
     }
 
 namespace Homomorphism
@@ -248,18 +258,17 @@ freeAsExtension fs = MkExtension
         , homomorphic = \x,y,prf => fs.Data.Model.validate (Assumption prf) []
         }
       , preserves = \(MkOp op),xs =>
-        CalcWith @{cast fs.Data.Model} $
+        CalcWith (cast fs.Data.Model) $
         |~ (fs.Data.Model.sem (Constant $ a.Sem (MkOp op) xs))
-        <~ fs.Data.Model.Sem (Call
+        ~~ fs.Data.Model.Sem (Call
                     {sig = (EvaluationPresentation pres a.Algebra).signature, a = Fin 0}
                   (MkOp (Construction.Op op))
                   (map (\x => Call (MkOp $ Constant x) []) xs))
                   (flip index Vect.Nil)
-           ...(fs.Data.Model.equivalence.symmetric _ _ $
-                 fs.Data.Model.validate (Evaluation op xs) [])
+           ..<(fs.Data.Model.validate (Evaluation op xs) [])
         ~~ fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)
            (map (\i => fs.Data.Model.sem (Constant i)) xs)
-           ...(cong (fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)) $
+           .=.(cong (fs.Data.Model.Algebra.algebra.Semantics (MkOp $ Construction.Op op)) $
                vectorExtensionality _ _ $ \i => Calc $
                -- Sorry, this will do for now
                |~ index i (bindTerms {a = fs.Data.Model.Algebra.algebra}
@@ -356,31 +365,30 @@ other.Over = MkModelOver
   { Model = MkModel
       { Algebra = other.OverAlgebra
       , Validate = \case
-          Axiom ax        => \env => CalcWith @{cast other.Model} $
+          Axiom ax        => \env => CalcWith (cast other.Model) $
             |~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).lhs) env
             ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).lhs env
-               ...(irrelevantEq $ coherence other.OverAlgebra _ _)
+               .=.(irrelevantEq $ coherence other.OverAlgebra _ _)
             ~~ other.Model.Sem (pres.axiom ax).lhs env
-               ...(other.OverAlgebraCoherence _ _)
-            <~ other.Model.Sem (pres.axiom ax).rhs env
+               .=.(other.OverAlgebraCoherence _ _)
+            ~~ other.Model.Sem (pres.axiom ax).rhs env
                ...(other.Model.Validate ax env)
             ~~ (castEval other.OverAlgebra).Sem (pres.axiom ax).rhs env
-               ...(sym $ other.OverAlgebraCoherence _ _)
+               .=<(other.OverAlgebraCoherence _ _)
             ~~ other.OverAlgebra.Sem (Signature.cast @{EvalEmbed pres.signature {a = U a}}
                  (pres.axiom ax).rhs) env
-               ...(sym $ irrelevantEq $ coherence other.OverAlgebra _ _)
-          Evaluation f cs => \env => CalcWith @{cast other.Model} $
+               .=<(irrelevantEq $ coherence other.OverAlgebra _ _)
+          Evaluation f cs => \env => CalcWith (cast other.Model) $
             |~ other.Model.Algebra.algebra.Semantics (MkOp f)
                  (bindTerms {a = other.OverAlgebra.algebra}
                    (map (\x => Call (MkOp (Constant x)) []) cs) env)
             ~~ other.Model.Algebra.algebra.Semantics (MkOp f)
                  (map other.Embed.H.H cs)
-                 ...(cong (other.Model.Algebra.algebra.Semantics (MkOp f)) $
+                 .=.(cong (other.Model.Algebra.algebra.Semantics (MkOp f)) $
                      OverAlgebraNop other _ _)
-            <~ other.Embed.H.H (a.Sem (MkOp f) cs)
-               ...(other.Model.equivalence.symmetric _ _ $
-                   other.Embed.preserves (MkOp f) _)
+            ~~ other.Embed.H.H (a.Sem (MkOp f) cs)
+               ..<(other.Embed.preserves (MkOp f) _)
           Assumption xyEq => \env => other.Embed.H.homomorphic _ _ xyEq
       }
   , Env   = other.Var
@@ -399,9 +407,9 @@ Extender fs other =
     , preserves = \case
         MkOp op => \xs => h.H.preserves (MkOp $ Construction.Op op) xs
     }
-  , PreserveEmbed = \i => CalcWith @{cast other.Model} $
+  , PreserveEmbed = \i => CalcWith (cast other.Model) $
     |~ h.H.H.H (fs.Data.Model.sem (Constant i))
-    <~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
+    ~~ other.Over.Model.sem (Constant i) ...(h.H.preserves (MkOp $ Constant i) [])
   , PreserveVar   = h.preserves
   }
 

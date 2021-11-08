@@ -45,13 +45,9 @@ Prod : Op Signature
 Prod = MkOp Product
 
 export
-HasPrecedence Signature where
- OpPrecedence Product = Just (InfixR 0)
-
-export
 Show (Op Signature) where
-  show (MkOp Neutral) = "ε"
-  show (MkOp Product) = "•"
+  show (MkOp Neutral) = "Neutral"
+  show (MkOp Product) = "Product"
 
 export
 Finite (Op Signature) where
@@ -97,8 +93,118 @@ Finite Axiom where
               ]
 
 export
-Show Axiom where
+[Raw] Show Axiom where
+  show = \case
+    LftNeutrality => "LftNeutrality"
+    RgtNeutrality => "RgtNeutrality"
+    Associativity => "Associativity"
+
+export
+[Words] Show Axiom where
   show = \case
     LftNeutrality => "Left neutrality"
     RgtNeutrality => "Right neutrality"
     Associativity => "Associativity"
+
+export
+ascii : Printer Signature Unit
+ascii = MkPrinter
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = asciiShow
+  , opPrec     = asciiPrec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [asciiPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [asciiShow] Show (Op Signature) where
+    show (MkOp Neutral) = "zero"
+    show (MkOp Product) = "<>"
+
+export
+generic : Printer Signature Unit
+generic = MkPrinter
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = genericShow
+  , opPrec     = genericPrec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [genericPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixR 0)
+
+  [genericShow] Show (Op Signature) where
+    show (MkOp Neutral) = "ε"
+    show (MkOp Product) = "•"
+
+export
+natPlus : Printer Signature Unit
+natPlus = MkPrinter
+  { carrier    = "Nat"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = natPlusShow
+  , opPrec     = natPlusPrec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [natPlusPrec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [natPlusShow] Show (Op Signature) where
+    show (MkOp Neutral) = "0"
+    show (MkOp Product) = "+"
+
+export
+additive1 : Printer Signature Unit
+additive1 = MkPrinter
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = additive1Show
+  , opPrec     = additive1Prec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [additive1Prec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [additive1Show] Show (Op Signature) where
+    show (MkOp Neutral) = "O1"
+    show (MkOp Product) = ".+."
+
+export
+additive2 : Printer Signature Unit
+additive2 = MkPrinter
+  { carrier    = "a"
+  , varShow    = %search
+  , opPatterns = %search
+  , opShow     = additive2Show
+  , opPrec     = additive2Prec
+  , topParens  = False
+  , opParens   = False
+  } where
+
+  [additive2Prec] HasPrecedence Signature where
+    OpPrecedence Product = Just (InfixL 8)
+
+  [additive2Show] Show (Op Signature) where
+    show (MkOp Neutral) = "O2"
+    show (MkOp Product) = ":+:"
+
+export
+withRaw : Printer Signature a -> Printer MonoidTheory a
+withRaw = MkPrinter "MonoidTheory" Raw
+
+export
+withWords : Printer Signature a -> Printer MonoidTheory a
+withWords = MkPrinter "MonoidTheory" Words

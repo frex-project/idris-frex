@@ -1,0 +1,8 @@
+rm -rf build
+
+$1 --exec main -p frex -p contrib Monoids.idr
+diff Proofs.idr build/Proofs.idr &>> output
+diff GenericProofs.idr build/GenericProofs.idr &>> output
+
+$1 --check -p frex -p contrib build/Proofs.idr
+$1 --check -p frex -p contrib build/GenericProofs.idr

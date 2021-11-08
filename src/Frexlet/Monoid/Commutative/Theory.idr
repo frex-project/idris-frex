@@ -53,7 +53,25 @@ Plus : Op Signature
 Plus = MkOp Product
 
 export
-Show Commutative.Theory.Axiom where
+[Raw] Show Commutative.Theory.Axiom where
   show = \case
-    Mon ax => show ax
+    Mon ax => show @{Raw} ax
     Commutativity => "Commutativity"
+
+export
+[Words] Show Commutative.Theory.Axiom where
+  show = \case
+    Mon ax => show @{Words} ax
+    Commutativity => "Commutativity"
+
+export
+Finite Commutative.Theory.Axiom where
+  enumerate = map Mon enumerate ++ [Commutativity]
+
+export
+withRaw : Printer Signature a -> Printer CommutativeMonoidTheory a
+withRaw = MkPrinter "CommutativeMonoidTheory" Raw
+
+export
+withWords : Printer Signature a -> Printer CommutativeMonoidTheory a
+withWords = MkPrinter "CommutativeMonoidTheory" Words

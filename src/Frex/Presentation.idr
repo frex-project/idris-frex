@@ -9,6 +9,7 @@ import Data.Stream
 import Data.String
 import Frex.Signature
 import Frex.Algebra
+import Utils.String
 
 %default total
 
@@ -29,12 +30,36 @@ public export %hint
 projectSignature : Presentation -> Signature
 projectSignature pres = pres.signature
 
+public export
+record Printer (pres : Presentation) (a : Type) where
+  constructor MkPrinter
+  theoryName : String
+  axiomShow  : Show pres.Axiom
+  sigPrinter : Printer pres.signature a
+
+||| Used to print a definition corresponding to an axiom
+export
+withLower : Presentation.Printer pres a -> Printer pres a
+withLower p = { axiomShow := lowerAxiom } p where
+
+  [lowerAxiom] Show pres.Axiom where
+    show ax = uncapitalise (show @{p.axiomShow} ax)
+
+||| Used to print a context
+export
+withQuoted : Presentation.Printer pres a -> Printer pres a
+withQuoted = { sigPrinter $= withQuoted }
+
+||| Used to print a definition corresponding to an axiom
+export
+withNames : Presentation.Printer pres () -> Printer pres (Fin n)
+withNames = { sigPrinter $= withNames }
+
 namespace Equation
 
   export
-  display : (Show (Op sig), HasPrecedence sig) =>
-            Bool -> Equation sig -> Doc ()
-  display b (MkEq supp lhs rhs)
+  display : Printer sig () -> Equation sig -> Doc ()
+  display printer (MkEq supp lhs rhs)
     = concat {t = List} [ tele supp, scoped lhs, pretty " ≡ ", scoped rhs]
 
     where
@@ -43,33 +68,59 @@ namespace Equation
       tele Z = ""
       tele n = "∀" <++> hsep (map (pretty . show) (take n names)) <+> ". "
 
-      prettyName : Term sig (Fin supp) -> Term sig Name
-      prettyName = map (\ k => index (cast k) names)
-
       scoped : Term sig (Fin supp) -> Doc ()
-      scoped = display b . prettyName
+      scoped = display (withNames printer)
+
+  export
+  pretty : Printer sig () ->
+           String -> List (Doc ()) ->
+           Equation sig -> Doc ()
+  pretty p nm xs eq =
+        let tmPrinter = withNames p in
+        pretty nm <++> colon
+                  <++> parens (concatWith (\ p, q => (p <+> comma <++> q)) xs
+                               <++> colon <++> pretty p.carrier)
+                  <++> "->"
+                  <++> display tmPrinter eq.lhs
+                  <++> "=~="
+                  <++> display tmPrinter eq.rhs
 
 namespace Presentation
 
   export
-  display : (p : Presentation) ->
-            Finite (p .Axiom) =>
-            Show (p .Axiom) =>
-            Finite (Op p.signature) =>
-            Show (Op p.signature) =>
-            HasPrecedence p.signature =>
+  display : (pres : Presentation) ->
+            Finite (pres .Axiom) =>
+            Finite (Op pres.signature) =>
+            Printer pres () ->
             Doc ()
-  display p = vcat
+  display pres p = vcat
             $ "Operations:"
-            :: indent 2 (display p.signature)
+            :: indent 2 (Signature.display pres.signature p.sigPrinter)
             :: "Axioms:"
             :: map (indent 2 . showAxiom) enumerate
 
     where
 
-    showAxiom : p .Axiom -> Doc ()
-    showAxiom ax = concat {t = List}
-                 [pretty (show ax), ": ", display True (p.axiom ax)]
+    showAxiom : pres .Axiom -> Doc ()
+    showAxiom ax = hcat
+                 [ pretty (show @{p.axiomShow} ax)
+                 , ": "
+                 , display p.sigPrinter (pres.axiom ax)]
+
+namespace Axiom
+
+  export
+  display : {pres : _} -> Printer pres () -> pres .Axiom -> Doc ()
+  display p ax =
+    let rawAx = show @{p.axiomShow} ax; nm = uncapitalise rawAx in
+    let eq = pres .axiom ax in
+    let xs = map (pretty . show) $ take eq.support names in
+      vcat [ pretty p.sigPrinter nm xs eq
+           , pretty nm <++> hsep xs <++> "="
+             <++> "m.Validate" <++> pretty rawAx
+             <++> parens (#"\ k => index k"# <++> group (list xs))
+           , ""
+           ]
 
 %hint
 public export

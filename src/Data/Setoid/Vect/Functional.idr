@@ -8,12 +8,15 @@ import Data.HVect
 import Data.Vect.Properties
 import Data.Setoid.Vect.Inductive
 import Control.Order
+import Syntax.PreorderReasoning.Setoid
+
 
 %default total
 
 public export
 0 (.VectEquality) : (a : Setoid) -> Rel (Vect n (U a))
-a.VectEquality xs ys = (i : Fin n) -> a.equivalence.relation (index i xs) (index i ys)
+a.VectEquality xs ys = (i : Fin n) -> a.equivalence.relation
+                                        (index i xs) (index i ys)
 
 -- Not using the more sensible type definition
 -- Inductive.(.VectEquality) a xs ys -> Functional.(.VectEquality) a xs ys
@@ -28,26 +31,29 @@ index (FS k) (_ :: tlEq) = index k tlEq
 public export
 VectSetoid : (n : Nat) -> (a : Setoid) -> Setoid
 VectSetoid n a = MkSetoid (Vect n (U a))
-  -- need a local definition, see #1435
   $ MkEquivalence
   { relation   = Functional.(.VectEquality) a
-  , reflexive  = \xs                    , i => a.equivalence.reflexive  _
-  , symmetric  = \xs,ys, prf            , i => a.equivalence.symmetric  _ _   (prf  i)
-  , transitive = \xs, ys, zs, prf1, prf2, i => a.equivalence.transitive _ _ _ (prf1 i) (prf2 i)
+  , reflexive  = \xs                    , i
+               => a.equivalence.reflexive  _
+  , symmetric  = \xs,ys, prf            , i
+               => a.equivalence.symmetric  _ _   (prf  i)
+  , transitive = \xs, ys, zs, prf1, prf2, i
+               => a.equivalence.transitive _ _ _ (prf1 i) (prf2 i)
   }
 
 public export
-VectMap : {a, b : Setoid} -> (a ~~> b) ~> ((Functional.VectSetoid n a) ~~> (Functional.VectSetoid n b))
+VectMap : {a, b : Setoid} -> (a ~~> b) ~>
+  ((Functional.VectSetoid n a) ~~> (Functional.VectSetoid n b))
 VectMap = MkSetoidHomomorphism
   (\f => MkSetoidHomomorphism
             (\xs => map f.H xs)
-            $ \xs, ys, prf, i  => CalcWith @{cast b} $
+            $ \xs, ys, prf, i  => CalcWith b $
               |~ index i (map f.H xs)
-              ~~ f.H (index i xs)     ...(indexNaturality _ _ _)
-              <~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
-              ~~ index i (map f.H ys) ...(sym $ indexNaturality _ _ _))
-  $ \f,g,prf,xs,i => CalcWith @{cast b} $
+              ~~ f.H (index i xs)     .=.(indexNaturality _ _ _)
+              ~~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
+              ~~ index i (map f.H ys) .=<(indexNaturality _ _ _))
+  $ \f,g,prf,xs,i => CalcWith b $
     |~ index i (map f.H xs)
-    ~~ f.H (index i xs) ...(indexNaturality _ _ _)
-    <~ g.H (index i xs) ...(prf _)
-    ~~ index i (map g.H xs) ...(sym $ indexNaturality _ _ _)
+    ~~ f.H (index i xs) .=.(indexNaturality _ _ _)
+    ~~ g.H (index i xs) ...(prf _)
+    ~~ index i (map g.H xs) .=<(indexNaturality _ _ _)
