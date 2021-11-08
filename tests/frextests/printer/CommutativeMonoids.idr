@@ -46,7 +46,6 @@ myProof : (~~) {x = Fin 3}
     (Dyn' 1 :+: ((the Nat 1) *: Dyn' 0) :+: Dyn' 2 :+: Sta' 8)
 myProof
   = Frex.prove 3 (Monoid.Commutative.Frex Nat.Additive)
-    {prf = %search}
           $ (Dyn FZ .+. Sta 6) .+. Dyn 1 .+. (Dyn 2 .+. Sta 2) =-=
             Dyn 1 .+. ((the Nat 1) *. Dyn 0) .+. Dyn 2 .+. Sta 8
 
