@@ -23,7 +23,8 @@ data Axiom
 
 public export
 MonoidTheory : Presentation
-MonoidTheory = MkPresentation Theory.Signature Theory.Axiom $ \case
+MonoidTheory = MkPresentation Theory.Signature
+                              Theory.Axiom $ \case
     LftNeutrality => lftNeutrality Neutral Product
     RgtNeutrality => rgtNeutrality Neutral Product
     Associativity => associativity Product
