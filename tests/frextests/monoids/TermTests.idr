@@ -13,7 +13,7 @@ monoidNotation : (a : Monoid) -> NotationHint a Additive1
 monoidNotation a = a.notationHint Additive1 a.Additive1
 
 infix 0 ~~
-0 (~~) : {auto monoid : Monoid} -> (lhs, rhs : U monoid) -> Type
+0 (~~) : (monoid : Monoid) => (lhs, rhs : U monoid) -> Type
 (~~) = monoid.equivalence.relation
 
 trivial : {monoid : Monoid} -> {a : U monoid} -> a ~~ a
