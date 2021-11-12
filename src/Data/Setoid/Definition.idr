@@ -15,16 +15,11 @@ public export
 record Equivalence (A : Type) where
   constructor MkEquivalence
   0 relation: Rel A
-  reflexive : (x : A)
-              ------------
-           -> relation x x
+  reflexive : (x : A) -> relation x x
   symmetric : (x : A) -> (y : A)
-              -> relation x y
-              ---------------
-              -> relation y x
+              -> relation x y -> relation y x
   transitive: (x : A) -> (y : A) -> (z : A)
               -> relation x y -> relation y z
-              -------------------------------
               -> relation x z
 
 public export
