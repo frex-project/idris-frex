@@ -18,7 +18,7 @@ record Equivalence (A : Type) where
   reflexive : (x       : A) -> relation x x
   symmetric : (x, y    : A) -> relation x y -> relation y x
   transitive: (x, y, z : A) -> relation x y -> relation y z
-              -> relation x z
+                            -> relation x z
 
 public export
 EqualEquivalence : (0 a : Type) -> Equivalence a
