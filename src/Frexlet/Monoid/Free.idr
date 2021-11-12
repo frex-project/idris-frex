@@ -61,7 +61,8 @@ FreeMonoidVoid = MkFree
 
 public export
 FreeMonoidOver : (s : Setoid) -> Free MonoidTheory s
-FreeMonoidOver s = ByFrex FreeMonoidVoid (MonoidFrex TrivialMonoid s)
+FreeMonoidOver s = ByFrex FreeMonoidVoid
+                          (MonoidFrex TrivialMonoid s)
 
 ||| A free monoid built out of n variables
 public export
