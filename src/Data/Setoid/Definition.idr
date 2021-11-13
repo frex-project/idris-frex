@@ -110,7 +110,6 @@ g . f = MkSetoidHomomorphism (H g . H f) $ \x,y,prf => g.homomorphic _ _ (f.homo
 
 public export
 (~~>) : (a,b : Setoid) -> Setoid
-%unbound_implicits off
 (~~>) a b = MkSetoid (a ~> b) $
   let 0 relation : (f, g : a ~> b) -> Type
       relation f g = (x : U a) ->
@@ -125,8 +124,6 @@ public export
       b.equivalence.transitive
                  _ _ _ (f_eq_g q) (g_eq_h q)
   }
-%unbound_implicits on
-
 
 ||| Two setoid homomorphism are each other's inverses
 public export
