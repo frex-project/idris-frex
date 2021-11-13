@@ -68,27 +68,27 @@ depCong2 : {0 p : a -> Type} -> {0 q : (x : a) -> (y : p x) -> Type} ->
 depCong2 f Refl Refl = Refl
 
 
-OpInjective : {0 op1, op2 : Op sig} -> op1 = op2 -> (op1.fst = op2.fst, op1.snd ~=~ op2.snd)
+OpInjective : {0 op1, op2 : Op sig} -> op1 = op2 -> (op1.arity = op2.arity, op1.snd ~=~ op2.snd)
 OpInjective Refl = (Refl, Refl)
 
 OpEq : (arity1 = arity2) ->
   {0 op1 : sig.OpWithArity arity1} ->
   {0 op2 : sig.OpWithArity arity2} ->
-  (op1 ~=~ op2) -> MkOp {Sig=sig, fst = arity1} op1 = MkOp {Sig=sig, fst = arity2} op2
+  (op1 ~=~ op2) -> MkOp {sig, arity = arity1} op1 = MkOp {sig, arity = arity2} op2
 OpEq Refl Refl = Refl
 
 OpEqEvalSig : (arity1 = arity2) ->
   {0 op1 : sig.OpWithArity arity1} ->
   {0 op2 : sig.OpWithArity arity2} ->
   (op1 ~=~ op2) ->
-  MkOp {Sig=EvaluationSig sig a, fst = arity1} (Op op1) =
-  MkOp {Sig=EvaluationSig sig a, fst = arity2} (Op op2)
+  MkOp {sig=EvaluationSig sig a, arity = arity1} (Op op1) =
+  MkOp {sig=EvaluationSig sig a, arity = arity2} (Op op2)
 OpEqEvalSig Refl Refl = Refl
 
 
 export
 (DecEq (Op sig), DecEq a) => DecEq (Op (EvaluationSig sig a)) where
-  decEq (MkOp {fst = fst1} (Op op1)) (MkOp {fst = fst2} (Op op2)) =
+  decEq (MkOp {arity = fst1} (Op op1)) (MkOp {arity = fst2} (Op op2)) =
     case decEq (MkOp op1) (MkOp op2) of
       Yes op1_eq_op2 => Yes $ OpEqEvalSig
                           (fst $ OpInjective op1_eq_op2)
@@ -303,7 +303,7 @@ other.OverAlgebra = MkSetoidAlgebra
       }
   , equivalence = other.Model.equivalence
   , congruence = \case
-      MkOp {fst = arity} (Op op     ) => \xs,ys,prf =>
+      MkOp {arity} (Op op     ) => \xs,ys,prf =>
         other.Model.Algebra.congruence (MkOp op) xs ys prf
       MkOp (Constant i) => \_,_,_ => other.Model.equivalence.reflexive _
   }

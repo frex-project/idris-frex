@@ -16,14 +16,10 @@ record Signature where
   OpWithArity : Nat -> Type
 
 public export
-record Op (Sig : Signature) where
+record Op (sig : Signature) where
   constructor MkOp
-  {fst : Nat}
-  snd : (Sig).OpWithArity fst
-
-public export
-arity : Op sig -> Nat
-arity = fst
+  {arity : Nat}
+  snd : sig.OpWithArity arity
 
 public export
 data Precedence : Nat -> Type where
@@ -58,11 +54,11 @@ interface HasPrecedence (0 sig : Signature) where
 export
 precedence : HasPrecedence sig => (f : Op sig) ->
              {auto 0 eq : arity f = S n} -> Maybe (Precedence (S n))
-precedence (MkOp {fst = S _} f) {eq = Refl} = OpPrecedence f
+precedence (MkOp {arity = S _} f) {eq = Refl} = OpPrecedence f
 
 export
 isInfix : HasPrecedence sig => Op sig -> Bool
-isInfix (MkOp {fst = S _} f) = maybe False isInfix (OpPrecedence f)
+isInfix (MkOp {arity = S _} f) = maybe False isInfix (OpPrecedence f)
 isInfix _ = False
 
 public export
@@ -100,11 +96,11 @@ namespace Operators
   export
   display : Printer sig () ->
             Op sig -> Doc ()
-  display p op@(MkOp {fst = 0} _)
+  display p op@(MkOp {arity = 0} _)
       = hsep [ pretty (show @{p.opShow} op)
              , ":", pretty p.carrier
              ]
-  display p op@(MkOp {fst = n@(S _)} _)
+  display p op@(MkOp {arity = n@(S _)} _)
       = hsep [ parenthesise (isJust (precedence @{p.opPrec} op))
                     $ pretty $ show @{p.opShow} op
              , ":", pretty (unwords (nary n))]
@@ -119,8 +115,8 @@ namespace Precedence
 
   export
   display : Printer sig () -> Op sig -> Maybe (Doc ())
-  display p (MkOp {fst = 0} _) = Nothing
-  display p op@(MkOp {fst = S _} _)
+  display p (MkOp {arity = 0} _) = Nothing
+  display p op@(MkOp {arity = S _} _)
       = case precedence @{p.opPrec} op of
             Nothing => Nothing
             Just prec => pure (pretty (show prec))

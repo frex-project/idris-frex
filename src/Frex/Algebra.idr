@@ -57,8 +57,10 @@ uncurryCurryId f (x :: xs) = uncurryCurryId (\xs => f (x :: xs)) xs
 
 ||| States: each operation has an interpretation
 public export
-algebraOver : (sig : Signature) -> (a : Type) -> Type
-sig `algebraOver` a = (f : Op sig) -> a ^ (arity f) -> a
+algebraOver :
+  (sig : Signature) -> (a : Type) -> Type
+sig `algebraOver` a =
+  (f : Op sig) -> a ^ (arity f) -> a
 
 public export
 algebraOver' : (sig : Signature) -> (a : Type) -> Type

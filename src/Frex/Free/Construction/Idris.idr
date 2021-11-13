@@ -206,7 +206,7 @@ idris printer is proofs = with [List.(++), Prelude.(.)] show $ vcat
     operations : String -> Printer pres () -> List (Doc ())
     operations call p = enumerate {a = Op (pres .signature)} <&> \ op =>
       let nm = pretty (show @{p.sigPrinter.opShow} op) in
-      let xs = map (pretty . show) (take op.fst names) in
+      let xs = map (pretty . show) (take op.arity names) in
       Doc.indent 2 $ vcat
         $ toList ((<++> nm) <$> display p.sigPrinter op) ++
         [ display p.sigPrinter op
