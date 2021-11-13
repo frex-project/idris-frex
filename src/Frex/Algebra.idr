@@ -590,8 +590,7 @@ public export
 public export
 (~~>) : (a, b : SetoidAlgebra sig) -> Setoid
 %unbound_implicits off
-(~~>) a b = Quotient (a ~> b)
-                      {b = (cast {to = Setoid} a) ~~> cast b}
+(~~>) a b = Quotient ((cast {to = Setoid} a) ~~> cast b)
                      (\h => h.H)
 %unbound_implicits on
 

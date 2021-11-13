@@ -113,12 +113,16 @@ public export
 %unbound_implicits off
 (~~>) a b = MkSetoid (a ~> b) $
   let 0 relation : (f, g : a ~> b) -> Type
-      relation f g = (x : U a) -> b.equivalence.relation (f.H x) (g.H x)
+      relation f g = (x : U a) ->
+        b.equivalence.relation (f.H x) (g.H x)
   in MkEquivalence
   { relation
-  , reflexive = \f,v => b.equivalence.reflexive (f.H v)
-  , symmetric = \f,g,prf,w => b.equivalence.symmetric _ _ (prf w)
-  , transitive = \f,g,h,f_eq_g, g_eq_h, q => b.equivalence.transitive
+  , reflexive = \f,v       =>
+      b.equivalence.reflexive (f.H v)
+  , symmetric = \f,g,prf,w =>
+      b.equivalence.symmetric _ _ (prf w)
+  , transitive = \f,g,h,f_eq_g, g_eq_h, q =>
+      b.equivalence.transitive
                  _ _ _ (f_eq_g q) (g_eq_h q)
   }
 %unbound_implicits on
@@ -169,13 +173,16 @@ IsoEquivalence = MkEquivalence (<~>) (\_ => refl) (\_,_ => sym) (\_,_,_ => trans
 |||
 ||| Instance of the more general coequaliser of two setoid morphisms.
 public export
-Quotient : (0 a : Type) -> {b : Setoid} -> (a -> U b) -> Setoid
-Quotient a {b} q = MkSetoid a $
-  let 0 Relation : a -> a -> Type
-      Relation x y = b.equivalence.relation (q x) (q y)
+Quotient : (b : Setoid) -> (a -> U b) -> Setoid
+Quotient b q = MkSetoid a $
+  let 0 relation : a -> a -> Type
+      relation x y = b.equivalence.relation (q x) (q y)
   in MkEquivalence
-    { relation = Relation
-    , reflexive = \x => b.equivalence.reflexive (q x)
-    , symmetric =  \x,y=> b.equivalence.symmetric (q x) (q y)
-    , transitive = \x,y,z  => b.equivalence.transitive (q x) (q y) (q z)
+    { relation = relation
+    , reflexive  = \x      =>
+        b.equivalence.reflexive  (q x)
+    , symmetric  = \x,y    =>
+        b.equivalence.symmetric  (q x) (q y)
+    , transitive = \x,y,z  =>
+        b.equivalence.transitive (q x) (q y) (q z)
     }
