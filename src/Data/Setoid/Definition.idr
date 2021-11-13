@@ -121,8 +121,7 @@ public export
   , symmetric = \f,g,prf,w =>
       b.equivalence.symmetric _ _ (prf w)
   , transitive = \f,g,h,f_eq_g, g_eq_h, q =>
-      b.equivalence.transitive
-                 _ _ _ (f_eq_g q) (g_eq_h q)
+      b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
   }
 
 ||| Two setoid homomorphism are each other's inverses
