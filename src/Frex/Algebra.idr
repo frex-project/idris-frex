@@ -96,8 +96,8 @@ data Term : (0 sig : Signature) -> Type -> Type where
   ||| A variable with the given index
   Done : {0 sig : Signature} -> a -> Term sig a
   ||| An operator, applied to a vector of sub-terms
-  Call : {0 sig : Signature} -> (f : Op sig) -> Vect (arity f) (Term sig a)
-         -> Term sig a
+  Call : {0 sig : Signature} -> (f : Op sig) ->
+         Vect (arity f) (Term sig a) -> Term sig a
 
 export
 Uninhabited (Done x = Call f xs) where uninhabited eq impossible
@@ -315,7 +315,8 @@ bindTermsPureRightUnit (t :: ts)
 namespace Setoid
   ||| The equivalence relation on `a` is a congruence w.r.t. the operation `f`.
   public export 0
-  CongruenceWRT : {n : Nat} -> (a : Setoid) -> (f : (U a) ^ n -> U a) -> Type
+  CongruenceWRT : {n : Nat} -> (a : Setoid) ->
+    (f : (U a) ^ n -> U a) -> Type
   CongruenceWRT a f = SetoidHomomorphism (VectSetoid n a) a f
 
   ||| Equality is always a congruence
