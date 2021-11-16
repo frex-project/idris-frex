@@ -20,11 +20,12 @@ infix 1 =|
 ||| environments, the interpretations of the lhs and rhs are in the
 ||| setoid equivalence.
 public export 0
-models : {sig : Signature} -> (a : SetoidAlgebra sig) -> (eq : Equation sig)
-  -> (env : Fin eq.support -> U a.algebra) -> Type
+models : {sig : Signature} ->
+  (a : SetoidAlgebra sig) -> (eq : Equation sig) ->
+  (env : Fin eq.support -> U a.algebra) -> Type
 models a eq env = a.equivalence.relation
-                    (a.Sem eq.lhs env)
-                    (a.Sem eq.rhs env)
+    (a.Sem eq.lhs env)
+    (a.Sem eq.rhs env)
 
 ||| Like `models`, but the arguments are reversed and packed slightly
 ||| more compactly, makes nice syntax sometimes
@@ -52,15 +53,19 @@ eqPreservation eq env h prf = CalcWith (cast b) $
 
 ||| States: `pres.signature`-algebra `a` satisfies the given equation.
 public export 0
-ValidatesEquation : (eq : Equation sig) -> (a : SetoidAlgebra sig) -> Type
-ValidatesEquation eq a = (env : Fin eq.support -> U a.algebra) ->
+ValidatesEquation : (eq : Equation sig) ->
+  (a : SetoidAlgebra sig) -> Type
+ValidatesEquation eq a =
+  (env : Fin eq.support -> U a.algebra) ->
   eq =| (a ** env)
 
 
 ||| States: `pres.signature`-algebra `a` satisfies all the axioms of `pres`.
 public export 0
-Validates : (pres : Presentation) -> (a : SetoidAlgebra pres.signature) -> Type
-Validates pres a = (ax : pres.Axiom) -> ValidatesEquation (pres.axiom ax) a
+Validates : (pres : Presentation) ->
+  (a : SetoidAlgebra pres.signature) -> Type
+Validates pres a = (ax : pres.Axiom) ->
+  ValidatesEquation (pres.axiom ax) a
 
 parameters {0 sig : Signature} {a, b : SetoidAlgebra sig} (iso : a <~> b)
   ||| Isomorphisms let us replace the semantics of one algebra with another

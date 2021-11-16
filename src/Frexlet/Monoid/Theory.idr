@@ -27,11 +27,11 @@ MonoidTheory = MkPresentation Theory.Signature
                               Theory.Axiom $ \case
     LftNeutrality => lftNeutrality Neutral Product
     RgtNeutrality => rgtNeutrality Neutral Product
-    Associativity => associativity Product
+    Associativity => associativity         Product
 
 public export
 MonoidStructure : Type
-MonoidStructure = SetoidAlgebra Theory.Signature
+MonoidStructure = SetoidAlgebra Signature
 
 public export
 Monoid : Type
