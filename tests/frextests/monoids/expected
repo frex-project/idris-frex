@@ -1,9 +1,10 @@
-1/7: Building NatTests (NatTests.idr)
-2/7: Building PairTests (PairTests.idr)
-3/7: Building TermTests (TermTests.idr)
-4/7: Building TermTests2 (TermTests2.idr)
-5/7: Building ListTests (ListTests.idr)
-6/7: Building MagicNatTests (MagicNatTests.idr)
-7/7: Building Monoids (Monoids.idr)
-Main> ok
-Main> Bye for now!
+1/9: Building NatTests (NatTests.idr)
+2/9: Building PairTests (PairTests.idr)
+3/9: Building TermTests (TermTests.idr)
+4/9: Building TermTests2 (TermTests2.idr)
+5/9: Building ListTests (ListTests.idr)
+6/9: Building MagicListTests (MagicListTests.idr)
+7/9: Building MagicNatTests (MagicNatTests.idr)
+8/9: Building MagicPairTests (MagicPairTests.idr)
+9/9: Building Monoids (Monoids.idr)
+Main>ok Main> Bye for now!
