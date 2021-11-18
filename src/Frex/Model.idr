@@ -193,6 +193,20 @@ public export
 (~~>) a b = a.Algebra ~~> b.Algebra
 
 public export
+post : {a,b,c : Model pres} -> (h : b ~> c) -> (a ~~> b) ~> (a ~~> c)
+post h = MkSetoidHomomorphism
+  { H = (h .)
+  , homomorphic = \f1,f2,prf,x => h.H.homomorphic _ _ (prf x)
+  }
+
+public export
+pre : {a1,a2,b : Model pres} -> (h : a2 ~> a1) -> (a1 ~~> b) ~> (a2 ~~> b)
+pre h = MkSetoidHomomorphism
+  { H = (. h)
+  , homomorphic = \f1,f2,prf,x => prf _
+  }
+
+public export
 transport : {pres : Presentation} -> (a : Model pres) ->
   {b : SetoidAlgebra (pres.signature)} ->
   (a.Algebra <~> b) ->
