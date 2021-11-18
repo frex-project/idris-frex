@@ -1,6 +1,5 @@
 module MagicNatTests
 
-import Frex
 import Frex.Magic
 import Frexlet.Monoid
 
@@ -19,7 +18,7 @@ rassoc : {a, b, c : Nat} -> (a + b) + c = a + (b + c)
 rassoc = %runElab frexMagic MonoidFrexlet Additive
 
 -- mixed : {a, b : Nat} -> (a + 1) + (1 + b) = (a + 2 + b)
--- mixed = %runElab frexMagic MonoidFrex Additive
+-- mixed = %runElab frexMagic MonoidFrexlet Additive
 
--- units : {a, b : Nat} -> (0 + (a + 0)) + 0 = a
--- units = %runElab frexMagic MonoidFrex Additive
+units : {a, b : Nat} -> (0 + (a + 0)) + 0 = a
+units = %runElab frexMagic MonoidFrexlet Additive

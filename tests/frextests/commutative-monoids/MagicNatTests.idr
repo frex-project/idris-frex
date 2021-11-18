@@ -18,6 +18,3 @@ namespace Assoc -- TODO remove when hole names are no longer leaked
 namespace Shuffle -- TODO remove when hole names are no longer leaked
   shuffle : {a, b, c : Nat} -> a + (b + c) = c + (a + b)
   shuffle = %runElab frexMagic Monoid.Commutative.Frex Nat.Additive
-
--- plusSuccRightSucc : (n, m : Nat) -> n + S m = S (n + m)
--- plusSuccRightSucc n m = %runElab frexMagic Monoid.Commutative.Frex Nat.Additive
