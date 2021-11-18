@@ -15,7 +15,8 @@ import Syntax.PreorderReasoning.Generic
 %default total
 
 public export
-record Extension {Pres : Presentation} (A : Model Pres)(X : Setoid) where
+record Extension {Pres : Presentation}
+    (A : Model Pres)(X : Setoid) where
   constructor MkExtension
   Model : Model Pres
   Embed : A ~> Model
@@ -33,15 +34,13 @@ public export
 
 public export
 record (~>) {Pres : Presentation} {A : Model Pres} {X : Setoid}
-            (Extension1, Extension2 : Extension A X) where
+    (Extension1, Extension2 : Extension A X) where
   constructor MkExtensionMorphism
   H : (Extension1).Model ~> (Extension2).Model
   PreserveEmbed : (cast A ~~> (Extension2).Model).equivalence.relation
-                     (H . (Extension1).Embed)
-                          (Extension2).Embed
+                     (H . (Extension1).Embed) (Extension2).Embed
   PreserveVar   : (X ~~> cast (Extension2).Model).equivalence.relation
-                     ((H).H . (Extension1).Var)
-                              (Extension2).Var
+                     ((H).H . (Extension1).Var) (Extension2).Var
 
 public export
 Extender : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
