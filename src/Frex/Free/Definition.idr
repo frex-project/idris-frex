@@ -34,7 +34,7 @@ public export
 
 ||| States: Homomorphism between the models over X.
 public export 0
-PreservesEnv : {Pres : Presentation} -> 
+PreservesEnv : {Pres : Presentation} ->
     {X : Setoid} -> (a, b : Pres `ModelOver` X) ->
     (h : cast {to = Setoid} a.Model ~> cast b.Model) -> Type
 PreservesEnv a b h = 

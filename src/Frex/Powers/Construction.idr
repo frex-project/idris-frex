@@ -121,7 +121,7 @@ a ^ x = MkPower
         $ \u,i => (cast a).equivalence.reflexive _
   , Unique = \other, extend1,extend2,u,i => CalcWith (cast a) $
       |~ (the _ $ extend1.H.H.H u).H i
-      ~~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve u i)
-      ~~ (the _ $ extend2.H.H.H u).H i  ..<(extend2.preserve u i)
+      ~~ (the _ $ other.Eval.H i).H.H u ...(extend1.preserve i u)
+      ~~ (the _ $ extend2.H.H.H u).H i  ..<(extend2.preserve i u)
   }
 %unbound_implicits off

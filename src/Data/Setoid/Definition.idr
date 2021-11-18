@@ -124,6 +124,13 @@ public export
       b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
   }
 
+public export
+post : {a,b,c : Setoid} -> b ~> c -> (a ~~> b) ~> (a ~~> c)
+post h = MkSetoidHomomorphism 
+  { H = (h .)
+  , homomorphic = \f1,f2,prf,x => h.homomorphic _ _ (prf x)
+  }
+
 ||| Two setoid homomorphism are each other's inverses
 public export
 record Isomorphism {a, b : Setoid} (Fwd : a ~> b) (Bwd : b ~> a) where

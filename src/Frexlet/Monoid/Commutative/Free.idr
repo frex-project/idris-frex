@@ -42,6 +42,8 @@ FreeCommutativeMonoidOver n =
   , Env   = mate (unit n)
   }
 
+-- TODO: this can be proved more generally for constant operations
+-- involving powers
 export
 FreeModelZeroRepresentation : (n : Nat) -> (Model n).sem Neutral = replicate n 0
 FreeModelZeroRepresentation  n = vectorExtensionality _ _ $ \i => Calc $
