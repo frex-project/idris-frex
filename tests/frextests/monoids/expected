@@ -7,4 +7,5 @@
 7/9: Building MagicNatTests (MagicNatTests.idr)
 8/9: Building MagicPairTests (MagicPairTests.idr)
 9/9: Building Monoids (Monoids.idr)
-Main>ok Main> Bye for now!
+Main> ok
+Main> Bye for now!
