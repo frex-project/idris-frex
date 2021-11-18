@@ -200,7 +200,7 @@ post h = MkSetoidHomomorphism
   }
 
 public export
-pre : {a1,a2,b : Model pres} -> (h : a2 ~> a1) -> (a1 ~~> b) ~> (a2 ~~> b)
+pre : {a1,a2,b : SetoidAlgebra sig} -> (h : a2 ~> a1) -> (a1 ~~> b) ~> (a2 ~~> b)
 pre h = MkSetoidHomomorphism
   { H = (. h)
   , homomorphic = \f1,f2,prf,x => prf _
