@@ -1,1 +1,58 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Data.Finite</title><link rel="stylesheet" href="../styles.css"></head><body class="namespace"><header><strong>Idris2Doc</strong> : Data.Finite<nav><a href="../index.html">Index</a></nav></header><div class="container"><div id="moduleHeader"><h1>Data.Finite</h1><p></p></div><dl class="decls"><dt id="Data.Finite.Finite"><!-- ann ignored START -->interface<!-- ann END -->&ensp;<a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;:&ensp;<span class="name type">Type</span>&ensp;-&gt;&ensp;<span class="name type">Type</span></dt><dd>  <b>Parameters</b>:&ensp;a<br><b>Methods</b>:<br><dl class="decls">  <dt id="Data.Finite.enumerate"><a class="type" href="Data.Finite.html#Data.Finite.enumerate"><span class="name function">enumerate</span></a>&ensp;:&ensp;<span class="type resolved" title="Prelude.Basics.List"><span class="name type">List</span></span>&ensp;<!-- ann ignored START -->a<!-- ann END --></dt></dl><br><b>Implementations</b>:<br><dl class="decls">  <dt id="$resolved15694"><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Commutative.Theory.html#Frexlet.Monoid.Commutative.Theory.Axiom"><span class="name type">Axiom</span></a></dt>  <dt id="$resolved12779"><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;(<a class="type" href="Frex.Signature.html#Frex.Signature.Op"><span class="name type">Op</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Signature"><span class="name function">Signature</span></a>)</dt>  <dt id="$resolved12778"><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Axiom"><span class="name type">Axiom</span></a></dt></dl></dd><dt id="Data.Finite.enumerate"><a class="type" href="Data.Finite.html#Data.Finite.enumerate"><span class="name function">enumerate</span></a>&ensp;:&ensp;<a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;=&gt;&ensp;<span class="type resolved" title="Prelude.Basics.List"><span class="name type">List</span></span>&ensp;<!-- ann ignored START -->a<!-- ann END --></dt><dd>  <b>Totality</b>:&ensp;total</dd></dl></div><footer>Produced by Idris 2 version 0.4.0-d62e45d8d</footer></body></html>
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Data.Finite</title>
+  <link rel="stylesheet" type="text/css" id="preferredStyle" href="../default.css">
+  <script>
+    /* Updates the stylesheet to use the preferred one.
+       Note that we set the link to root ++ sourceLoc because the config
+       is shared across the whole website, so the root may differ from
+       page to page.
+    */
+    function setStyleSource (sourceLoc) {
+      document.getElementById("preferredStyle").href = "../" + sourceLoc + ".css";
+      document.getElementById("selectPreferredStyle").value = sourceLoc;
+    }
+    /* Initialises the preferred style sheet:
+       1. if there is a stored value then use that
+          otherwise select the default
+       2. set both the css link href & the drop down menu selected option
+    */
+    function initStyleSource () {
+      var preferredStyle = localStorage.getItem("stylefile");
+      if (preferredStyle !== null) {
+        setStyleSource(preferredStyle);
+      } else {
+        setStyleSource("default");
+      };
+    }
+    function saveStyleSource (preferredStyle) {
+      localStorage.stylefile = preferredStyle;
+    }
+    </script>
+</head>
+<body class="namespace">
+<header>
+  <strong>Idris2Doc</strong> : Data.Finite
+  <nav><a href="../index.html">Index</a>
+  <select id="selectPreferredStyle">
+    <option value="default">Default</option>
+<option value="alternative">Alternative</option>
+<option value="blackandwhite">Black & White</option>
+
+  </select>
+  </nav>
+  <script>
+  /* We start by initialising the style source */
+  initStyleSource();
+  /* This listens for changes on the drop down menu and updates the
+     css used for the current page when a selection is made.
+  */
+  document.getElementById("selectPreferredStyle").addEventListener("change", function(){
+    var selected = this.options[this.selectedIndex].value; /* the option chosen */
+    setStyleSource (selected);
+    saveStyleSource (selected);
+  });
+</script>
+</header>
+<div class="container"><div id="moduleHeader"><h1>Data.Finite</h1><pre></pre></div><dl class="decls"><dt id="Data.Finite.Finite"><code><!-- ann ignored START -->interface<!-- ann END -->&ensp;<a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;:&ensp;<span class="name type">Type</span>&ensp;-&gt;&ensp;<span class="name type">Type</span></code></dt><dd>  <b>Parameters</b>:&ensp;a<br><b>Methods</b>:<br><dl class="decls">  <dt id="Data.Finite.enumerate"><code><a class="type" href="Data.Finite.html#Data.Finite.enumerate"><span class="name function">enumerate</span></a>&ensp;:&ensp;<span class="type resolved" title="Prelude.Basics.List"><span class="name type">List</span></span>&ensp;<!-- ann ignored START -->a<!-- ann END --></code></dt></dl><br><b>Implementations</b>:<br><dl class="decls">  <dt id="$resolved17372"><code><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Commutative.Theory.html#Frexlet.Monoid.Commutative.Theory.Axiom"><span class="name type">Axiom</span></a></code></dt>  <dt id="$resolved14559"><code><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;(<a class="type" href="Frex.Signature.html#Frex.Signature.Op"><span class="name type">Op</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Signature"><span class="name function">Signature</span></a>)</code></dt>  <dt id="$resolved14558"><code><a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Axiom"><span class="name type">Axiom</span></a></code></dt></dl></dd><dt id="Data.Finite.enumerate"><code><a class="type" href="Data.Finite.html#Data.Finite.enumerate"><span class="name function">enumerate</span></a>&ensp;:&ensp;<a class="type" href="Data.Finite.html#Data.Finite.Finite"><span class="name type">Finite</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;=&gt;&ensp;<span class="type resolved" title="Prelude.Basics.List"><span class="name type">List</span></span>&ensp;<!-- ann ignored START -->a<!-- ann END --></code></dt><dd>  <b>Totality</b>:&ensp;total</dd></dl></div><footer>Produced by Idris 2 version 0.5.1-c7df41958</footer></body></html>

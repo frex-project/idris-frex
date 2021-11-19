@@ -1,1 +1,58 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Frexlet.Monoid.Pair</title><link rel="stylesheet" href="../styles.css"></head><body class="namespace"><header><strong>Idris2Doc</strong> : Frexlet.Monoid.Pair<nav><a href="../index.html">Index</a></nav></header><div class="container"><div id="moduleHeader"><h1>Frexlet.Monoid.Pair</h1><p>Monoid structures over pairs</p></div><dl class="decls"><dt id="Frexlet.Monoid.Pair.MonoidPair"><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.MonoidPair"><span class="name function">MonoidPair</span></a>&ensp;:&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Monoid"><span class="name function">Monoid</span></a></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.Unit"><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.Setoid"><span class="name type">Setoid</span></a></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.assoc"><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.assoc"><span class="name function">assoc</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;(<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->b<!-- ann END -->&ensp;<!-- ann ignored START -->c<!-- ann END -->)&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;(<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<!-- ann ignored START -->b<!-- ann END -->)&ensp;<!-- ann ignored START -->c<!-- ann END --></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.leftNeut"><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.leftNeut"><span class="name function">leftNeut</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END --></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.rightNeut"><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.rightNeut"><span class="name function">rightNeut</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END --></dt><dd>  <b>Totality</b>:&ensp;total</dd></dl></div><footer>Produced by Idris 2 version 0.4.0-d62e45d8d</footer></body></html>
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frexlet.Monoid.Pair</title>
+  <link rel="stylesheet" type="text/css" id="preferredStyle" href="../default.css">
+  <script>
+    /* Updates the stylesheet to use the preferred one.
+       Note that we set the link to root ++ sourceLoc because the config
+       is shared across the whole website, so the root may differ from
+       page to page.
+    */
+    function setStyleSource (sourceLoc) {
+      document.getElementById("preferredStyle").href = "../" + sourceLoc + ".css";
+      document.getElementById("selectPreferredStyle").value = sourceLoc;
+    }
+    /* Initialises the preferred style sheet:
+       1. if there is a stored value then use that
+          otherwise select the default
+       2. set both the css link href & the drop down menu selected option
+    */
+    function initStyleSource () {
+      var preferredStyle = localStorage.getItem("stylefile");
+      if (preferredStyle !== null) {
+        setStyleSource(preferredStyle);
+      } else {
+        setStyleSource("default");
+      };
+    }
+    function saveStyleSource (preferredStyle) {
+      localStorage.stylefile = preferredStyle;
+    }
+    </script>
+</head>
+<body class="namespace">
+<header>
+  <strong>Idris2Doc</strong> : Frexlet.Monoid.Pair
+  <nav><a href="../index.html">Index</a>
+  <select id="selectPreferredStyle">
+    <option value="default">Default</option>
+<option value="alternative">Alternative</option>
+<option value="blackandwhite">Black & White</option>
+
+  </select>
+  </nav>
+  <script>
+  /* We start by initialising the style source */
+  initStyleSource();
+  /* This listens for changes on the drop down menu and updates the
+     css used for the current page when a selection is made.
+  */
+  document.getElementById("selectPreferredStyle").addEventListener("change", function(){
+    var selected = this.options[this.selectedIndex].value; /* the option chosen */
+    setStyleSource (selected);
+    saveStyleSource (selected);
+  });
+</script>
+</header>
+<div class="container"><div id="moduleHeader"><h1>Frexlet.Monoid.Pair</h1><pre>Monoid structures over pairs</pre></div><dl class="decls"><dt id="Frexlet.Monoid.Pair.MonoidPair"><code><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.MonoidPair"><span class="name function">MonoidPair</span></a>&ensp;:&ensp;<a class="type" href="Frexlet.Monoid.Theory.html#Frexlet.Monoid.Theory.Monoid"><span class="name function">Monoid</span></a></code></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.Unit"><code><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.Setoid"><span class="name type">Setoid</span></a></code></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.assoc"><code><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.assoc"><span class="name function">assoc</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;(<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->b<!-- ann END -->&ensp;<!-- ann ignored START -->c<!-- ann END -->)&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;(<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<!-- ann ignored START -->b<!-- ann END -->)&ensp;<!-- ann ignored START -->c<!-- ann END --></code></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.leftNeut"><code><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.leftNeut"><span class="name function">leftNeut</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END --></code></dt><dd>  <b>Totality</b>:&ensp;total</dd><dt id="Frexlet.Monoid.Pair.rightNeut"><code><a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.rightNeut"><span class="name function">rightNeut</span></a>&ensp;:&ensp;<a class="type" href="Data.Setoid.Pair.html#Data.Setoid.Pair.Pair"><span class="name function">Pair</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END -->&ensp;<a class="type" href="Frexlet.Monoid.Pair.html#Frexlet.Monoid.Pair.Unit"><span class="name function">Unit</span></a>&ensp;<a class="type" href="Data.Setoid.Definition.html#Data.Setoid.Definition.&lt;~&gt;"><span class="name type">&lt;~&gt;</span></a>&ensp;<!-- ann ignored START -->a<!-- ann END --></code></dt><dd>  <b>Totality</b>:&ensp;total</dd></dl></div><footer>Produced by Idris 2 version 0.5.1-c7df41958</footer></body></html>
