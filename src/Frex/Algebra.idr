@@ -84,8 +84,9 @@ Semantic (Algebra sig) (Op sig) where
 ||| @U : A type called the carrier
 ||| @Sem : a semantic interpretation for each Sig-operation
 public export
-MkAlgebra : {0 Sig : Signature} -> (0 U : Type) -> (Sem : Sig `algebraOver'` U) -> Algebra Sig
-MkAlgebra u sem = MakeAlgebra u $ \f => uncurry (sem (snd f))
+MkAlgebra : {sig : Signature} -> (0 U : Type) -> (Sem : sig `algebraOver'` U) -> Algebra sig
+MkAlgebra {sig} u sem = MakeAlgebra u
+  $ \f => uncurry {n = arity {sig} f} (sem (snd f))
 
 ||| Algebraic terms of this signature with variables in the given type
 public export

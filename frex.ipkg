@@ -1,6 +1,7 @@
 package frex
 authors = "Guillaume Allais, Edwin Brady, Nathan Corbin, Ohad Kammar, and Jeremy Yallop"
 modules = Frex
+        , Frex.Magic
         , Frex.Signature
         , Frex.Algebra
         , Frex.Algebra.Abstract
@@ -81,6 +82,7 @@ modules = Frex
         , Data.Vect.Extra1
         , Syntax.PreorderReasoning.Setoid
         , Utils.String
+        , Language.Reflection.Relation
 
 
 depends = contrib
