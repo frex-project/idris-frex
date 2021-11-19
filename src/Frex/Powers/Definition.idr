@@ -24,10 +24,10 @@ parameters {Pres : Presentation} {X : Setoid} {A : Model Pres}
   public export 0
   PreservesEvaluation : (v,w : Parameterisation Pres X A)
     -> (h : v.Model ~> w.Model) -> Type
-  PreservesEvaluation v w h = (f : U v.Model) -> (i : U X) ->
-    (cast A).equivalence.relation
-      ((w.Eval.H i).H.H (h.H.H f))
-      ((v.Eval.H i).H.H         f)
+  PreservesEvaluation v w h =
+    (X ~~> (v.Model ~~> A)).equivalence.relation
+       ((pre h) . w.Eval)
+       (v.Eval)
 
 -- Need to repeat this for records, see #1482
 parameters {Pres : Presentation} {X : Setoid} {A : Model Pres}
@@ -68,3 +68,4 @@ record Power {Pres : Presentation} (X : Setoid) (A : Model Pres) where
   constructor MkPower
   Data : Parameterisation Pres X A
   UP   : Universality Data
+

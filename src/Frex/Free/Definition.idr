@@ -15,7 +15,9 @@ import Frex.Model
 ||| For example, the monads associated to a presentation are the
 ||| choices of a free model over each set(oid).
 public export
-record ModelOver (Pres : Presentation) (X : Setoid) where
+record ModelOver
+    (Pres : Presentation)
+    (X : Setoid) where
   constructor MkModelOver
   Model : Model Pres
   Env : X ~> cast Model
@@ -30,17 +32,20 @@ public export
   (.SemType) a = a.Model.SemType
   (.Sem)     a = a.Model.Sem
 
-parameters {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X)
-  ||| States: Homomorphism between the models over X.
-  public export 0
-  PreservesEnv : (h : cast {to = Setoid} (A .Model) ~> cast (B .Model)) -> Type
-  PreservesEnv h = (X ~~> cast (B .Model)).equivalence.relation
-    (h . (A .Env))
-         (B .Env)
+||| States: Homomorphism between the models over X.
+public export 0
+PreservesEnv : {Pres : Presentation} ->
+    {X : Setoid} -> (a, b : Pres `ModelOver` X) ->
+    (h : cast {to = Setoid} a.Model ~> cast b.Model) -> Type
+PreservesEnv a b h = 
+ (X ~~> cast b.Model).equivalence.relation
+    (h . a.Env) b.Env
 
 ||| A `Pres`-model over X homomorphism
 public export
-record (~>) {Pres : Presentation} {X : Setoid} (A, B : Pres `ModelOver` X) where
+record (~>) 
+    {Pres : Presentation} {X : Setoid}
+    (A, B : Pres `ModelOver` X) where
   constructor MkHomomorphism
   H : (A .Model) ~> (B .Model)
   preserves : PreservesEnv A B (H .H)
