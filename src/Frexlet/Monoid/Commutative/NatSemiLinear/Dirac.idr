@@ -33,7 +33,7 @@ easyDec  x with (decEq x x)
 
 
 public export
-dirac : {0 n : Nat} -> (i, j : Fin n) -> Nat
+dirac : (i, j : Fin n) -> Nat
 dirac i j = case (decEq i j) of
   Yes _ => 1
   No  _ => 0
