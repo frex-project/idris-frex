@@ -16,15 +16,27 @@ import Text.PrettyPrint.Prettyprinter
 
 %default total
 
+%hide Data.Relation.Rel
+
+namespace PresetoidAlgebra
+
+  public export
+  (.bindTerm) : {0 sig : Signature} -> {0 x : Type} ->
+       (a : PresetoidAlgebra sig)
+    -> (t : Term sig x) -> (env : x -> U a)
+    -> (U a)
+  a .bindTerm = bindTerm {a = a.algebra}
+
 public export
 data Step : (pres : Presentation) ->
             (a : PresetoidAlgebra pres.signature) ->
-            Control.Relation.Rel (U a) where
+            Rel (U a) where
   Include : {x, y : U a} -> a.relation x y -> Step pres a x y
   ByAxiom : {0 a : PresetoidAlgebra pres.signature} ->
-            (eq : Axiom pres) -> (env : Fin (pres.axiom eq).support -> U a) ->
-            Step pres a (bindTerm {a = a.algebra} (pres.axiom eq).lhs env)
-                        (bindTerm {a = a.algebra} (pres.axiom eq).rhs env)
+            (eq : Axiom pres) ->
+            (env : Fin (pres.axiom eq).support -> U a) ->
+            Step pres a (a .bindTerm (pres.axiom eq).lhs env)
+                        (a .bindTerm (pres.axiom eq).rhs env)
 
 namespace Step
 
@@ -79,37 +91,33 @@ plugFusion ctx2 ctx1 t
       Just v => Refl
 
 public export
-data Locate : (sig : Signature) ->
-              (a : Algebra sig) ->
-              Control.Relation.Rel (U a) -> Control.Relation.Rel (U a) where
-
+data Locate : (sig : Signature) -> (a : Algebra sig) ->
+              Rel (U a) -> Rel (U a) where
   ||| We prove the equality by invoking a rule at the toplevel
-  Here : {0 r : Control.Relation.Rel (U a)} -> r x y -> Locate sig a r x y
-
-  ||| We focus on a subterm (that may appear in multiple places)
-  ||| and rewrite it using a specific rule.
-  Cong : {0 r : Control.Relation.Rel (U a)} ->
+  Here : {0 r : Rel (U a)} -> r x y -> Locate sig a r x y
+  ||| We focus on a subterm `lhs` that may appear in multiple
+  ||| locations and rewrite it to `rhs` using a specific rule.
+  Cong : {0 r : Rel (U a)} ->
          (t : Term sig (Maybe (U a))) ->
          {lhs, rhs : U a} -> r lhs rhs ->
          Locate sig a r (plug a t lhs) (plug a t rhs)
 
 public export 0
 Closure : (pres : Presentation) ->
-          (a : PresetoidAlgebra pres.signature) ->
-          Control.Relation.Rel (U a)
+          (a : PresetoidAlgebra pres.signature) -> Rel (U a)
 Closure pres a
   = Symmetrise                      -- Symmetric
   $ Locate pres.signature a.algebra -- Congruence
   $ Step pres a
 
-
 public export 0
-Derivation : (pres : Presentation) ->
-             (a : PresetoidAlgebra pres.signature) ->
-             Control.Relation.Rel (U a)
-Derivation pres a
-  = RTList          -- Reflexive, Transitive
-  $ Closure pres a
+Derivation : (p : Presentation) ->
+             (a : PresetoidAlgebra p.signature) -> Rel (U a)
+Derivation p a
+  = RTList                       -- Reflexive, Transitive
+  $ Symmetrise                   -- Symmetric
+  $ Locate p.signature a.algebra -- Congruence
+  $ Step p a                     -- Axiomatic steps
 
 public export 0
 Proof : (pres : Presentation) ->
@@ -212,7 +220,7 @@ keepEq t env = trans
 
 
 cong' : {sig : Signature} -> {a : Algebra sig} ->
-        {0 r : Control.Relation.Rel (U a)} ->
+        {0 r : Rel (U a)} ->
         (n : Nat) ->
         (t : Term sig (Either (U a) (Fin n))) ->
         {lhs, rhs : Fin n -> U a} ->
@@ -249,7 +257,7 @@ cong' (S k) t eq =
   $ cong' k (map (keep rhs) t) (\ k => eq (FS k)))
 
 cong : {sig : Signature} -> {a : Algebra sig} ->
-       {0 r : Control.Relation.Rel (U a)} ->
+       {0 r : Rel (U a)} ->
        {n : Nat} ->
        (t : Term sig (Fin n)) ->
        {lhs, rhs : Fin n -> U a} ->

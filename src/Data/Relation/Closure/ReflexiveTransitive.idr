@@ -10,7 +10,8 @@ import Data.SortedMap.Dependent
 public export
 data RTList : Rel a -> Rel a where
   Nil  : RTList r x x
-  (::) : {0 r : Rel a} -> {y : a} -> r x y -> RTList r y z -> RTList r x z
+  (::) : {0 r : Rel a} -> {y : a} ->
+         r x y -> RTList r y z -> RTList r x z
 
 public export
 data SnocRTList : Rel a -> Rel a where

@@ -227,7 +227,6 @@ bindTerm : {0 sig : Signature} -> {0 x : Type} -> {auto a : Algebra sig}
   -> (t : Term sig x) -> (env : x -> U a)
   -> (U a)
 
-
 public export total
 bindTerms : {0 sig : Signature} -> {0x : Type} -> {auto a : Algebra sig}
   -> (ts : Vect n (Term sig x)) -> (env : x -> U a)
@@ -238,7 +237,6 @@ bindTerms (t :: ts) env = bindTerm t env :: bindTerms ts env
 
 bindTerm (Done i) env = env i
 bindTerm (Call f xs) env = a.Sem f $ bindTerms  xs env
-
 
 public export
 Semantic (Algebra sig) (Term sig x) where
