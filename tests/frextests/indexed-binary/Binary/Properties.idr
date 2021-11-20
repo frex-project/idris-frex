@@ -40,8 +40,8 @@ numberUnique {width = S width}      -- coverage checker wants to replace `_` her
   ((bit_x :: bits_x) {width = _, b = b_x, val = val_x, val' = val', valueFord = valford_x})
   ((bit_y :: bits_y) {width = _, b = b_y, val = val_y, val' = _   , valueFord = valford_y})
   Refl with (let 0 lemma : (a,b : Nat) -> (2*b + a = (a + b) + b)
-                 lemma a b = Frex.solve 2 (Frex Nat.Additive) $
-                           (Dyn 1 :+: (Dyn 1 :+: Sta 0)) :+: Dyn 0 -- (2 *: (Dyn 0)) :+: (Dyn 1)
+                 lemma a b = Frex.solve 2 (Frex Nat.Additive) {prf = (%search, %search)} $
+                           (2 *: (Dyn 1)) :+: (Dyn 0)
                                  =-=
                            (Dyn 0 :+: Dyn 1) :+: Dyn 1 in
            let
