@@ -16,7 +16,6 @@ test = solve 2 (Frexlet.Monoid.Involutive.Frex.Frex List _)
          $ (((Dyn 1) .inv .*. (I1 .*. (Dyn 0) .inv)) .inv)
             =-=
            (Dyn 0 .*. Dyn 1)
-
 PropListMonoid : {A:Type} -> Monoid
 PropListMonoid = MkModel
   { Algebra = cast {from = Algebra Frexlet.Monoid.Theory.Signature} $ MkAlgebra
@@ -30,7 +29,7 @@ PropListMonoid = MkModel
       Associativity => \env => appendAssociative _ _ _ }
 
 PropListInvolutiveMonoid : {A: Type} -> InvolutiveMonoid
-PropListInvolutiveMonoid = MkModel (MkInvolutiveMonoidStructure ((PropListMonoid {A=A}) .Algebra)
+PropListInvolutiveMonoid = MkModel (MkInvolutiveMonoidStructure ((PropListMonoid {A}) .Algebra)
   (MkSetoidHomomorphism List.reverse (\_,_,Refl => Refl)))
   $ \case
      (Mon LftNeutrality) => PropListMonoid .Validate LftNeutrality
