@@ -68,7 +68,7 @@ public export
 unit : {a : Setoid} -> a ~> cast Unit
 unit = MkSetoidHomomorphism
   { H = const ()
-  , homomorphic = \_,_,_ => unitVal _ _
+  , homomorphic = \_,_,_ => unitVal () ()
   }
 
 ||| The constant function as a setoid morphism

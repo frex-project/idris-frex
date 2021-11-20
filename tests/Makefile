@@ -1,11 +1,12 @@
 INTERACTIVE ?= --interactive
+IDRIS2 ?= idris2
 
 all: build
 
 build:
-	idris2 --build tests.ipkg
+	${IDRIS2} --build tests.ipkg
 
 run:
-	./build/exec/runtests idris2 $(INTERACTIVE) --failure-file failures
+	./build/exec/runtests ${IDRIS2} $(INTERACTIVE) --failure-file failures
 
 .PHONY: all build run

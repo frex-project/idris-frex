@@ -1,16 +1,18 @@
+IDRIS2 ?= idris2
+
 all: build
 
 build:
-	idris2 --build frex.ipkg
+	${IDRIS2} --build frex.ipkg
 
 install:
-	idris2 --install frex.ipkg
+	${IDRIS2} --install frex.ipkg
 
 doc:
-	idris2 --mkdoc frex.ipkg
+	${IDRIS2} --mkdoc frex.ipkg
 
 clean:
-	idris2 --clean frex.ipkg
+	${IDRIS2} --clean frex.ipkg
 
 test:
 	@${MAKE} -C tests build run
