@@ -20,5 +20,5 @@ rassoc = %runElab frexMagic MonoidFrexlet Additive
 -- mixed : {a, b : Nat} -> (a + 1) + (1 + b) = (a + 2 + b)
 -- mixed = %runElab frexMagic MonoidFrexlet Additive
 
-units : {a, b : Nat} -> (0 + (a + 0)) + 0 = a
+units : {a, b : Nat} -> (0 + (a + 0)) + b + 0 = a + b
 units = %runElab frexMagic MonoidFrexlet Additive

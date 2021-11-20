@@ -191,7 +191,7 @@ extractOps {pres} a
   where extractOp : Name -> Elab Operator
         extractOp symbol
           = do op <- check {expected = Op pres.signature} `(MkOp ~(N symbol))
-               let n = op.fst
+               let n = arity {sig = pres.signature} op
                sem <- Magic.curry {a = a.Algebra.algebra.U}
                   $ a.Algebra.algebra.Semantics op
                sem <- normalise {as = n `ary` a.Algebra.algebra.U} sem
