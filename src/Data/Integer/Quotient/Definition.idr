@@ -10,8 +10,8 @@ import Frexlet.Monoid.Notation.Additive
 
 import Data.Nat
 
-import Frex.Magic
-%language ElabReflection
+-- import Frex.Magic
+-- %language ElabReflection
 
 
 public export
