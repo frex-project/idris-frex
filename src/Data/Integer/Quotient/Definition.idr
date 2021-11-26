@@ -12,7 +12,7 @@ import Data.Nat
 
 -- import Frex.Magic
 -- %language ElabReflection
-
+%default total
 
 public export
 record INT where
