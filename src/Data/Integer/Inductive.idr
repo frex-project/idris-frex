@@ -1,44 +1,34 @@
 module Data.Integer.Inductive
 
+import public Data.Integer.Inductive.Definition
+
 import Data.Setoid
 import Syntax.PreorderReasoning
 
 import Syntax.WithProof
 import Data.Primitives.Views
+
+import Frex
+import Frexlet.Monoid.Commutative
+
+import Data.Integer.Quotient
+import Data.Integer.Connections
+
 -- Let's validate the monoid axioms!
 
 %default total
 
--- TODO: multiplication. Much easier once we have semiring frexlet.
-
 public export
-data INTEGER : Type where
-  ||| ANat n : the integer n
-  ANat : Nat -> INTEGER
-  ||| NegS n : the integer -(S n)
-  NegS : Nat -> INTEGER
-
-public export
-minus : (m, n : Nat) -> INTEGER
-minus    m   0    = ANat m
-minus  0    (S n) = NegS n
-minus (S m) (S n) = minus m n
+Additive : Monoid
+Additive = transportSetoid Quotient.Operations.Additive representationInteger
 
 public export
 plus : (m,n : INTEGER) -> INTEGER
-plus (ANat m) (ANat n) = ANat (m + n)
-plus (ANat m) (NegS n) = minus m (S n)
-plus (NegS m) (ANat n) = minus n (S m)
-plus (NegS m) (NegS n) = NegS (S (m + n))
+plus m n = (Inductive.Additive).Sem Prod [m,n]
 
 public export
 mult : (m,n : INTEGER) -> INTEGER
-mult (ANat m) (ANat n) = ANat (m * n)
-mult (ANat 0) (NegS n) = ANat 0
-mult (ANat (S m)) (NegS n) = NegS (m + n + m*n)
-mult (NegS m) (ANat 0) = ANat 0
-mult (NegS m) (ANat (S n)) = NegS (m + n + m*n)
-mult (NegS m) (NegS n) = ANat ((S m) * (S n))
+-- TODO: implement. Much easier once we have semiring frexlet.
 
 public export
 Num INTEGER where

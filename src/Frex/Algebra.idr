@@ -20,6 +20,7 @@ import Data.String
 import Control.WellFounded
 
 import Syntax.PreorderReasoning
+import Syntax.PreorderReasoning.Setoid
 
 import Text.PrettyPrint.Prettyprinter
 
@@ -644,3 +645,30 @@ namespace Signature
   cast (Done x   ) = Done x
   cast (Call f ts) = (Free sig2 _).Sem (castOp.H f.snd)
                    $ flip index $ Signature.castTerms castOp ts
+
+public export
+transport : {sig : Signature} -> (a : SetoidAlgebra sig) -> {x : Setoid} ->
+  (cast a <~> x) -> SetoidAlgebra sig
+transport a iso = MkSetoidAlgebra
+  { algebra = MakeAlgebra
+      { U = U x
+      , Semantics = \f,args => iso.Fwd.H $ a.Sem f $ map iso.Bwd.H args
+      }
+  , equivalence = x.equivalence
+  , congruence  = \f,xs,ys,prf => CalcWith x $
+      |~ iso.Fwd.H (a.Sem f $ map iso.Bwd.H xs)
+      ~~ iso.Fwd.H (a.Sem f $ map iso.Bwd.H ys)
+         ...(iso.Fwd.homomorphic _ _ $
+             a.congruence f _ _      $
+             \i => (the _ (VectMap).H iso.Bwd).homomorphic _ _ prf i)
+  }
+
+public export
+transportIso : {sig : Signature} -> (a : SetoidAlgebra sig) -> {x : Setoid} ->
+  (iso : cast a <~> x) -> (transport a iso <~> a)
+transportIso a iso {x = MkSetoid {}} = MkIsomorphism
+  { Iso = sym iso
+  , FwdHomo = \f,xs => CalcWith (cast a) $
+      |~ iso.Bwd.H (iso.Fwd.H (a.Sem f (map iso.Bwd.H xs)))
+      ~~ a.Sem f (map iso.Bwd.H xs) ...(iso.Iso.BwdFwdId _)
+  }

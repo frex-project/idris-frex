@@ -73,8 +73,8 @@ plusHom = MkSetoidHomomorphism
   }
 
 public export
-IntegerMonoid : Monoid
-IntegerMonoid = MkModel
+Additive : Monoid
+Additive = MkModel
   { Algebra  = MkSetoidAlgebra
       { algebra     = MkAlgebra
         { U   = U IntegerSetoid

@@ -82,6 +82,7 @@ modules = Frex
         , Data.Integer.Quotient.Definition
         , Data.Integer.Quotient.Operations
         , Data.Integer.Inductive
+        , Data.Integer.Inductive.Definition
         , Data.Integer.Connections
         , Data.Unit
         , Data.Vect.Extra1
