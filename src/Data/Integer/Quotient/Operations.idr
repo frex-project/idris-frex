@@ -36,6 +36,18 @@ Num INT where
     GT => MkINT {pos = cast x, neg = 0}
   (*) = mult
   (+) = plus
+  
+public export
+Neg INT where
+  m - n = MkINT 
+    { pos = m.pos + n.neg
+    , neg = m.neg + n.pos
+    }
+
+  negate m = MkINT
+    { pos = m.neg
+    , neg = m.pos
+    }
 
 public export
 plusHom : (IntegerSetoid `Pair` IntegerSetoid) ~> IntegerSetoid

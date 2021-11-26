@@ -21,5 +21,10 @@ import Syntax.WithProof
 %default total
 
 -- TODO: multiplication. Much easier once we have semiring frexlet.
-
+public export
+data INTEGER : Type where
+  ||| ANat n : the integer n
+  ANat : Nat -> INTEGER
+  ||| NegS n : the integer -(S n)
+  NegS : Nat -> INTEGER
 
