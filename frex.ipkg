@@ -78,6 +78,8 @@ modules = Frex
         , Data.Setoid.Vect.Functional
         , Data.Setoid.Vect.Inductive
         , Data.Setoid.List
+        , Data.Integer.Quotient
+        , Data.Integer.Quotient.Definition
         , Data.Unit
         , Data.Vect.Extra1
         , Syntax.PreorderReasoning.Setoid
