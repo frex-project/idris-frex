@@ -96,42 +96,42 @@ public export
 
 namespace Composable
   public export
-  (.map) : {c,d : Category} -> {0 a,b : c.Obj} -> (f : c ~> d) ->
+  (.mapC) : {c,d : Category} -> {0 a,b : c.Obj} -> (f : c ~> d) ->
     Composable {cat = c} a b -> Composable {cat = d} (f !! a) (f !! b)
-  f.map [] = []
-  f.map (u  :: vs) = (f.map u  :: f.map vs)
-  f.map (us `ConsNested` vs) = (f.map us `ConsNested` f.map vs)
+  f.mapC [] = []
+  f.mapC (u  :: vs) = (f.map u  :: f.mapC vs)
+  f.mapC (us `ConsNested` vs) = (f.mapC us `ConsNested` f.mapC vs)
 
   public export
   (.functoriality) : {c,d : Category} -> {0 a, b : c.Obj} -> (f : c ~> d) ->
     (us : Composable a b) ->
     (d.HomSet _ _).equivalence.relation
       (f.map us.flatten)
-      ((f.map us).flatten)
+      ((f.mapC us).flatten)
   f.functoriality [] = f.functoriality.id _
   f.functoriality (u  :: vs@[]) = (d.HomSet _ _).equivalence.reflexive _
 
   f.functoriality (u  :: vs@(_ :: _)) = CalcWith (d.HomSet _ _) $
     |~ f.map (u . vs.flatten)
     ~~ f.map u . (f.map vs.flatten) ...(f.functoriality.comp u vs.flatten)
-    ~~ f.map u . (f.map vs).flatten ...(_ . f.functoriality vs)
+    ~~ f.map u . (f.mapC vs).flatten ...(_ . f.functoriality vs)
     ~~ _ .=.(Refl)
   f.functoriality (u  :: vs@(_ `ConsNested` _)) = CalcWith (d.HomSet _ _) $
     |~ f.map (u . vs.flatten)
     ~~ f.map u . (f.map vs.flatten) ...(f.functoriality.comp u vs.flatten)
-    ~~ f.map u . (f.map vs).flatten ...(f.map u . (f.functoriality vs))
+    ~~ f.map u . (f.mapC vs).flatten ...(f.map u . (f.functoriality vs))
     ~~ _ .=.(Refl)
 
   f.functoriality (us `ConsNested` []) = f.functoriality us
   f.functoriality (us `ConsNested` vs@(_ :: _)) = CalcWith (d.HomSet _ _) $
     |~ f.map (us.flatten . vs.flatten)
     ~~ (f.map us.flatten) . (f.map vs.flatten) ...(f.functoriality.comp _ _)
-    ~~ (f.map us).flatten . (f.map vs).flatten ...((f.functoriality _) .:. (f.functoriality _))
+    ~~ (f.mapC us).flatten . (f.mapC vs).flatten ...((f.functoriality _) .:. (f.functoriality _))
     ~~ _ .=.(Refl)
   f.functoriality (us `ConsNested` vs@(_ `ConsNested` _)) = CalcWith (d.HomSet _ _) $
     |~ f.map (us.flatten . vs.flatten)
     ~~ (f.map us.flatten) . (f.map vs.flatten) ...(f.functoriality.comp _ _)
-    ~~ (f.map us).flatten . (f.map vs).flatten ...((f.functoriality _) .:. (f.functoriality _))
+    ~~ (f.mapC us).flatten . (f.mapC vs).flatten ...((f.functoriality _) .:. (f.functoriality _))
     ~~ _ .=. Refl
 
 public export
@@ -141,10 +141,10 @@ public export
     us.flatten
     vs.flatten ->
   (d.HomSet _ _).equivalence.relation
-    (f.map us).flatten
-    (f.map vs).flatten
+    (f.mapC us).flatten
+    (f.mapC vs).flatten
 f.byFunctoriality us vs prf = CalcWith (d.HomSet _ _) $
-  |~ (f.map us).flatten
+  |~ (f.mapC us).flatten
   ~~  f.map us.flatten  ..<(f.functoriality _)
   ~~  f.map vs.flatten  ...(f.mapSetoid.homomorphic _ _ prf)
-  ~~ (f.map vs).flatten ...(f.functoriality _)
+  ~~ (f.mapC vs).flatten ...(f.functoriality _)

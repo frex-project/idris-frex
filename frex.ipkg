@@ -85,6 +85,8 @@ modules = Frex
         , Data.Category.Core.Category
         , Data.Category.Core.Functor
         , Data.Category.Core.NatTrans
+        , Data.Category.Construction.Op
+        , Data.Category.Construction.Pair
         , Data.Category.Adjunction
         , Syntax.PreorderReasoning.Setoid
         , Utils.String
