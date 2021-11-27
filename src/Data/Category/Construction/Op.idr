@@ -63,6 +63,11 @@ namespace Functor
     }
 
   public export
+  OpMapHomo : {c,d : Category} -> {f,g : c ~> d} ->
+    SetoidHomomorphism (g ~~> f) (f.op ~~> g.op) ((.opMap) {f,g})
+  OpMapHomo alpha beta prf a = MkHomEq (prf a).runEq
+
+  public export
   opFunctor : {c,d : Category} -> (Functor c d).op ~> (Functor c.op d.op)
   opFunctor = MkFunctor
     { structure = MkStructure
@@ -70,12 +75,14 @@ namespace Functor
         , mapHom =
             MkSetoidHomomorphism
             { H = \alpha => MkHom (U alpha).opMap
-            , homomorphic = \alpha,beta,prf => MkHomEq $ \a =>
-                MkHomEq (prf.runEq a).runEq
+            , homomorphic = \alpha,beta,prf =>
+                MkHomEq $ \a =>
+                MkHomEq (OpMapHomo (U alpha) (U beta) (prf.runEq) a).runEq
             }
         }
     , functoriality = Check
-        { id = ?h232881
-        , comp = ?h2
+        { id = \f => MkHomEq $ \a => (d.op.HomSet _ _).equivalence.reflexive _
+        , comp = \alpha,beta => MkHomEq $ \a =>
+                   (d.op.HomSet _ _).equivalence.reflexive _
         }
     }
