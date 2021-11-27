@@ -10,6 +10,7 @@ import Data.Primitives.Views
 
 import Frex
 import Frexlet.Monoid.Commutative
+import Frexlet.Group
 
 import Data.Integer.Quotient
 import Data.Integer.Connections
@@ -17,18 +18,23 @@ import Data.Integer.Connections
 -- Let's validate the monoid axioms!
 
 %default total
-
-public export
-Additive : Monoid
-Additive = transportSetoid Quotient.Operations.Monoid.Additive representationInteger
+namespace Monoid
+  public export
+  Additive : Monoid
+  Additive = transportSetoid Quotient.Operations.Monoid.Additive representationInteger
 
 public export
 plus : (m,n : INTEGER) -> INTEGER
-plus m n = (Inductive.Additive).Sem Prod [m,n]
+plus m n = (Inductive.Monoid.Additive).Sem Prod [m,n]
 
 public export
 mult : (m,n : INTEGER) -> INTEGER
 -- TODO: implement. Much easier once we have semiring frexlet.
+
+namespace Group
+  public export
+  Additive : Group
+  Additive = transportSetoid Quotient.Operations.Group.Additive representationInteger
 
 public export
 Num INTEGER where
@@ -40,11 +46,8 @@ Num INTEGER where
 
 public export
 Neg INTEGER where
-  negate = (ANat 0 -)
-  (ANat m) - (ANat n) = minus m n
-  (ANat m) - (NegS n) = ANat (S (m + n))
-  (NegS m) - (ANat n) = NegS (S (m + n))
-  (NegS m) - (NegS n) = minus n m
+  negate = Algebra.curry $ (Inductive.Group.Additive).Algebra.algebra.Semantics Invert
+  m - n = m + negate n
 
 public export
 Show INTEGER where

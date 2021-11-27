@@ -113,6 +113,10 @@ public export
 Mult : Op (GroupTheory).signature
 Mult = MkOp $ Mono Product
 
+public export
+Invert : Op (GroupTheory).signature
+Invert = MkOp Inverse
+
 export
 [Raw] Show Group.Theory.Axiom where
   show = \case
