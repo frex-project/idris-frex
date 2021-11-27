@@ -20,7 +20,7 @@ import Data.Integer.Connections
 
 public export
 Additive : Monoid
-Additive = transportSetoid Quotient.Operations.Additive representationInteger
+Additive = transportSetoid Quotient.Operations.Monoid.Additive representationInteger
 
 public export
 plus : (m,n : INTEGER) -> INTEGER
@@ -50,4 +50,3 @@ public export
 Show INTEGER where
   show (ANat m) = show m
   show (NegS n) = "-\{show (S n)}"
-

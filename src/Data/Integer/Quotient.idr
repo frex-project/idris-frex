@@ -9,6 +9,8 @@ import Frex
 import Frexlet.Monoid.Commutative
 import Frexlet.Monoid.Commutative.Nat
 
+import Frexlet.Group
+
 import Frexlet.Monoid.Notation
 
 import Data.Primitives.Views
@@ -21,4 +23,3 @@ import Syntax.WithProof
 %default total
 
 -- TODO: multiplication. Much easier once we have semiring frexlet.
-

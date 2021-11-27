@@ -5,6 +5,8 @@ import Frex
 import Frexlet.Monoid.Commutative
 import Frexlet.Monoid.Commutative.Nat
 
+import Frexlet.Group
+
 import Frexlet.Monoid.Notation
 
 import Data.Primitives.Views
@@ -36,10 +38,10 @@ Num INT where
     GT => MkINT {pos = cast x, neg = 0}
   (*) = mult
   (+) = plus
-  
+
 public export
 Neg INT where
-  m - n = MkINT 
+  m - n = MkINT
     { pos = m.pos + n.neg
     , neg = m.neg + n.pos
     }
@@ -72,43 +74,74 @@ plusHom = MkSetoidHomomorphism
     ~~ (x2.pos + y2.pos) + (x1.neg + y1.neg) ...(lemma)
   }
 
-public export
-Additive : Monoid
-Additive = MkModel
-  { Algebra  = MkSetoidAlgebra
-      { algebra     = MkAlgebra
-        { U   = U IntegerSetoid
-        , Sem = \case
-            Neutral => 0
-            Product => plus
+namespace Monoid
+  public export
+  Additive : Monoid
+  Additive = MkModel
+    { Algebra  = MkSetoidAlgebra
+        { algebra     = MkAlgebra
+          { U   = U IntegerSetoid
+          , Sem = \case
+              Neutral => 0
+              Product => plus
+          }
+        , equivalence = (IntegerSetoid).equivalence
+        , congruence  = \case
+            (MkOp Neutral) => \[],[],_ => Refl
+            (MkOp Product) => \[x1,y1],[x2,y2],prf => plusHom.homomorphic (x1,y1) (x2,y2) $
+                  MkAnd (prf 0) (prf 1)
         }
-      , equivalence = (IntegerSetoid).equivalence
-      , congruence  = \case
-          (MkOp Neutral) => \[],[],_ => Refl
-          (MkOp Product) => \[x1,y1],[x2,y2],prf => plusHom.homomorphic (x1,y1) (x2,y2) $
-                MkAnd (prf 0) (prf 1)
+    , Validate = \case
+        LftNeutrality => \env => case @@(env 0) of
+          (MkINT _ _ ** prf) => rewrite prf in Refl
+           {- Bug? Refl doesn't discharge h1
+           env : Fin 1 -> INT
+           ------------------------------
+           h1 : {a = Nat} {b = Nat}
+                ((env (FZ {k = 0}).pos) + (env (FZ {k = 0}).neg)) ===
+                ((env (FZ {k = 0}).pos) + (env (FZ {k = 0}).neg))
+           -}
+        RgtNeutrality => \env => case @@(env 0) of
+          (u@(MkINT pos neg) ** prf) => rewrite prf in
+           solve 2 Free {a = Nat.Additive} $
+           (X 0 .+. O1) .+. X 1 =-=
+            X 0 .+.(X 1 .+. O1)
+        Associativity => \env => case (@@(env 0), @@(env 1), @@(env 2)) of
+          ((u@(MkINT _ _) ** prf1), (v@(MkINT _ _) ** prf2), (w@(MkINT _ _) ** prf3)) =>
+            rewrite prf1 in
+            rewrite prf2 in
+            rewrite prf3 in
+            solve 6 Free {a = Nat.Additive} $
+            (X 0 .+. (X 1 .+. X 2)) .+. ((X 3 .+. X 4) .+. X 5) =-=
+            ((X 0 .+. X 1) .+. X 2) .+. ( X 3 .+.(X 4 .+. X 5))
+    }
+
+public export
+negateHom : Quotient.Operations.Monoid.Additive ~> Quotient.Operations.Monoid.Additive
+negateHom = MkSetoidHomomorphism
+  { H = MkSetoidHomomorphism
+      { H = negate
+      , homomorphic = \x,y,prf => Calc $
+          |~ x.neg + y.pos
+          ~~ y.pos + x.neg ...(plusCommutative _ _)
+          ~~ x.pos + y.neg ...(sym prf)
+          ~~ y.neg + x.pos ...(plusCommutative _ _)
       }
-  , Validate = \case
-      LftNeutrality => \env => case @@(env 0) of
-        (MkINT _ _ ** prf) => rewrite prf in Refl
-         {- Bug? Refl doesn't discharge h1
-         env : Fin 1 -> INT
-         ------------------------------
-         h1 : {a = Nat} {b = Nat}
-              ((env (FZ {k = 0}).pos) + (env (FZ {k = 0}).neg)) ===
-              ((env (FZ {k = 0}).pos) + (env (FZ {k = 0}).neg))
-         -}
-      RgtNeutrality => \env => case @@(env 0) of
-        (u@(MkINT pos neg) ** prf) => rewrite prf in 
-         solve 2 Free {a = Nat.Additive} $
-         (X 0 .+. O1) .+. X 1 =-=
-          X 0 .+.(X 1 .+. O1)
-      Associativity => \env => case (@@(env 0), @@(env 1), @@(env 2)) of
-        ((u@(MkINT _ _) ** prf1), (v@(MkINT _ _) ** prf2), (w@(MkINT _ _) ** prf3)) =>
-          rewrite prf1 in
-          rewrite prf2 in
-          rewrite prf3 in
-          solve 6 Free {a = Nat.Additive} $
-          (X 0 .+. (X 1 .+. X 2)) .+. ((X 3 .+. X 4) .+. X 5) =-=
-          ((X 0 .+. X 1) .+. X 2) .+. ( X 3 .+.(X 4 .+. X 5))
+  , preserves = \case
+      MkOp Neutral => \_     => Refl
+      MkOp Product => \[x,y] => Refl
   }
+
+namespace Group
+  public export
+  Additive : Group
+  Additive = MkGroup
+    { monoid = Quotient.Operations.Monoid.Additive
+    , inverse = negateHom.H
+    , lftInversion = \env => solve 2 Commutative.Free.Free {a = Additive} $
+        (X 0 .+. X 1) .+. O1 =-=
+        (X 1 .+. X 0)
+    , rgtInversion = \env => solve 2 Commutative.Free.Free {a = Additive} $
+        (X 0 .+. X 1) .+. O1 =-=
+        (X 1 .+. X 0)
+    }
