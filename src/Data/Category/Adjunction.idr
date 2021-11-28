@@ -59,3 +59,10 @@ public export
 mateInvNatural : {c,d : Category} -> (adj : Adjunction c d) ->
   (HomPair Id adj.rgt) ~> (HomPair adj.lft Id)
 mateInvNatural adj = U (mateIsInvertible adj).inverse
+
+public export
+mateIsomorphism : {c,d : Category} -> (adj : Adjunction c d) ->
+  (Functor (c.op `Pair` d) Setoid).Isomorphism
+    (MkHom $ mateNatural    adj)
+    (MkHom $ mateInvNatural adj)
+mateIsomorphism adj = (mateIsInvertible adj).isInverse
