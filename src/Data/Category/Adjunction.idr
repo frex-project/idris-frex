@@ -1,12 +1,13 @@
 module Data.Category.Adjunction
 
 import Data.Setoid
+import Data.Setoid.Fun
+
 import Data.Category.Core
 import Data.Category.Construction.Pair
 import Data.Category.Construction.Op
 import Data.Category.Setoid
 
-import Data.Setoid.Fun
 -- Use natural bijection definition, to avoid messing around with 2-categories
 public export
 HomPair : {c1, c2, d : Category} -> (f : c1 ~> d) -> (g : c2 ~> d) ->
@@ -19,7 +20,8 @@ record Adjunction (C, D : Category) where
   lft : C ~> D
   rgt : D ~> C
 
-  mate : {a : C .Obj} -> {b : D .Obj} -> D .HomSet (lft !! a) b <~> C .HomSet a (rgt !! b)
+  mate : {a : C .Obj} -> {b : D .Obj} ->
+    D .HomSet (lft !! a) b <~> C .HomSet a (rgt !! b)
 
   naturality : {a1,a2 : C .Obj} -> {b1,b2 : D .Obj} ->
     (f : D .Hom b1 b2) -> (g : C .Hom a2 a1) ->
@@ -42,7 +44,7 @@ mateNatural {c,d} adj =
 
 public export
 mateIsInvertible : {c,d : Category} -> (adj : Adjunction c d) ->
-  (Functor (c.op `Pair` d) Setoid).Invertible $ MkHom (mateNaturality adj)
+  (Functor (c.op `Pair` d) Setoid).Invertible $ MkHom (mateNatural adj)
 mateIsInvertible adj = ComponentwiseIso (mateNatural adj) $
   \ab => IsInvertible
     { inverse = MkHom adj.mate.Bwd
