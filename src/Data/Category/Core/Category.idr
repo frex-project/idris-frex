@@ -94,6 +94,22 @@ public export
 cat.cong (u1,u2) (v1,v2) prf = MkHomEq $ cat.structure.compArr.homomorphic
   (U u1, U u2) (U v1, U v2) (MkAnd prf.fst.runEq prf.snd.runEq)
 
+public export
+MkHomHomo : {c : Category} -> {a,b : c.Obj} ->
+  (c.structure.Arr a b)  ~> c.HomSet a b
+MkHomHomo = MkSetoidHomomorphism
+  { H = MkHom
+  , homomorphic = \uv1,uv2 => MkHomEq
+  }
+
+public export
+UHomo : {c : Category} -> {a,b : c.Obj} ->
+  c.HomSet a b ~> (c.structure.Arr a b)
+UHomo = MkSetoidHomomorphism
+  { H = U
+  , homomorphic = \uv1,uv2,prf => prf.runEq
+  }
+
 namespace CongTgt
   public export
   (.) : {cat : Category} -> {a,b,c : cat.Obj} ->

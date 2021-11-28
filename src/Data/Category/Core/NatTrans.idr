@@ -3,6 +3,8 @@ module Data.Category.Core.NatTrans
 import Data.Category.Core.Category
 import Data.Category.Core.Functor
 
+import Data.Setoid.Fun
+
 public export 0
 Transformation : {c,d : Category} -> (f,g : c ~> d) -> Type
 Transformation f g = (a : c.Obj) -> d.Hom (f !! a) (g !! a)

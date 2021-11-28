@@ -24,9 +24,6 @@ cat.op = MkCategory
     }
   }
 
-hide : ((a : t) -> b) -> {a : t} -> b
-hide f {a} = f a
-
 namespace Functor
   public export
   (.op) : {c,d : Category} -> (f : c ~> d) -> c.op ~> d.op

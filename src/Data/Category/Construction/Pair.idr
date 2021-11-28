@@ -42,4 +42,25 @@ parameters (Cat1, Cat2 : Category)
     }
 
   -- and one can construct the other structure: projection functors,
-  -- tupling functor etc.
+  -- tupling functor etc. We'll define this one (even if it's not the
+  -- most economical way to go about it)
+
+public export
+pair : {c1, c2, d1, d2 : Category} -> (f : c1 ~> c2) -> (g : d1 ~> d2) ->
+  (c1 `Pair` d1) ~> (c2 `Pair` d2)
+pair f1 f2 = MkFunctor
+  { structure = MkStructure           -- build eta into the def
+      { mapObj = \uv => bimap (f1 !!) (f2 !!) (fst uv, snd uv)
+      , mapHom = MkHomHomo {c = c2 `Pair` d2}
+               . (bimap (UHomo  . f1.mapSetoid . MkHomHomo)
+                        (UHomo  . f2.mapSetoid . MkHomHomo))
+               . (UHomo {c = c1 `Pair` d1})
+      }
+  , functoriality = Check
+      { id = \ab => MkHomEq $ MkAnd (f1.functoriality.id $ fst ab).runEq
+                                    (f2.functoriality.id $ snd ab).runEq
+      , comp = \uv1,uv2 => MkHomEq $ MkAnd
+          (f1.functoriality.comp (MkHom $ fst $ U uv1) (MkHom $ fst $ U uv2)).runEq
+          (f2.functoriality.comp (MkHom $ snd $ U uv1) (MkHom $ snd $ U uv2)).runEq
+      }
+  }
