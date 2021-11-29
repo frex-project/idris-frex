@@ -78,7 +78,6 @@ record Category where
   structure : Structure Obj
   laws : Laws structure
 
-
 public export
 (.HomSet) : (cat : Category) -> (a, b : cat.Obj) -> Setoid
 cat.HomSet a b = cat.structure.HomSet a b
@@ -86,6 +85,17 @@ cat.HomSet a b = cat.structure.HomSet a b
 public export
 (.Hom) : (cat : Category) -> (a, b : cat.Obj) -> Type
 cat.Hom a b = cat.structure.Hom a b
+
+-- A bit crazy but:
+-- since we often give objects as implicit arguments in types, and since we
+-- often define record fields of these types using anonymous functions, and
+-- idris2 doesn't have any syntax for implicit arguments in anonymous functions
+-- it's useful to be able to project out the domain and codomain of a morphism.
+
+public export
+(.src),(.tgt) : {0 c : Category} -> {a,b : c.Obj} -> (c.Hom a b) -> c.Obj
+(u.src) {a} = a
+(u.tgt) {b} = b
 
 public export
 (.cong) : (cat : Category) -> {a,b,c : cat.Obj} ->

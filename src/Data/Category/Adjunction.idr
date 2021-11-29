@@ -15,54 +15,151 @@ HomPair : {c1, c2, d : Category} -> (f : c1 ~> d) -> (g : c2 ~> d) ->
 HomPair f g = Hom {c = d} . (f.op `pair` g)
 
 public export
+record Adjoint {C,D : Category} (Lft : C ~> D) (Rgt : D ~> C) where
+  constructor AreAjoint
+  mate : {a : C .Obj} -> {b : D .Obj} ->
+    D .HomSet (Lft !! a) b <~> C .HomSet a (Rgt !! b)
+  naturality : {a1,a2 : C .Obj} -> {b1,b2 : D .Obj} ->
+    (f : D .Hom b1 b2) -> (g : C .Hom a2 a1) ->
+    (u : D .Hom (Lft !! a1) b1) ->
+    (C .HomSet a2 (Rgt !! b2)).equivalence.relation
+      (mate.Fwd.H (f . u . (Lft).map g))
+      ((Rgt).map f . mate.Fwd.H u . g)
+
+public export
 record Adjunction (C, D : Category) where
   constructor MkAdjunction
   lft : C ~> D
   rgt : D ~> C
 
-  mate : {a : C .Obj} -> {b : D .Obj} ->
-    D .HomSet (lft !! a) b <~> C .HomSet a (rgt !! b)
+  adjoint : Adjoint lft rgt
 
-  naturality : {a1,a2 : C .Obj} -> {b1,b2 : D .Obj} ->
-    (f : D .Hom b1 b2) -> (g : C .Hom a2 a1) ->
-    (u : D .Hom (lft !! a1) b1) ->
-    (C .HomSet a2 (rgt !! b2)).equivalence.relation
-      (mate.Fwd.H (f . u . lft.map g))
-      (rgt.map f . mate.Fwd.H u . g)
 
 public export
-mateNatural : {c,d : Category} -> (adj : Adjunction c d) ->
+{f : c ~> d} -> {g : d ~> c} -> Cast (Adjoint {C=c,D=d} f g) (Adjunction c d) where
+  cast adjoint = MkAdjunction f g adjoint
+
+public export
+(.mateNatural) : {c,d : Category} -> (adj : Adjunction c d) ->
   (HomPair adj.lft Id) ~> (HomPair Id adj.rgt)
-mateNatural {c,d} adj =
+(adj.mateNatural) {c,d} =
   MkNatTrans
-  { transformation = \ab => MkHom (adj.mate).Fwd
+  { transformation = \ab => MkHom (adj.adjoint.mate).Fwd
   , naturality = \uv => MkHomEq $ \phi =>
-    MkHomEq (adj.naturality (MkHom $ snd $ U uv)
-                            (MkHom $ fst $ U uv)
+    MkHomEq (adj.adjoint.naturality (MkHom $ snd $ U uv)
+                                    (MkHom $ fst $ U uv)
                             phi).runEq
   }
 
 public export
 mateIsInvertible : {c,d : Category} -> (adj : Adjunction c d) ->
-  (Functor (c.op `Pair` d) Setoid).Invertible $ MkHom (mateNatural adj)
-mateIsInvertible adj = ComponentwiseIso (mateNatural adj) $
+  (Functor (c.op `Pair` d) Setoid).Invertible $ MkHom adj.mateNatural
+mateIsInvertible adj = ComponentwiseIso adj.mateNatural $
   \ab => IsInvertible
-    { inverse = MkHom adj.mate.Bwd
+    { inverse = MkHom adj.adjoint.mate.Bwd
     , isInverse = MutuallyInverse
-        { FromIntoId = MkHomEq adj.mate.Iso.BwdFwdId
-        , IntoFromId = MkHomEq adj.mate.Iso.FwdBwdId
+        { FromIntoId = MkHomEq adj.adjoint.mate.Iso.BwdFwdId
+        , IntoFromId = MkHomEq adj.adjoint.mate.Iso.FwdBwdId
         }
 
     }
 
 public export
-mateInvNatural : {c,d : Category} -> (adj : Adjunction c d) ->
+(.mateInvNatural) : {c,d : Category} -> (adj : Adjunction c d) ->
   (HomPair Id adj.rgt) ~> (HomPair adj.lft Id)
-mateInvNatural adj = U (mateIsInvertible adj).inverse
+adj.mateInvNatural = U (mateIsInvertible adj).inverse
 
 public export
 mateIsomorphism : {c,d : Category} -> (adj : Adjunction c d) ->
   (Functor (c.op `Pair` d) Setoid).Isomorphism
-    (MkHom $ mateNatural    adj)
-    (MkHom $ mateInvNatural adj)
+    (MkHom adj.mateNatural   )
+    (MkHom adj.mateInvNatural)
 mateIsomorphism adj = (mateIsInvertible adj).isInverse
+
+public export
+unit : {c,d : Category} -> (adj : Adjunction c d) ->
+  Id ~> adj.rgt . adj.lft
+unit {c,d} adj = MkNatTrans
+  { transformation = \a => (U $ adj.mateNatural ^ (a , adj.lft !! a)).H Id
+  , naturality = \u =>
+      {- The plan is to chase the identity through two diagrams:
+
+  d.Hom (lft !! a) (lft !! a)  ----- mate ----------> c.Hom a (rgt !! lft !! a)
+     \                        naturality                                     |
+      \  d.Hom Id (lft.map u)     =          c.Hom Id (rgt.map . lft.map u)  |
+       \                                                                     v
+       --> d.Hom (lft !! a) (lft !! b) ---- mate ---> c.Hom a (rgt !! lft !! b)
+      /                                                                      ^
+     / d.Hom (lft !! u) Id               =                       d.Hom u  Id |
+    /                                naturality                              |
+  d.Hom (lft !! b) (lft !! b) ----- mate ----------> c.Hom b (rgt !! lft !! a)
+
+       like so:
+
+       id           |------------------->     unit a
+       __                                      _
+        \                                      |
+         \                                     |
+          -> lft.map u . id                    V
+                ||                       (rgt.map . lft.map) u . unit a
+             lft.map u                        ||
+                ||                            ||
+        id . lft.map u                   unit b . u
+            ^                                 ^
+           /                                  |
+          /                                   |
+        _/_                                  _|_
+        id   |-------------------------> unit b
+      -}
+      let A,B : c.Obj
+          A = u.src
+          B = u.tgt
+          T : c ~> c
+          T = adj.rgt . adj.lft
+          mate : {a : c.Obj} -> {b : d.Obj} ->
+                  d.HomSet (adj.lft !! a) b ~> c.HomSet a (adj.rgt !! b)
+          mate {a,b} = (U $ adj.mateNatural ^ (a , b))
+          eta : (a : c.Obj) -> c.Hom a (T !! a)
+          eta a = mate.H Id
+          upper : (c.HomSet A (T !! B)).equivalence.relation
+                    (mate.H (adj.lft.map u))
+                    (((T).map u) . (eta A))
+          upper = CalcWith (c.HomSet _ _) $
+            |~  mate.H (adj.lft.map u)
+            ~~ (mate.H (adj.lft.map u . Id     )) ..<(mate.homomorphic _ _ $
+                                                      d.laws.idRgtNeutral _)
+            ~~ (mate.H (adj.lft.map u . Id . Id)) ..<(mate.homomorphic _ _ $
+                                                     (adj.lft.map u) .
+                                                       (d.laws.idRgtNeutral Id))
+            ~~ (mate.H (adj.lft.map u
+                 . Id {a = adj.lft !! A}
+                 . (adj.lft.map $ Id)))           ..<(mate.homomorphic _ _ $
+                                                     adj.lft.map u . Id .
+                                                     adj.lft.functoriality.id A)
+
+            ~~ (((T).map u) . (eta A . Id))       ...(adj.adjoint.naturality
+                                                     (adj.lft.map u)
+                                                     Id
+                                                     Id)
+            ~~ (((T).map u) . (eta A))          ...(((T).map u) .
+                                                    (c.laws.idRgtNeutral _ ))
+          -- similarly for the lower half
+          lower : (c.HomSet A (T !! B)).equivalence.relation
+                    (mate.H (adj.lft.map u))
+                    (eta B . u)
+          lower = CalcWith (c.HomSet _ _) $
+            |~ mate.H (adj.lft.map u)
+            ~~ mate.H (     Id . (adj.lft.map u)) ..<(mate.homomorphic _ _ $
+                                                      d.laws.idLftNeutral _)
+            ~~ mate.H (Id . Id . (adj.lft.map u)) ..<(mate.homomorphic _ _ $
+                                                      d.laws.idLftNeutral _)
+            ~~ adj.rgt.map Id . eta B . u         ...(adj.adjoint.naturality
+                                                      Id u Id)
+            ~~             Id . eta B . u         ...(adj.rgt.functoriality.id _
+                                                      . (eta B . u))
+            ~~                  eta B . u         ...(c.laws.idLftNeutral _)
+      in CalcWith (c.HomSet _ _) $
+      |~ (eta B . u)
+      ~~ mate.H (adj.lft.map u)  ..<(lower)
+      ~~ (((T).map u) . (eta A)) ...(upper)
+  }
