@@ -86,6 +86,13 @@ public export
 (.Hom) : (cat : Category) -> (a, b : cat.Obj) -> Type
 cat.Hom a b = cat.structure.Hom a b
 
+public export
+etaLaw : {c : Category} -> {a,b : c.Obj} ->
+    (u : c.Hom a b) -> (c.HomSet a b).equivalence.relation
+        (MkHom $ U u)
+        u
+etaLaw (MkHom _) = (c.HomSet a b).equivalence.reflexive _
+
 -- A bit crazy but:
 -- since we often give objects as implicit arguments in types, and since we
 -- often define record fields of these types using anonymous functions, and

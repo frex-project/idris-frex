@@ -208,3 +208,34 @@ namespace Adjoint
 public export
 (.op) : {c, d : Category} -> Adjunction c d -> Adjunction d.op c.op
 adj.op = MkAdjunction adj.rgt.op adj.lft.op adj.adjoint.op
+
+public export
+counit : {c,d : Category} -> (adj : Adjunction c d) ->
+  adj.lft . adj.rgt ~> Id
+counit {c,d} adj =
+  let unitOp : Id ~> adj.op.rgt . adj.op.lft
+      unitOp = unit adj.op
+      epsilon : Transformation (adj.lft . adj.rgt) Id
+      epsilon a = MkHom $ U $ unitOp ^ a
+  in MkNatTrans
+  { transformation = epsilon
+  , naturality = \u@(MkHom u' {a,b}) =>
+      let A,B : d.Obj
+          A = a
+          B = b
+          v : d.op.Hom B A
+          v = MkHom $ u'
+      in CalcWith (d.HomSet _ _) $
+      |~ (epsilon B) . (adj.lft.map (adj.rgt.map $ MkHom u'))
+      ~~ (MkHom $ U $ (adj.op.rgt.map (adj.op.lft.map v)) . (MkHom $ U $ unitOp ^ B))
+          -- We need to use an eta law smack inside the middle of the term ;..(
+          ..<(MkHomHomo .homomorphic _ _ $
+              d.structure.compArr.homomorphic _ _ $
+              MkAnd
+                ((d.structure.Arr (adj.lft !! adj.rgt !! b) b).equivalence.reflexive
+                  (U $ epsilon B))
+                (adj.lft.structure.mapHom.homomorphic _ _ $ (etaLaw _)).runEq)
+      ~~ (MkHom $ U $ (unitOp ^ A) . v)
+          ..<(MkHomEq (unitOp.naturality (MkHom $ U u)).runEq)
+      ~~ (MkHom u') . (epsilon A) .=.(Refl)
+  }
