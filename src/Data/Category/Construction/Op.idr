@@ -83,3 +83,7 @@ namespace Functor
                    (d.op.HomSet _ _).equivalence.reflexive _
         }
     }
+
+public export
+HomOpIso : {c : Category} -> {a,b : c.Obj} -> c.op.HomSet a b <~> c.HomSet b a
+HomOpIso = (HomArrIso {c = c.op} `trans` (sym $ HomArrIso {c}))

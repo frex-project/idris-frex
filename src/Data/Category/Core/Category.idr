@@ -120,6 +120,19 @@ UHomo = MkSetoidHomomorphism
   , homomorphic = \uv1,uv2,prf => prf.runEq
   }
 
+
+public export
+HomArrIso : {c : Category} -> {a,b : c.Obj} ->
+  c.HomSet a b <~> c.structure.Arr a b
+HomArrIso = MkIsomorphism
+  { Fwd = UHomo
+  , Bwd = MkHomHomo
+  , Iso = IsIsomorphism
+      { FwdBwdId = (c.structure.Arr a b).equivalence.reflexive
+      , BwdFwdId = \(MkHom u) => (c       .HomSet a b).equivalence.reflexive _
+      }
+  }
+
 namespace CongTgt
   public export
   (.) : {cat : Category} -> {a,b,c : cat.Obj} ->

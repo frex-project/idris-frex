@@ -16,7 +16,7 @@ HomPair f g = Hom {c = d} . (f.op `pair` g)
 
 public export
 record Adjoint {C,D : Category} (Lft : C ~> D) (Rgt : D ~> C) where
-  constructor AreAjoint
+  constructor AreAdjoint
   mate : {a : C .Obj} -> {b : D .Obj} ->
     D .HomSet (Lft !! a) b <~> C .HomSet a (Rgt !! b)
   naturality : {a1,a2 : C .Obj} -> {b1,b2 : D .Obj} ->
@@ -36,8 +36,8 @@ record Adjunction (C, D : Category) where
 
 
 public export
-{f : c ~> d} -> {g : d ~> c} -> Cast (Adjoint {C=c,D=d} f g) (Adjunction c d) where
-  cast adjoint = MkAdjunction f g adjoint
+cast : {f : c ~> d} -> {g : d ~> c} -> Adjoint f g -> (Adjunction c d)
+cast adjoint = MkAdjunction f g adjoint
 
 public export
 (.mateNatural) : {c,d : Category} -> (adj : Adjunction c d) ->
@@ -163,3 +163,48 @@ unit {c,d} adj = MkNatTrans
       ~~ mate.H (adj.lft.map u)  ..<(lower)
       ~~ (((T).map u) . (eta A)) ...(upper)
   }
+
+%unbound_implicits off
+namespace Adjoint
+  public export
+  (.op) : {c,d : Category} -> {lft : c ~> d} -> {rgt : d ~> c} ->
+    Adjoint lft rgt -> Adjoint rgt.op lft.op
+  adjoint.op =
+    let MateOp : {a : d.op.Obj}-> {b : c.op.Obj} ->
+          c.op.HomSet (rgt.op !! a) b <~> d.op.HomSet a (lft.op !! b)
+        MateOp = (HomOpIso `trans` (sym $ adjoint.mate))
+                       `trans` (sym HomOpIso)
+    in AreAdjoint
+    { mate = MateOp
+      -- This is ridiculous, I think there's a bug in the elaborator if I need to
+      -- supply all this information just to get going.
+    , naturality = \f@(MkHom f' {a=b1,b=b2}),g@(MkHom g' {a=a2,b=a1}),u@(MkHom u') =>
+        MkHomEq (CalcWith (d.HomSet (lft !! b2) a2) $
+        |~ adjoint.mate.Bwd.H ((rgt.map (MkHom $ g')
+                              . (MkHom $ u'))
+                              . (MkHom $ f'))
+        ~~ adjoint.mate.Bwd.H (rgt.map (MkHom $ g')
+                              . (MkHom $ u')
+                              . (MkHom $ f')) ..<(adjoint.mate.Bwd.homomorphic
+                                                  _ _ $
+                                                  c.laws.associativity
+                                                    (rgt.map (MkHom $ g'))
+                                                    (MkHom $ u')
+                                                    (MkHom $ f'))
+        ~~ (MkHom $ g') . (adjoint.mate.Bwd.H $ MkHom $ u')
+                        . (lft.map $ MkHom $ f')
+                -- simply ridiculous
+             ...(((MkAdjunction lft rgt adjoint).mateInvNatural.naturality
+                   (MkHom {a = (b1,a1), b=(b2, a2)} (f', g'))).runEq (MkHom u'))
+        ~~ ((MkHom $ g') . (adjoint.mate.Bwd.H $ MkHom $ u'))
+                         . (lft.map $ MkHom $ f')
+                                                 ...(d.laws.associativity
+                                                     (MkHom $ g')
+                                                     (adjoint.mate.Bwd.H $ MkHom $ u')
+                                                     (lft.map $ MkHom $ f'))).runEq
+    }
+%unbound_implicits on
+
+public export
+(.op) : {c, d : Category} -> Adjunction c d -> Adjunction d.op c.op
+adj.op = MkAdjunction adj.rgt.op adj.lft.op adj.adjoint.op
