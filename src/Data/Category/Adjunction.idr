@@ -228,13 +228,9 @@ counit {c,d} adj =
       in CalcWith (d.HomSet _ _) $
       |~ (epsilon B) . (adj.lft.map (adj.rgt.map $ MkHom u'))
       ~~ (MkHom $ U $ (adj.op.rgt.map (adj.op.lft.map v)) . (MkHom $ U $ unitOp ^ B))
-          -- We need to use an eta law smack inside the middle of the term ;..(
-          ..<(MkHomHomo .homomorphic _ _ $
-              d.structure.compArr.homomorphic _ _ $
-              MkAnd
-                ((d.structure.Arr (adj.lft !! adj.rgt !! b) b).equivalence.reflexive
-                  (U $ epsilon B))
-                (adj.lft.structure.mapHom.homomorphic _ _ $ (etaLaw _)).runEq)
+          ..<(MkHomEq
+                ((epsilon B) . (adj.lft.structure.mapHom.homomorphic _ _ (etaLaw _))
+             ).runEq)
       ~~ (MkHom $ U $ (unitOp ^ A) . v)
           ..<(MkHomEq (unitOp.naturality (MkHom $ U u)).runEq)
       ~~ (MkHom u') . (epsilon A) .=.(Refl)
