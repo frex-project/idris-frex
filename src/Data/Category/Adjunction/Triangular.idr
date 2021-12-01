@@ -22,6 +22,7 @@ import Data.Category.Setoid
 
 public export
 record AdjunctionStructure (C,D : Category) where
+  constructor MkAdjunctionStructure
   lft : C ~> D
   rgt : D ~> C
 

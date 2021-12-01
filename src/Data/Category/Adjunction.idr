@@ -235,3 +235,92 @@ counit {c,d} adj =
           ..<(MkHomEq (unitOp.naturality (MkHom $ U u)).runEq)
       ~~ (MkHom u') . (epsilon A) .=.(Refl)
   }
+
+-- TODO: refactor the above to use these
+
+-- Easy consequences of mate's naturality
+public export
+(.mateNaturalityPre) : {c,d : Category} -> (adj : Adjunction.Adjunction c d) ->
+  {a2,a1 : c.Obj} -> {b : d.Obj} ->
+  (u : c.Hom a2 a1) -> (f : d.Hom (adj.lft !! a1) b) ->
+  (c.HomSet _ _).equivalence.relation
+    (adj.adjoint.mate.Fwd.H (f . adj.lft.map u))
+    (adj.adjoint.mate.Fwd.H f . u)
+adj.mateNaturalityPre u f =
+  let mate : {a : c.Obj} -> {b : d.Obj} ->
+             d.HomSet (adj.lft !! a) b ~> c.HomSet a (adj.rgt !! b)
+      mate = adj.adjoint.mate.Fwd
+  in CalcWith (c.HomSet _ _) $
+  |~ mate.H (f . adj.lft.map u)
+  ~~ mate.H (Id . f . adj.lft.map u) ..<(mate.homomorphic _ _ $
+                                         d.laws.idLftNeutral _)
+  ~~ adj.rgt.map Id . mate.H f .  u  ...(adj.adjoint.naturality Id _ _)
+  ~~             Id . mate.H f .  u  ...(adj.rgt.functoriality.id _
+                                        . (mate.H f . u))
+  ~~                  mate.H f .  u  ...(c.laws.idLftNeutral _)
+
+public export
+(.mateNaturalityPost) : {c,d : Category} -> (adj : Adjunction.Adjunction c d) ->
+  {a : c.Obj} -> {b1,b2 : d.Obj} ->
+  (u : d.Hom b1 b2) -> (f : d.Hom (adj.lft !! a) b1) ->
+         -- v-- no idea why this `a` can't be inferred. Bug?
+  (c.HomSet a _).equivalence.relation
+    (adj.adjoint.mate.Fwd.H (u . f))
+    (adj.rgt.map u . adj.adjoint.mate.Fwd.H f)
+adj.mateNaturalityPost u f =
+  let mate : {a : c.Obj} -> {b : d.Obj} ->
+             d.HomSet (adj.lft !! a) b ~> c.HomSet a (adj.rgt !! b)
+      mate = adj.adjoint.mate.Fwd
+  in CalcWith (c.HomSet _ _) $
+  |~ mate.H (u . f)
+  ~~ mate.H (u . f . Id)             ..<(mate.homomorphic _ _ $
+                                         u . d.laws.idRgtNeutral _)
+  ~~ mate.H (u . f . adj.lft.map Id) ..<(mate.homomorphic _ _ $
+                                         u . f . adj.lft.functoriality.id _)
+  ~~ adj.rgt.map u . mate.H f . Id   ...(adj.adjoint.naturality _ _ _)
+  ~~ adj.rgt.map u . mate.H f        ...(adj.rgt.map u . c.laws.idRgtNeutral _)
+
+public export
+(.mateInvNaturalityPre) : {c,d : Category} -> (adj : Adjunction.Adjunction c d) ->
+  {a1,a2 : c.Obj} -> {b : d.Obj} ->
+  (u : c.Hom a2 a1) -> (g : c.Hom a1 (adj.rgt !! b)) ->
+  (d.HomSet _ b).equivalence.relation
+    (adj.adjoint.mate.Bwd.H (g . u))
+    (adj.adjoint.mate.Bwd.H g . adj.lft.map u)
+adj.mateInvNaturalityPre u g =
+  let mate : {a : c.Obj} -> {b : d.Obj} ->
+             d.HomSet (adj.lft !! a) b <~> c.HomSet a (adj.rgt !! b)
+      mate = adj.adjoint.mate
+  in CalcWith (d.HomSet _ _) $
+  |~ mate.Bwd.H (                          g . u)
+  ~~ mate.Bwd.H ((mate.Fwd.H $ mate.Bwd.H g) . u)
+                               ..<(mate.Bwd.homomorphic _ _ $
+                                  mate.Iso.FwdBwdId g
+                                  . u)
+  ~~ mate.Bwd.H (mate.Fwd.H ((mate.Bwd.H g) . adj.lft.map u))
+                               ..<(mate.Bwd.homomorphic _ _ $
+                                   adj.mateNaturalityPre u (mate.Bwd.H g))
+  ~~ mate.Bwd.H g . adj.lft.map u
+                               ...(mate.Iso.BwdFwdId _)
+
+public export
+(.mateInvNaturalityPost) : {c,d : Category} -> (adj : Adjunction.Adjunction c d) ->
+  {a : c.Obj} -> {b1,b2 : d.Obj} ->
+  (u : d.Hom b1 b2) -> (g : c.Hom a (adj.rgt !! b1)) ->
+  (d.HomSet _ _).equivalence.relation
+    (adj.adjoint.mate.Bwd.H (adj.rgt.map u . g))
+    (u . adj.adjoint.mate.Bwd.H g)
+adj.mateInvNaturalityPost u g =
+  let mate : {a : c.Obj} -> {b : d.Obj} ->
+             d.HomSet (adj.lft !! a) b <~> c.HomSet a (adj.rgt !! b)
+      mate = adj.adjoint.mate
+  in CalcWith (d.HomSet _ _) $
+  |~ mate.Bwd.H (adj.rgt.map u .                          g )
+  ~~ mate.Bwd.H (adj.rgt.map u . (mate.Fwd.H $ mate.Bwd.H g))
+                               ..<(mate.Bwd.homomorphic _ _ $
+                                  adj.rgt.map u .
+                                  mate.Iso.FwdBwdId g)
+  ~~ mate.Bwd.H (mate.Fwd.H (u . (mate.Bwd.H g)))
+                               ..<(mate.Bwd.homomorphic _ _ $
+                                   adj.mateNaturalityPost u (mate.Bwd.H g))
+  ~~ u . mate.Bwd.H g          ...(mate.Iso.BwdFwdId _)
