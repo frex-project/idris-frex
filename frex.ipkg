@@ -89,6 +89,7 @@ modules = Frex
         , Data.Category.Construction.Pair
         , Data.Category.Setoid
         , Data.Category.Adjunction
+        , Data.Category.Adjunction.Triangular
         , Syntax.PreorderReasoning.Setoid
         , Utils.String
 

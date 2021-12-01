@@ -196,3 +196,10 @@ record (.Invertible) (cat : Category) {a,b : cat.Obj}  (u : cat.Hom a b) where
   inverse : cat.Hom b a
   isInverse : cat.Isomorphism u inverse
 %unbound_implicits on
+
+public export
+record (.Iso) (cat : Category) (A,B : cat.Obj)where
+  constructor MkIso
+  into : cat.Hom A B
+  from : cat.Hom B A
+  iso  : cat.Isomorphism into from

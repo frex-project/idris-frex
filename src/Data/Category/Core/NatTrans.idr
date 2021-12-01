@@ -186,3 +186,78 @@ ComponentwiseIso alpha inverses =
     , FromIntoId = MkHomEq $ \a => (inverses a).isInverse.FromIntoId
     }
   }
+
+-- More structure from the bicategory of categories, functors, and
+-- natural transformations. It looks a bit funny because, under the
+-- hood, Idris normalises function application by evaluation
+public export
+IdRgt : {c,d : Category} -> (f : c ~> d) ->
+  (Functor c d).Iso
+     f
+    (f . Id)
+IdRgt f = MkIso
+  { into = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map u
+        ~~ f.map u . Id ...(Id .naturality u)
+    }
+  , from = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map u
+        ~~ f.map u . Id ...(Id .naturality u)
+    }
+  , iso = MutuallyInverse
+    { IntoFromId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    , FromIntoId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    }
+  }
+public export
+IdLft : {c,d : Category} -> (f : c ~> d) ->
+  (Functor c d).Iso
+    f
+    (Id . f)
+IdLft f = MkIso
+  { into = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map u
+        ~~ f.map u . Id  ...(Id .naturality u)
+    }
+  , from = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map u
+        ~~ f.map u . Id ...(Id .naturality u)
+    }
+  , iso = MutuallyInverse
+    { IntoFromId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    , FromIntoId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    }
+  }
+
+public export
+Associativity : {a, b, c, d : Category} ->
+  (f : c ~> d) -> (g : b ~> c) -> (h : a ~> b) ->
+  (Functor a d).Iso
+    (f . g . h)
+    ((f . g) . h)
+Associativity f g h = MkIso
+  { into = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map (g.map (h.map u))
+        ~~ f.map (g.map (h.map u)) . Id ...(Id .naturality _)
+    }
+  , from = MkHom $ MkNatTrans
+    { transformation = \a => Id
+    , naturality = \u => CalcWith (d.HomSet _ _) $
+        |~ Id . f.map (g.map (h.map u))
+        ~~ f.map (g.map (h.map u)) . Id ...(Id .naturality _)
+    }
+  , iso = MutuallyInverse
+    { IntoFromId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    , FromIntoId = MkHomEq $ \a => d.laws.idRgtNeutral _
+    }
+  }
