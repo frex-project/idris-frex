@@ -6,6 +6,8 @@ import Data.Category
 import Data.Category.Adjunction
 import Data.Category.Colimit.Universal
 
+%ambiguity_depth 5
+
 parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
   public export
   Farr : (x : C .Obj) -> x `Arrow` G
@@ -106,10 +108,8 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
              (C .HomSet x y).equivalence.relation
                   (u1 . (Unit x))
                   (u2 . (Unit x))
-  congUnit prf = ?h131717
-    --let foo = True --CongTgt.(.) --{a = x, b = G !! Fobj x, c = y, v = Unit x, u1, u2} prf (Unit x)
-    --in ?h181731
-{-
+  -- bug: should be the following, but takes forever to typecheck
+  --congUnit {x} prf = prf . (Unit x)
 
   %unbound_implicits off
   public export
@@ -159,14 +159,6 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
               Z = u.tgt
               ArrTgt : X `Arrow` G
               ArrTgt = (MkArrow {Cod = Fobj Z, Arr = Unit Z . (u . v)})
-              lemma1 : (C .HomSet (G !! Fobj X) (G !! Fobj Z)).equivalence.relation
-                (G .map $ Fmap u . Fmap v)
-                ((GFmap u) . (GFmap v))
-              lemma1 = G .functoriality.comp (Fmap u) (Fmap v)
-              lemma2 : (C .HomSet X (G !! Fobj Z)).equivalence.relation
-                ((G .map $ Fmap u . Fmap v) . (Unit X))
-                (((GFmap u) . (GFmap v)   ) . (Unit X))
-              lemma2 = congUnit lemma1
 
               h1,h2 : (X ~~> G).Hom
                         (Farr X)
@@ -181,20 +173,19 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
                 , preserves = CalcWith (C .HomSet _ _) $
                   |~ (G .map $ Fmap u . Fmap v) . (Unit X)
                   ~~ ((GFmap u) . (GFmap v)) . (Unit X)
-                                       ...(lemma2)
+                                       ...(congUnit $
+                                           G .functoriality.comp (Fmap u) (Fmap v))
                   ~~  (GFmap u) . ((GFmap v)  . (Unit X))
-                                       ...(?h1912)
+                                       ..<(C .laws.associativity (GFmap u) (GFmap v) (Unit X))
                   ~~  (GFmap u) . (Unit Y  . v)
-                                       ...(?h1913)
+                                       ..<(?h131)--(GFmap u) . (UnitNat v)) -- bug?
                   ~~ ((GFmap u) .  Unit Y) . v
-                                       ...(?h1914)
-                  ~~ (Unit Z . u) . v  ...(?h1915)
-                  ~~ (Unit Z) . (u . v) ...(?h1911)
+                                       ...(C .laws.associativity (GFmap u) (Unit Y) v)
+                  ~~ (Unit Z . u) . v  ..<(?h1909) --UnitNat u . v) -- bug?
+                  ~~ (Unit Z) . (u . v) ..<(C .laws.associativity (Unit Z) u v)
                 }
           in ((univ X).UP.unique ArrTgt h1 h2).runEq
         }
     }
   %unbound_implicits on
-
 %hide F
--}
