@@ -90,6 +90,8 @@ modules = Frex
         , Data.Category.Setoid
         , Data.Category.Adjunction
         , Data.Category.Adjunction.Triangular
+        , Data.Category.Adjunction.Universal
+        , Data.Category.Colimit.Universal
         , Syntax.PreorderReasoning.Setoid
         , Utils.String
 

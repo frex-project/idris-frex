@@ -82,6 +82,8 @@ public export
 (.HomSet) : (cat : Category) -> (a, b : cat.Obj) -> Setoid
 cat.HomSet a b = cat.structure.HomSet a b
 
+%hide Category.Core.Category.Category.(.HomSet)
+
 public export
 (.Hom) : (cat : Category) -> (a, b : cat.Obj) -> Type
 cat.Hom a b = cat.structure.Hom a b
