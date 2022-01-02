@@ -86,6 +86,15 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
   psi {x,b} p = G .map p . (Unit x)
 
   public export
+  psiCong : {x : C .Obj} -> {b : B .Obj} ->
+    SetoidHomomorphism (B .HomSet (Fobj x) b) (C .HomSet x (G !! b))
+      (psi {x,b})
+  psiCong {x,b} p q prf = CalcWith (C .HomSet x (G !! b)) $
+    |~ G .map p . (Unit x)
+    ~~ G .map q . (Unit x)
+      ...((G .structure.mapHom.homomorphic p q prf) . (Unit x))
+
+  public export
   Fmap : {x,y : C .Obj} -> C .Hom x y -> B .Hom (Fobj x) (Fobj y)
   Fmap {y} u = phi (Unit y . u)
 
@@ -188,4 +197,83 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
         }
     }
   %unbound_implicits on
+
+  public export
+  psi_phi : {x : C .Obj} -> {b : B .Obj} -> (u : C .Hom x (G !! b)) ->
+    (C .HomSet x (G !! b)).equivalence.relation
+      (psi {x,b} (phi {x,b} u))
+      u
+  psi_phi {x,b} u = CalcWith (C .HomSet _ _) $
+    |~ G .map (phi {x,b} u) . (Unit x)
+    ~~ u ...((phiMor {x,b} u).preserves)
+
+  public export
+  phi_psi : {x : C .Obj} -> {b : B .Obj} -> (p : B .Hom (Fobj x) b) ->
+    (B .HomSet (Fobj x) b).equivalence.relation
+      (phi {x,b} (psi {x,b} p))
+      p
+  phi_psi {x,b} p =
+    let u : C .Hom x (G !! b)
+        u = psi p
+        ArrPhi : x `Arrow` G
+        ArrPhi = MkArrow {Cod = b, Arr = u}
+        h1,h2 : (x ~~> G).Hom (Farr x) ArrPhi
+        h1 = MkHom $ phiMor {x,b} u
+        h2 = MkHom $ MkHomo
+          { H = p
+          , preserves = (C .HomSet _ _).equivalence.reflexive _
+          }
+    in ((univ x).UP.unique ArrPhi h1 h2).runEq
+
+  public export
+  AdjunctionByUniversals : Adjunction C B
+  AdjunctionByUniversals = MkAdjunction
+    { lft = F
+    , rgt = G
+    , adjoint = AreAdjoint
+      { mate = MkIsomorphism
+        { Fwd = MkSetoidHomomorphism psi psiCong
+        , Bwd = MkSetoidHomomorphism phi phiCong
+        , Iso = IsIsomorphism
+          { BwdFwdId = phi_psi
+          , FwdBwdId = psi_phi
+          }
+        }
+      , naturality = \p,u,f =>
+        let X1,X2 : C .Obj
+            X2 = u.src
+            X1 = u.tgt
+            B1,B2 : B .Obj
+            B1 = p.src
+            B2 = p.tgt
+        in CalcWith (C .HomSet _ _) $
+        |~ psi (p . f . (F .map u))
+        ~~ G .map (p . f . (F .map u)) . (Unit X2) .=.(Refl)
+        ~~ (G .map p . (G .map f) . (G .map $ F .map u)) . (Unit X2) ...(?h3)
+        ~~ ((G .map p) . (G .map f)) . ((G .map $ F .map u) . (Unit X2))
+                           ...(?h180) -- bug
+                                      --...(C .laws.associativity (G .map p) (G .map f) _ . (Unit X2))
+        ~~ ((G .map p) . (G .map f)) . (Unit X1 . u)
+                  ...(?h191910) --bug ... --..<(((G .map p) . (G .map f)) . (UnitNat u))
+        ~~ (G .map p) . ((G .map f) . (Unit X1 . u))
+            ..<(C .laws.associativity (G .map p) (G .map f) ((Unit X1) . u))
+        ~~ (G .map p) . ((G .map f) . (Unit X1)) . u
+            ...((G .map p) . (C .laws.associativity (G .map f) (Unit X1) u))
+        ~~ G .map p . psi f . u .=.(Refl)
+      }
+    }
 %hide F
+%hide Farr
+%hide Fobj
+%hide Universal.Unit
+%hide phiMor
+%hide phi
+%hide phiCong
+%hide psi
+%hide psiCong
+%hide Fmap
+%hide GFmap
+%hide UnitNat
+%hide congUnit
+%hide psi_phi
+%hide phi_psi
