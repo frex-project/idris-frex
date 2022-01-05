@@ -8,7 +8,7 @@ import Data.Category.Colimit.Universal
 
 %ambiguity_depth 5
 
-parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
+parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> x `Universal` G)
   public export
   Farr : (x : C .Obj) -> x `Arrow` G
   Farr x = (univ x).Data
@@ -249,10 +249,16 @@ parameters {B,C : Category} (G : B ~> C) (univ : (x : C .Obj) -> Universal x G)
         in CalcWith (C .HomSet _ _) $
         |~ psi (p . f . (F .map u))
         ~~ G .map (p . f . (F .map u)) . (Unit X2) .=.(Refl)
-        ~~ (G .map p . (G .map f) . (G .map $ F .map u)) . (Unit X2) ...(?h3)
+        ~~ (G .map p . (G .map f) . (G .map $ F .map u)) . (Unit X2)
+                           ...(?h190110)
+                           --bug --...(G .functoriality [p, f, F .map u] . (Unit X2))
+        ~~ ((G .map p . (G .map f)) . (G .map $ F .map u)) . (Unit X2)
+                           ...(?h121921010)
+                        --bug
+                        {- ...(C .laws.associativity (G .map p) (G .map f)
+                                 (G .map $ F .map u) . (Unit X2)) -}
         ~~ ((G .map p) . (G .map f)) . ((G .map $ F .map u) . (Unit X2))
-                           ...(?h180) -- bug
-                                      --...(C .laws.associativity (G .map p) (G .map f) _ . (Unit X2))
+                           ...(?h0) --bug --..<(C .laws.associativity ((G .map p) . (G .map f)) (G .map $ F .map u) (Unit X2))
         ~~ ((G .map p) . (G .map f)) . (Unit X1 . u)
                   ...(?h191910) --bug ... --..<(((G .map p) . (G .map f)) . (UnitNat u))
         ~~ (G .map p) . ((G .map f) . (Unit X1 . u))
