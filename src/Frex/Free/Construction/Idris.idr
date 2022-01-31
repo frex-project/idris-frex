@@ -153,7 +153,7 @@ idris printer is proofs = with [List.(++), Prelude.(.)] show $ vcat
     hidingList =
       let nms = flip List.mapMaybe (enumerate {a = pres .Axiom}) $ \ ax =>
                   do let nm = uncapitalise (show @{printer.axiomShow} ax)
-                     guard $ Prelude.elem nm
+                     guard $ elem nm $ the (List String)
                        [ "lftNeutrality"
                        , "rgtNeutrality"
                        , "associativity"
