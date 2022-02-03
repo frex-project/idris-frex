@@ -214,6 +214,14 @@ transport : {pres : Presentation} -> (a : Model pres) ->
 transport a iso = MkModel b $
   isoPreservesModels pres iso a.Validate
 
+public export
+transportSetoid : {pres : Presentation} -> (a : Model pres) ->
+  {x : Setoid} ->
+  (cast a <~> x) ->
+   Model pres
+transportSetoid a iso = transport a $ sym $
+  transportIso a.Algebra iso
+
 %unbound_implicits off
 ||| N-ary congruence in a term with `n` varialbes
 public export
