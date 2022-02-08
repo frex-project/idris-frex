@@ -125,9 +125,9 @@ mutual
   Eq Clause where
     PatClause _ lhs rhs == PatClause _ lhs' rhs' =
       lhs == lhs' && rhs == rhs'
-    WithClause _ l w p f cs == WithClause _ l' w' p' f' cs' =
-      l == l' && w == w' && p == p' && f == f' && cs == cs'
-    ImpossibleClause _ l == ImpossibleClause _ l' = l == l' 
+    WithClause _ l r w p f cs == WithClause _ l' r' w' p' f' cs' =
+      l == l' && r == r' && w == w' && p == p' && f == f' && cs == cs'
+    ImpossibleClause _ l == ImpossibleClause _ l' = l == l'
     _ == _ = False
 
   public export
@@ -196,7 +196,7 @@ mutual
 
     Implicit _ b == Implicit _ b' = b == b'
     IWithUnambigNames _ ns t == IWithUnambigNames _ ns' t' =
-      ns == ns' && t == t' 
+      ns == ns' && t == t'
 
     _ == _ = False
 
@@ -280,7 +280,7 @@ subexprs $ ILet _ _ _ _ t v s = [t, v, s]
 subexprs $ ICase _ x t cs = [x, t] ++ foldMap subclause cs
   where subclause : Clause -> List TTImp
         subclause $ PatClause _ l r = [l, r]
-        subclause $ WithClause _ l r _ _ cs = [l, r] ++ foldMap subclause cs
+        subclause $ WithClause _ l _ r _ _ cs = [l, r] ++ foldMap subclause cs
         subclause $ ImpossibleClause _ l = [l]
 subexprs $ ILocal _ _ e = [e]
 subexprs $ IUpdate _ _ _ = [] -- TODO
