@@ -51,14 +51,14 @@ VectMap = MkSetoidHomomorphism
   (\f => MkSetoidHomomorphism
     (\xs => map f.H xs)
     $ \xs, ys, prf, i  => CalcWith b $
-      |~ index i (map f.H xs)
-      ~~ f.H (index i xs)
-                          .=.(indexNaturality _ _ _)
-      ~~ f.H (index i ys) ...(f.homomorphic _ _ (prf i))
-      ~~ index i (map f.H ys)
+    |~ index i (map f.H xs)
+    ~~ f.H (index i xs)
+                        .=.(indexNaturality _ _ _)
+    ~~ f.H (index i ys) ...(f.homomorphic _ _ $ prf i)
+    ~~ index i (map f.H ys)
                           .=<(indexNaturality _ _ _))
   $ \f,g,prf,xs,i => CalcWith b $
-    |~ index i (map f.H xs)
-    ~~ f.H (index i xs) .=.(indexNaturality _ _ _)
-    ~~ g.H (index i xs) ...(prf _)
-    ~~ index i (map g.H xs) .=<(indexNaturality _ _ _)
+  |~ index i (map f.H xs)
+  ~~ f.H (index i xs) .=.(indexNaturality _ _ _)
+  ~~ g.H (index i xs) ...(prf _)
+  ~~ index i (map g.H xs) .=<(indexNaturality _ _ _)
