@@ -28,11 +28,14 @@ index : (i : Fin n) ->
 index FZ     (hdEq :: _) = hdEq
 index (FS k) (_ :: tlEq) = index k tlEq
 
+%hide Inductive.(.VectEquality)
+%hide Inductive.VectSetoid
+
 public export
 VectSetoid : (n : Nat) -> (a : Setoid) -> Setoid
 VectSetoid n a = MkSetoid (Vect n (U a))
   $ MkEquivalence
-  { relation   = Functional.(.VectEquality) a
+  { relation   = (.VectEquality) a
   , reflexive  = \xs                    , i =>
       a.equivalence.reflexive  _
   , symmetric  = \xs,ys, prf            , i =>
@@ -43,15 +46,15 @@ VectSetoid n a = MkSetoid (Vect n (U a))
 
 public export
 VectMap : {a, b : Setoid} -> (a ~~> b) ~>
-  ((Functional.VectSetoid n a) ~~> (Functional.VectSetoid n b))
+  (VectSetoid n a ~~> VectSetoid n b)
 VectMap = MkSetoidHomomorphism
   (\f => MkSetoidHomomorphism
-            (\xs => map f.H xs)
-            $ \xs, ys, prf, i  => CalcWith b $
-              |~ index i (map f.H xs)
-              ~~ f.H (index i xs)     .=.(indexNaturality _ _ _)
-              ~~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
-              ~~ index i (map f.H ys) .=<(indexNaturality _ _ _))
+    (\xs => map f.H xs)
+    $ \xs, ys, prf, i  => CalcWith b $
+      |~ index i (map f.H xs)
+      ~~ f.H (index i xs)     .=.(indexNaturality _ _ _)
+      ~~ f.H (index i ys)     ...(f.homomorphic _ _ (prf i))
+      ~~ index i (map f.H ys) .=<(indexNaturality _ _ _))
   $ \f,g,prf,xs,i => CalcWith b $
     |~ index i (map f.H xs)
     ~~ f.H (index i xs) .=.(indexNaturality _ _ _)
