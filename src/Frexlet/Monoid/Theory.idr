@@ -31,7 +31,8 @@ MonoidTheory = MkPresentation Theory.Signature
 
 public export
 MonoidStructure : Type
-MonoidStructure = SetoidAlgebra Signature
+MonoidStructure =
+  SetoidAlgebra Signature
 
 public export
 Monoid : Type
