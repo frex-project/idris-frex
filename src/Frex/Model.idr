@@ -31,7 +31,8 @@ models a eq env = a.equivalence.relation
 ||| more compactly, makes nice syntax sometimes
 public export 0
 (=|) : {sig : Signature} -> (eq : Equation sig) ->
-  (a : SetoidAlgebra sig ** Fin eq.support -> U a.algebra) -> Type
+  (a : SetoidAlgebra sig
+     ** Fin eq.support -> U a.algebra) -> Type
 eq =| (a ** env) = models a eq env
 
 ||| Homomorphisms preserve equations in an environment
