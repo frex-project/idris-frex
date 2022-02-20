@@ -33,14 +33,19 @@ public export
   (.Sem)     c = c.Model.Sem
 
 public export
-record (~>) {Pres : Presentation} {A : Model Pres} {X : Setoid}
+record (~>) {Pres : Presentation}
+       {A : Model Pres} {X : Setoid}
     (Extension1, Extension2 : Extension A X) where
   constructor MkExtensionMorphism
   H : (Extension1).Model ~> (Extension2).Model
-  PreserveEmbed : (cast A ~~> (Extension2).Model).equivalence.relation
-                     (H . (Extension1).Embed) (Extension2).Embed
-  PreserveVar   : (X ~~> cast (Extension2).Model).equivalence.relation
-                     ((H).H . (Extension1).Var) (Extension2).Var
+  PreserveEmbed :
+    (cast A ~~> (Extension2).Model).equivalence.relation
+      (H . (Extension1).Embed)
+           (Extension2).Embed
+  PreserveVar   :
+    (X ~~> cast (Extension2).Model).equivalence.relation
+      ((H).H . (Extension1).Var)
+               (Extension2).Var
 
 public export
 Extender : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
