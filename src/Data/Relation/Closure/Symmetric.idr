@@ -6,8 +6,10 @@ import Data.Relation
 
 public export
 data Symmetrise : Rel a -> Rel a where
-  Fwd : {0 r : Rel a} -> r x y -> Symmetrise r x y
-  Bwd : {0 r : Rel a} -> r x y -> Symmetrise r y x
+  Fwd : {0 r : Rel a} -> r x y
+           -> Symmetrise r x y
+  Bwd : {0 r : Rel a} -> r x y
+           -> Symmetrise r y x
 
 export
 sym : Symmetrise r ~> flip (Symmetrise r)

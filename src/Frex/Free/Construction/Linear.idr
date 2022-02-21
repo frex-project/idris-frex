@@ -111,13 +111,16 @@ Closure pres a
   $ Step pres a
 
 public export 0
-Derivation : (p : Presentation) ->
-             (a : PresetoidAlgebra p.signature) -> Rel (U a)
+Derivation : (p : Presentation)
+  -> (a : PresetoidAlgebra
+            p.signature)
+  -> Rel (U a)
 Derivation p a
-  = RTList                       -- Reflexive, Transitive
-  $ Symmetrise                   -- Symmetric
-  $ Locate p.signature a.algebra -- Congruence
-  $ Step p a                     -- Axiomatic steps
+  = RTList     -- Reflexive, Transitive
+  $ Symmetrise -- Symmetric
+               -- Congruence
+  $ Locate p.signature a.algebra
+  $ Step p a   -- Axiomatic steps
 
 public export 0
 Proof : (pres : Presentation) ->
