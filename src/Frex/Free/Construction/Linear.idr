@@ -28,15 +28,17 @@ namespace PresetoidAlgebra
   a .bindTerm = bindTerm {a = a.algebra}
 
 public export
-data Step : (pres : Presentation) ->
-            (a : PresetoidAlgebra pres.signature) ->
-            Rel (U a) where
-  Include : {x, y : U a} -> a.relation x y -> Step pres a x y
-  ByAxiom : {0 a : PresetoidAlgebra pres.signature} ->
-            (eq : Axiom pres) ->
-            (env : Fin (pres.axiom eq).support -> U a) ->
-            Step pres a (a .bindTerm (pres.axiom eq).lhs env)
-                        (a .bindTerm (pres.axiom eq).rhs env)
+data Step : (pres : Presentation)
+            -> (a : PresetoidAlgebra pres.signature)
+            -> Rel (U a) where
+  Include : {x, y : U a} -> a.relation x y
+            -> Step pres a x y
+  ByAxiom : {0 a : PresetoidAlgebra pres.signature}
+            -> (eq : Axiom pres)
+            -> (env : Fin (pres.axiom eq).support -> U a)
+            -> Step pres a
+                 (a .bindTerm (pres.axiom eq).lhs env)
+                 (a .bindTerm (pres.axiom eq).rhs env)
 
 namespace Step
 
@@ -93,10 +95,13 @@ plugFusion ctx2 ctx1 t
 public export
 data Locate : (sig : Signature) -> (a : Algebra sig) ->
               Rel (U a) -> Rel (U a) where
-  ||| We prove the equality by invoking a rule at the toplevel
-  Here : {0 r : Rel (U a)} -> r x y -> Locate sig a r x y
-  ||| We focus on a subterm `lhs` that may appear in multiple
-  ||| locations and rewrite it to `rhs` using a specific rule.
+  ||| We prove the equality by invoking a rule at the
+  ||| toplevel
+  Here : {0 r : Rel (U a)} -> r x y
+              -> Locate sig a r x y
+  ||| We focus on a subterm `lhs` that may appear in
+  ||| multiple locations and rewrite it to `rhs` using a
+  ||| specific rule.
   Cong : {0 r : Rel (U a)} ->
          (t : Term sig (Maybe (U a))) ->
          {lhs, rhs : U a} -> r lhs rhs ->
