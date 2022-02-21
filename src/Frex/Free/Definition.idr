@@ -34,16 +34,18 @@ public export
 
 ||| States: Homomorphism between the models over X.
 public export 0
-PreservesEnv : {Pres : Presentation} ->
-    {X : Setoid} -> (a, b : Pres `ModelOver` X) ->
-    (h : cast {to = Setoid} a.Model ~> cast b.Model) -> Type
-PreservesEnv a b h = 
+PreservesEnv : {Pres : Presentation}
+    -> {X : Setoid}
+    -> (a, b : Pres `ModelOver` X) ->
+    (cast {to = Setoid} a.Model
+      ~> cast b.Model) -> Type
+PreservesEnv a b h =
  (X ~~> cast b.Model).equivalence.relation
     (h . a.Env) b.Env
 
 ||| A `Pres`-model over X homomorphism
 public export
-record (~>) 
+record (~>)
     {Pres : Presentation} {X : Setoid}
     (A, B : Pres `ModelOver` X) where
   constructor MkHomomorphism

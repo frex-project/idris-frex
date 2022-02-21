@@ -28,12 +28,9 @@ Additive = MkModel
 public export
 Multiplicative : Monoid
 Multiplicative = MkModel
-  { Algebra = cast {from = Algebra Signature} $ MkAlgebra
-        { U = Nat
-        , Sem = \case
-           Neutral => 1
-           Product => mult
-        }
+  { Algebra = cast {from = Algebra Signature} $
+      MkAlgebra {U = Nat, Sem = \case Neutral => 1
+                                      Product => mult}
   , Validate = \case
       LftNeutrality => \env => plusZeroRightNeutral _
       RgtNeutrality => \env => multOneRightNeutral _

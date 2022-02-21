@@ -57,10 +57,12 @@ rgtNeutrality neutral product =
 
 ||| x + (y + z) = (x + y) + z
 public export
-associativity : {sig : Signature} -> EqSpec sig [2]
+associativity : {sig : Signature}
+  -> EqSpec sig [2]
 associativity product =
   let (+) = call product in
-  MkEquation 3 $ X 0 + (X 1 + X 2) =-= (X 0 + X 1) + X 2
+  MkEquation 3 $ X 0 + (X 1 +  X 2)
+            =-= (X 0 +  X 1) + X 2
 
 ||| x + y = y + x
 public export

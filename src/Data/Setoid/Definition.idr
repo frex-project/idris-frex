@@ -83,7 +83,8 @@ Cast Type Setoid where
   cast a = irrelevantCast a
 
 public export 0
-SetoidHomomorphism : (a,b : Setoid) -> (f : U a -> U b) -> Type
+SetoidHomomorphism : (a,b : Setoid)
+  -> (f : U a -> U b) -> Type
 SetoidHomomorphism a b f
   = (x,y : U a) -> a.equivalence.relation x y
   -> b.equivalence.relation (f x) (f y)
@@ -121,12 +122,13 @@ public export
   , symmetric = \f,g,prf,w =>
       b.equivalence.symmetric _ _ (prf w)
   , transitive = \f,g,h,f_eq_g, g_eq_h, q =>
-      b.equivalence.transitive _ _ _ (f_eq_g q) (g_eq_h q)
+      b.equivalence.transitive _ _ _
+        (f_eq_g q) (g_eq_h q)
   }
 
 public export
 post : {a,b,c : Setoid} -> b ~> c -> (a ~~> b) ~> (a ~~> c)
-post h = MkSetoidHomomorphism 
+post h = MkSetoidHomomorphism
   { H = (h .)
   , homomorphic = \f1,f2,prf,x => h.homomorphic _ _ (prf x)
   }
