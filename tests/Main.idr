@@ -15,4 +15,4 @@ tests = MkTestPool "Frex tests" [] Nothing
   ]
 
 main : IO ()
-main = runner [ record { testCases $= map ("frextests/" ++) } tests ]
+main = runner [ { testCases $= map ("frextests/" ++) } tests ]
