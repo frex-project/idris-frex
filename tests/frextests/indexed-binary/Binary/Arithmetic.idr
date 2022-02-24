@@ -89,11 +89,11 @@ addNumber {c = c} {width = S width}
                            in  ((b_s :+: b_s) :+: c_s)
                                 :+: (((val_a :+: val_a) :+: val_b) :+: val_b)
                            =-= c_s :+: 2 *:(((val_a :+: val_b) :+: b_s)))
-                  ~~ c_s + 2*(val_s + ((2 `power` width) * c0))
+                  ~~ c_s + 2*(val_s + ((2 `power` width)*c0))
                        ...(cong (\u => c_s + 2*u)
                                 valueFord)
                   -- rearrange terms to conclude
-                  ~~ (((c_s + val_s) + val_s) + (2*((2 `power` width)*c0 )))
+                  ~~ ((c_s + val_s) + val_s) + (2*((2 `power` width)*c0))
                    ...(Frex.solve 3 (Frex Nat.Additive) $
                      let c_s   = Dyn 0
                          val_s = Dyn 1
