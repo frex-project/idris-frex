@@ -88,10 +88,7 @@ addNumber {c = c} {width = S width}
                                val_b = Dyn 3
                            in  ((b_s :+: b_s) :+: c_s)
                                 :+: (((val_a :+: val_a) :+: val_b) :+: val_b)
-                           =-= c_s :+: (((val_a :+: val_b) :+: b_s) :+:
-                                       (((val_a :+: val_b) :+: b_s) :+: Sta 0)))
-                                       -- the `sta 0` comes from
-                                       -- the definition of 2*x = x + (x + 0)
+                           =-= c_s :+: 2 *:(((val_a :+: val_b) :+: b_s)))
                   ~~ c_s + 2*(val_s + ((2 `power` width) * c0))
                        ...(cong (\u => c_s + 2*u)
                                 valueFord)
@@ -101,10 +98,8 @@ addNumber {c = c} {width = S width}
                      let c_s   = Dyn 0
                          val_s = Dyn 1
                          expc0 = Dyn 2
-                     in c_s :+: ((val_s :+: expc0) :+:
-                          ((val_s :+: expc0) :+: Sta 0))
-                     =-= ((c_s :+: val_s) :+: val_s) :+:
-                          (expc0 :+: (expc0 :+: Sta 0))
+                     in c_s :+: (2 *: (val_s :+: expc0))
+                     =-= ((c_s :+: val_s) :+: val_s) :+: (2 *: expc0)
                    )
                  -- Since we don't have a semiring frexlet, we need another step
                  -- to associate brackets
