@@ -39,13 +39,15 @@ record (~>) {Pres : Presentation}
   constructor MkExtensionMorphism
   H : (Extension1).Model ~> (Extension2).Model
   PreserveEmbed :
-    (cast A ~~> (Extension2).Model).equivalence.relation
-      (H . (Extension1).Embed)
-           (Extension2).Embed
+    (cast A ~~> (Extension2).Model)
+      .equivalence.relation
+        (H . (Extension1).Embed)
+             (Extension2).Embed
   PreserveVar   :
-    (X ~~> cast (Extension2).Model).equivalence.relation
-      ((H).H . (Extension1).Var)
-               (Extension2).Var
+    (X ~~> cast (Extension2).Model)
+      .equivalence.relation
+        ((H).H . (Extension1).Var)
+                 (Extension2).Var
 
 public export
 Extender : {pres : Presentation} -> {a : Model pres} -> {x : Setoid} ->
