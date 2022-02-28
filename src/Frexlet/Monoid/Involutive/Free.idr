@@ -4,6 +4,7 @@ import Frex
 import Frexlet.Monoid.Involutive.Theory
 import Frexlet.Monoid.Involutive.Properties
 import Frexlet.Monoid.Involutive.Notation
+import Frexlet.Monoid.Involutive.Frex
 import Frexlet.Monoid.Notation
 import Notation.Multiplicative
 import Frexlet.Monoid.Free
@@ -67,4 +68,4 @@ Initial =
 
 public export
 FreeInvolutiveMonoidOver : (n : Nat) -> Free InvolutiveMonoidTheory (cast $ Fin n)
-FreeInvolutiveMonoidOver n = ByFrex Initial (Frex _ _)
+FreeInvolutiveMonoidOver n = ByFrex Initial (Involutive.Frex.Frex _ _)
