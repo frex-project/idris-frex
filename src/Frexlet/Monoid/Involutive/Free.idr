@@ -68,4 +68,4 @@ Initial =
 
 public export
 FreeInvolutiveMonoidOver : (n : Nat) -> Free InvolutiveMonoidTheory (cast $ Fin n)
-FreeInvolutiveMonoidOver n = ByFrex Initial (Involutive.Frex.Frex _ _)
+FreeInvolutiveMonoidOver n = ByFrex Initial (Involutive.Frex.Frex _)
