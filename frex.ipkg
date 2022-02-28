@@ -62,6 +62,7 @@ modules = Frex
         , Frexlet.Monoid.Involutive.Involution
         , Frexlet.Monoid.Involutive.Frex
         , Frexlet.Monoid.Involutive.List
+        , Frexlet.Monoid.Involutive.Free
         -- Should move to contrib
         , Data.Either.Extra
         , Data.Finite
