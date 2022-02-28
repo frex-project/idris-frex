@@ -66,3 +66,9 @@ notation1 : InvMult1 (Term (InvolutiveMonoidTheory).signature (a `Either` (Fin n
 notation1 = (notationSyntax, MkMultiplicative1
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Neutral)
               (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Product))
+
+public export
+multiplicative1 : (0 n : Nat) -> InvMult1 (Term (InvolutiveMonoidTheory).signature (Fin n))
+multiplicative1 n = (notationSyntax, MkMultiplicative1
+              (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Neutral)
+              (call {sig = (InvolutiveMonoidTheory).signature} $ Mono Product))
