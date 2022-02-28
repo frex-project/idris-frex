@@ -10,4 +10,5 @@ import public Frexlet.Monoid.Involutive.Theory
 import public Frexlet.Monoid.Involutive.Properties
 import public Frexlet.Monoid.Involutive.Involution
 import public Frexlet.Monoid.Involutive.Frex
+import public Frexlet.Monoid.Involutive.Free
 import public Frexlet.Monoid.Involutive.List
