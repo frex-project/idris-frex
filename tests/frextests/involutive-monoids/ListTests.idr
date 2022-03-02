@@ -10,7 +10,7 @@ inv x = Call (MkOp Involution) [x]
 
 test : {A : Setoid} -> {x,y : List (U A)} -> A .ListEquality (reverse (reverse y ++ ([] ++ reverse x)))
                                                              (x ++ y)
-test = solve 2 (Frexlet.Monoid.Involutive.Frex.Frex List _)
+test = solve 2 (Frexlet.Monoid.Involutive.Frex.Frex List)
          { prf = ConsUlt (A .ListEqualityReflexive _) (MkAnd Refl Refl) $
                  ConsUlt (A .ListEqualityReflexive _) (MkAnd Refl Refl) $ Ultimate (A .ListEqualityReflexive _) }
          $ (((Dyn 1) .inv .*. (I1 .*. (Dyn 0) .inv)) .inv)
@@ -39,5 +39,5 @@ PropListInvolutiveMonoid = MkModel (MkInvolutiveMonoidStructure ((PropListMonoid
      Antidistributivity  => \env => sym (revAppend _ _)
 
 testProp : {A : Type} -> {x,y : List A} -> reverse (reverse y ++ ([] ++ reverse x)) = x ++ y
-testProp = solve 2 (Frex.Frex PropListInvolutiveMonoid _)
+testProp = solve 2 (Involutive.Frex.Frex PropListInvolutiveMonoid)
          $ ((Dyn 1) .inv .*. (I1 .*. (Dyn 0) .inv)) .inv =-= Dyn 0 .*. Dyn 1

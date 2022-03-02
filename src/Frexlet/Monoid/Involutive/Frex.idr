@@ -489,9 +489,9 @@ Uniqueness a s other =
 -- %nf_metavar_threshold 50
 
 public export
-Frex : (a : InvolutiveMonoid) -> (s : Setoid) -> Frex a s
+Frex : (a : InvolutiveMonoid) -> {s : Setoid} -> Frex a s
 -- %nf_metavar_threshold 80000
-Frex a s = MkFrex
+Frex a {s} = MkFrex
   { Data = InvMonoidExtension a s
   , UP = IsUniversal
     { Exists = InvExtender a s
