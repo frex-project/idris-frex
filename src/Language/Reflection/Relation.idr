@@ -79,21 +79,7 @@ Eq Name where
 
 public export
 partial
-Eq Constant where
-  I c         == I c'        = c == c'
-  BI c        == BI c'       = c == c'
-  I8 c        == I8 c'       = c == c'
-  I16 c       == I16 c'      = c == c'
-  I32 c       == I32 c'      = c == c'
-  I64 c       == I64 c'      = c == c'
-  B8 c        == B8 c'       = c == c'
-  B16 c       == B16 c'      = c == c'
-  B32 c       == B32 c'      = c == c'
-  B64 c       == B64 c'      = c == c'
-  Str c       == Str c'      = c == c'
-  Ch c        == Ch c'       = c == c'
-  Db c        == Db c'       = c == c'
-  WorldVal    == WorldVal    = True
+Eq PrimType where
   IntType     == IntType     = True
   IntegerType == IntegerType = True
   Int8Type    == Int8Type    = True
@@ -108,6 +94,26 @@ Eq Constant where
   CharType    == CharType    = True
   DoubleType  == DoubleType  = True
   WorldType   == WorldType   = True
+  _ == _ = False
+
+public export
+partial
+Eq Constant where
+  I c         == I c'        = c == c'
+  BI c        == BI c'       = c == c'
+  I8 c        == I8 c'       = c == c'
+  I16 c       == I16 c'      = c == c'
+  I32 c       == I32 c'      = c == c'
+  I64 c       == I64 c'      = c == c'
+  B8 c        == B8 c'       = c == c'
+  B16 c       == B16 c'      = c == c'
+  B32 c       == B32 c'      = c == c'
+  B64 c       == B64 c'      = c == c'
+  Str c       == Str c'      = c == c'
+  Ch c        == Ch c'       = c == c'
+  Db c        == Db c'       = c == c'
+  PrT t       == PrT t'      = t == t'
+  WorldVal    == WorldVal    = True
   _ == _ = False
 
 mutual
