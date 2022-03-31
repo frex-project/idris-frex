@@ -121,8 +121,8 @@ findOp tm $ op :: ops =
 
 fold : FoldSyntax a b => (0 _ : Type)
   -> List Operator -> b -> TTImp -> Elab (a, b)
-fold @{folder} t ops init tm = foldAcc tm $ init
-  where mutual
+fold @{folder} t ops init tm = foldAcc tm $ init where
+  mutual
     foldArgs : Vect n TTImp -> b -> Elab (a ^ n, b)
     foldArgs [] acc = pure ([], acc)
     foldArgs (x :: xs) acc
