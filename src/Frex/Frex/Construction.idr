@@ -56,18 +56,6 @@ withEvaluation printer =
     showPrec p (MkOp (Constant c)) = showPrec p c
 
 
-depCong : {0 p : a -> Type} -> (0 f : (x : a) -> p x) -> {0 x1, x2 : a} -> (prf : x1 = x2) ->
-  f x1 = f x2
-depCong f Refl = Refl
-
-depCong2 : {0 p : a -> Type} -> {0 q : (x : a) -> (y : p x) -> Type} ->
-  (0 f : (x : a) -> (y : p x) -> q x y) ->
-  {0 x1, x2 : a} -> (prf : x1 = x2) ->
-  {0 y1 : p x1} -> {y2 : p x2} -> (prf : y1 = y2) ->
-  f x1 y1 = f x2 y2
-depCong2 f Refl Refl = Refl
-
-
 OpInjective : {0 op1, op2 : Op sig} -> op1 = op2 -> (op1.arity = op2.arity, op1.snd ~=~ op2.snd)
 OpInjective Refl = (Refl, Refl)
 
