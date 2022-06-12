@@ -48,7 +48,7 @@ metadataEq s@(IVar _ _) t@(IVar _ _) = metadata s == metadata t
 metadataEq s@(IPi _ _ _ _ _ _) t@(IPi _ _ _ _ _ _) = metadata s == metadata t
 metadataEq s@(ILam _ _ _ _ _ _) t@(ILam _ _ _ _ _ _) = metadata s == metadata t
 metadataEq s@(ILet _ _ _ _ _ _ _) t@(ILet _ _ _ _ _ _ _) = metadata s == metadata t
-metadataEq s@(ICase _ _ _ _) t@(ICase _ _ _ _) = metadata s == metadata t
+metadataEq s@(ICase _ _ _ _ _) t@(ICase _ _ _ _ _) = metadata s == metadata t
 metadataEq s@(ILocal _ _ _) t@(ILocal _ _ _) = metadata s == metadata t
 metadataEq s@(IUpdate _ _ _) t@(IUpdate _ _ _) = metadata s == metadata t
 metadataEq s@(IApp _ _ _) t@(IApp _ _ _) = metadata s == metadata t
@@ -81,7 +81,7 @@ subexprs : TTImp -> List TTImp
 subexprs $ IPi _ _ _ _ a r = [a, r]
 subexprs $ ILam _ _ _ _ a r = [a, r]
 subexprs $ ILet _ _ _ _ t v s = [t, v, s]
-subexprs $ ICase _ x t cs = [x, t] ++ foldMap subclause cs
+subexprs $ ICase _ _ x t cs = [x, t] ++ foldMap subclause cs
   where subclause : Clause -> List TTImp
         subclause $ PatClause _ l r = [l, r]
         subclause $ WithClause _ l _ r _ _ cs = [l, r] ++ foldMap subclause cs
