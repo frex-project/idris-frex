@@ -12,7 +12,6 @@ import Frexlet.Monoid.Notation.Additive
 monoidNotation : (a : Monoid) -> NotationHint a Additive1
 monoidNotation a = a.notationHint Additive1 a.Additive1
 
-infix 0 ~~
 0 (~~) : (monoid : Monoid) => (lhs, rhs : U monoid) -> Type
 (~~) = monoid.equivalence.relation
 
