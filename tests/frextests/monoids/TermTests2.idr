@@ -8,12 +8,10 @@ import Frexlet.Monoid
 import Frexlet.Monoid.Free
 import Frexlet.Monoid.Notation.Additive
 
-infix 0 ~~
 0 (~~) : Rel (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
 (~~) = (Free MonoidTheory $ cast $ Fin n).Data.Model.rel
 
 -- Modulo normalisation:
--- infix 0 ~~~
 -- 0 (~~~) : Rel (Term Signature (Fin n))
 -- (~~~) = (|-) {pres = MonoidTheory} (QuotientData MonoidTheory (cast (Fin n)))
 
