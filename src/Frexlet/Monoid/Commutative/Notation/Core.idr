@@ -6,7 +6,7 @@ import Frexlet.Monoid.Commutative.Theory
 
 import public Notation
 import public Notation.Action
-import public Data.HVect
+import public Data.Vect.Quantifiers
 import public Frex.Free
 import public Frex.Free.Construction
 

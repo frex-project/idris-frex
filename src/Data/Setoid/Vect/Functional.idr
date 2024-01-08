@@ -4,7 +4,7 @@ module Data.Setoid.Vect.Functional
 import Data.Setoid.Definition
 
 import Data.Vect
-import Data.HVect
+import Data.Vect.Quantifiers
 import Data.Vect.Properties
 import Data.Setoid.Vect.Inductive
 import Control.Order

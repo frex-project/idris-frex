@@ -8,7 +8,7 @@ import Frex.Presentation
 import Data.Setoid
 import Data.Vect
 import Data.Vect.Extra
-import Data.HVect
+import Data.Vect.Quantifiers
 import Data.Fin
 
 infix 1 =|
