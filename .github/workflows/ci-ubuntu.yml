@@ -46,7 +46,6 @@ jobs:
       - name: Install Idris2
         if: steps.cache-idris2.outputs.cache-hit != 'true'
         run: |
-          # git clone https://github.com/idris-lang/idris2
           git clone https://github.com/mattpolzin/idris2
           cd idris2
           git checkout ${{ env.IDRIS2_COMMIT }}
