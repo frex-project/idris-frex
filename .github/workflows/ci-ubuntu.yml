@@ -12,7 +12,7 @@ on:
 ########################################################################
 
 env:
-  IDRIS2_COMMIT: 2a05023e398e667edfd42901b8988ee0a217205a
+  IDRIS2_COMMIT: 7ce4c45e8265a167bd13616ee3ccf7fa3cdd5718
   SCHEME: scheme
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
       - name: Install Idris2
         if: steps.cache-idris2.outputs.cache-hit != 'true'
         run: |
-          git clone https://github.com/mattpolzin/idris2
+          git clone https://github.com/idris-lang/idris2
           cd idris2
           git checkout ${{ env.IDRIS2_COMMIT }}
           make bootstrap && make install
