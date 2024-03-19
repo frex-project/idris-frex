@@ -1,6 +1,6 @@
 module Notation.Action
 
-import public Data.HVect
+import public Data.Vect.Quantifiers
 import public Data.Fun.Extra
 
 import public Notation
@@ -8,14 +8,6 @@ import public Notation.Additive
 import public Notation.Multiplicative
 
 %default total
-
-public export
-head : HVect (ty :: tys) -> ty
-head (x :: xs) = x
-
-public export
-tail : HVect (ty :: tys) -> HVect tys
-tail (x :: xs) = xs
 
 public export
 Action1 : (a,b : Type) -> Type

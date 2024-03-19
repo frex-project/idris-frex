@@ -2,7 +2,7 @@ module Notation.Multiplicative
 
 import Notation
 
-import public Data.HVect
+import public Data.Vect.Quantifiers
 import public Data.Fun.Extra
 
 %default total
