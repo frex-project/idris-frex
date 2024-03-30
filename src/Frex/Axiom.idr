@@ -12,7 +12,7 @@ import Data.Fin
 
 %default total
 
-infix 1 =-=
+export infix 1 =-=
 
 ||| Smart constructor for making equations look nicer
 public export

@@ -33,7 +33,7 @@ Sta' = (FrexNat).Data.Embed.H.H
 Dyn' : {0 x : Type} -> x -> U (FrexNat {x}).Data.Model
 Dyn' = (FrexNat {x}).Data.Var.H
 
-infix 0 ~~
+export infix 0 ~~
 0 (~~) : (lhs, rhs : Term (EvaluationSig (CommutativeMonoidTheory).signature Nat) x) -> Type
 (~~) = (FrexNat).Data.Model.rel
 

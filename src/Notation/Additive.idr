@@ -7,7 +7,7 @@ import public Data.Fun.Extra
 
 %default total
 
-infixl 8 .+., :+:, |+|, +., +:, +|, .+, :+, |+
+export infixl 8 .+., :+:, |+|, +., +:, +|, .+, :+, |+
 
 public export
 interface Additive1 a where

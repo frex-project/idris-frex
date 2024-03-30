@@ -27,8 +27,8 @@ import Data.Stream
 import Data.Name
 import Data.Vect.Extra
 
-infix 10 ^
-infix 5 ~>, <~>
+export infix 10 ^
+export infix 5 ~>, <~>
 
 %default total
 

@@ -7,7 +7,7 @@ import public Control.Order
 import Data.Vect
 import public Data.Fun.Nary
 
-infix 5 ~>, ~~>, <~>
+export infix 5 ~>, ~~>, <~>
 
 %default total
 

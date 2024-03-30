@@ -7,7 +7,7 @@ import Frex.Presentation
 import Frex.Algebra
 import Frex.Model
 
-infixr 3 <~.~>
+export infixr 3 <~.~>
 
 %default total
 

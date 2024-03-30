@@ -3,9 +3,9 @@ module Syntax.PreorderReasoning.Setoid
 
 import Data.Setoid.Definition
 
-infixl 0  ~~
-prefix 1  |~
-infix  1  ...,..<,..>,.=.,.=<,.=>
+export infixl 0  ~~
+export prefix 1  |~
+export infix  1  ...,..<,..>,.=.,.=<,.=>
 
 public export
 data Step : (a : Setoid) -> (lhs,rhs : U a) -> Type where

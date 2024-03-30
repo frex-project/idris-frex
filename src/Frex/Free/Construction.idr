@@ -16,7 +16,7 @@ import Text.PrettyPrint.Prettyprinter
 
 %default total
 
-infix 4 |-
+export infix 4 |-
 
 ||| Auxiliary abstraction: an algebra with a relation over it
 public export
