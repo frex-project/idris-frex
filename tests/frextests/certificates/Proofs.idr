@@ -11,7 +11,7 @@ import Notation.Hints
 
 parameters (m : Model MonoidTheory)
 
-  infix 0 =~=
+  export infix 0 =~=
   0 (=~=) : (x, y : U m) -> Type
   x =~= y = (cast m).equivalence.relation x y
 
