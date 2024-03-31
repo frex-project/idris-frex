@@ -1,5 +1,5 @@
 package frex
-authors = "Guillaume Allais, Edwin Brady, Nathan Corbin, Ohad Kammar, and Jeremy Yallop"
+authors = "Guillaume Allais, Edwin Brady, Nathan Corbyn, Ohad Kammar, and Jeremy Yallop"
 modules = Frex
         , Frex.Magic
         , Frex.Signature
