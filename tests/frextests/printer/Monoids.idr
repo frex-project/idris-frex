@@ -26,7 +26,7 @@ import System.File
   show _ = "boring"
 
 -- Using a concrete name so that the constraints when forming `X k` compute
-infix 0 ~~
+export infix 0 ~~
 (~~) : Term Signature (Fin 10) -> Term Signature (Fin 10) -> Type
 (~~) = (|-) {pres = MonoidTheory}
             (QuotientData MonoidTheory (irrelevantCast (Fin 10)))

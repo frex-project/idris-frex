@@ -71,7 +71,7 @@ plug : (a : Algebra sig) ->
        (t : U a) -> U a
 plug a t u = bindTerm t (fromMaybe u)
 
-infixr 0 :.:
+export infixr 0 :.:
 public export
 (:.:) : {0 sig : Signature} ->
         Term sig (Maybe a) ->

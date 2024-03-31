@@ -18,7 +18,7 @@ import Syntax.PreorderReasoning
 
 import System.File
 
-infix 0 ~~
+export infix 0 ~~
 0 (~~) : Rel (U (Construction.Free MonoidTheory $ cast $ Fin n).Data.Model)
 (~~) = (Free MonoidTheory $ cast $ Fin n).Data.Model.rel
 

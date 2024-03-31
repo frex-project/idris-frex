@@ -11,7 +11,7 @@ import Data.Vect.Extra
 import Data.Vect.Quantifiers
 import Data.Fin
 
-infix 1 =|
+export infix 1 =|
 
 %default total
 %ambiguity_depth 4
