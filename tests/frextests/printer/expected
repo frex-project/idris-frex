@@ -4,7 +4,7 @@
 
 Operations:
   ε : a
-  (•) : a -> a -> a (infixr 0)
+  (•) : a -> a -> a (export infixr 0)
 Axioms:
   Left neutrality: ∀ x. ε • x ≡ x
   Right neutrality: ∀ x. x • ε ≡ x
@@ -142,7 +142,7 @@ x • ([ε • y] • ((ε • z) • ε) • (ε • a) • ε)
 
 Operations:
   ε : a
-  (•) : a -> a -> a (infixr 0)
+  (•) : a -> a -> a (export infixr 0)
 Axioms:
   Left neutrality: ∀ x. ε • x ≡ x
   Right neutrality: ∀ x. x • ε ≡ x

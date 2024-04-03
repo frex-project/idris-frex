@@ -1,2 +1,13 @@
+104c104
+<       ...( lftNeutrality x )
+---
+>       ...( lftNeutrality x )
+\ No newline at end of file
+128,129c128
+<       ...( lftNeutrality x )
+< 
+---
+>       ...( lftNeutrality x )
+\ No newline at end of file
 1/1: Building build.Proofs (build/Proofs.idr)
 1/1: Building build.GenericProofs (build/GenericProofs.idr)
