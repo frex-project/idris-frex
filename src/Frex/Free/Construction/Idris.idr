@@ -179,7 +179,7 @@ idris printer is proofs = with [List.(++), Prelude.(.)] show $ vcat
 
     header : List (Doc ())
     header = map pretty $ lines #"""
-  infix 0 =~=
+  export infix 0 =~=
   0 (=~=) : U m -> U m -> Type
   x =~= y = (cast m).equivalence.relation x y
 

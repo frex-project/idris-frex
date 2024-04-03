@@ -15,7 +15,7 @@ parameters (m : Model MonoidTheory)
 ------------------------------------------------------------------------
 -- Boilerplate: equivalence & congruence combinator
 
-  infix 0 =~=
+  export infix 0 =~=
   0 (=~=) : U m -> U m -> Type
   x =~= y = (cast m).equivalence.relation x y
 
@@ -42,7 +42,7 @@ parameters (m : Model MonoidTheory)
   zero : U m
   zero = m .Algebra .algebra .Semantics (MkOp  Neutral) []
 
-  infixl 8 <>
+  export infixl 8 <>
   (<>) : U m -> U m -> U m
   x <> y = m .Algebra .algebra .Semantics (MkOp  Product) [x, y]
 
@@ -52,7 +52,7 @@ parameters (m : Model MonoidTheory)
   zero' : Term Sig (Maybe (U m))
   zero' = Call (MkOp  Neutral) []
 
-  infixl 8 :<>
+  export infixl 8 :<>
   (:<>) : Term Sig (Maybe (U m)) -> Term Sig (Maybe (U m)) -> Term Sig (Maybe (U m))
   x :<> y = Call (MkOp  Product) [x, y]
 

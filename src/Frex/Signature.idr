@@ -36,9 +36,9 @@ namespace Precedence
 
 export
 Show (Precedence n) where
-  show (Prefix lvl) = "prefix " ++ show lvl
-  show (InfixL lvl) = "infixl " ++ show lvl
-  show (InfixR lvl) = "infixr " ++ show lvl
+  show (Prefix lvl) = "export prefix " ++ show lvl
+  show (InfixL lvl) = "export infixl " ++ show lvl
+  show (InfixR lvl) = "export infixr " ++ show lvl
 
 export
 level : Precedence n -> Nat
