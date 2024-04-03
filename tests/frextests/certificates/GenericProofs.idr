@@ -126,4 +126,3 @@ parameters (m : Model MonoidTheory)
       ...( rgtNeutrality (zero <> x) )
     ~~ x
       ...( lftNeutrality x )
-
