@@ -31,7 +31,7 @@ export infix 10 ^
 export infix 5 ~>, <~>
 
 %default total
-
+%ambiguity_depth 4
 ||| N-ary tuples
 public export
 (^) : Type -> Nat -> Type

@@ -11,6 +11,7 @@ import Frex.Free
 import Frex.Free.Construction
 
 %default total
+%ambiguity_depth 4
 
 public export
 sumHomomorphism : (a : CommutativeMonoid) ->
