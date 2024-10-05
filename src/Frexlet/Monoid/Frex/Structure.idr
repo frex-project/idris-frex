@@ -159,8 +159,10 @@ MultHomomorphism a s (i, ConsUlt i1 x is) (j,ConsUlt j1 y js)
   = ( a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i_eq_j, i1_eq_i2]
     , x_eq_y
     ) :: is_eq_js
-MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) (MkAnd _ _) impossible
-MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) (MkAnd _ _) impossible
+MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) x with (x)
+  _ | MkAnd _ _ impossible
+MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) x with (x)
+  _ | MkAnd _ _ impossible
 
 public export
 AppendHomomorphismProperty : (a : Monoid) -> (x : Setoid) ->
