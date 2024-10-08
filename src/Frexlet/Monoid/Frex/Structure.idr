@@ -145,6 +145,12 @@ UltListSetoid pen ult = MkSetoid (UltList (U pen) (U ult)) $ MkEquivalence
   , transitive = UltListTransitive pen ult
   }
 
+Uninhabited (UltListEquality penRel ultRel (Ultimate i) (ConsUlt j1 y js)) where
+  uninhabited _ impossible
+
+Uninhabited (UltListEquality penRel ultRel (ConsUlt i1 x is) (Ultimate j)) where
+  uninhabited _ impossible
+
 public export
 MultHomomorphism : (a : Monoid) -> (s : Setoid) ->
   SetoidHomomorphism
@@ -159,8 +165,8 @@ MultHomomorphism a s (i, ConsUlt i1 x is) (j,ConsUlt j1 y js)
   = ( a.cong 2 (Dyn 0 .*. Dyn 1) [_,_] [_,_] [i_eq_j, i1_eq_i2]
     , x_eq_y
     ) :: is_eq_js
-MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) (MkAnd _ _) impossible
-MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) (MkAnd _ _) impossible
+MultHomomorphism _ _ (_, Ultimate _) (_, ConsUlt _ _ _) (MkAnd _ eq) = absurd eq
+MultHomomorphism _ _ (_, ConsUlt _ _ _) (_, Ultimate _) (MkAnd _ eq) = absurd eq
 
 public export
 AppendHomomorphismProperty : (a : Monoid) -> (x : Setoid) ->
