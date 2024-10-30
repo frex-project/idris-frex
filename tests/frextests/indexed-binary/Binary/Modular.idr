@@ -13,7 +13,7 @@ import Frexlet.Monoid.Commutative.Nat
 
 
 NZ2 : NonZero 2
-NZ2 = SIsNonZero
+NZ2 = %search
 
 export
 absurdSucIsZero : (k : Nat) -> (0 prf : S k = 0) -> b
@@ -69,10 +69,10 @@ multSucLeftCancel a b minusOne prf = multSucRightCancel a b minusOne $
 
 export
 powerNZ : (n : Nat) -> NonZero (2 `power` n)
-powerNZ   0 = SIsNonZero
+powerNZ   0 = %search
 powerNZ   (S n) with (powerNZ n)
  powerNZ  (S n) | prf with (2 `power` n)
-  powerNZ (S n) | SIsNonZero | S _ = SIsNonZero
+  powerNZ (S n) | _ | S _ = %search
 
 export
 modAffine : (a, k, n : Nat) -> (nz : NonZero n)
