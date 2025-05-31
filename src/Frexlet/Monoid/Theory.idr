@@ -16,23 +16,22 @@ Signature : Signature
 Signature = MkSignature Operation
 
 public export
-data Axiom
- = LftNeutrality
- | RgtNeutrality
- | Associativity
+data Axiom = LftNeutrality
+           | RgtNeutrality
+           | Associativity
+
 
 public export
 MonoidTheory : Presentation
-MonoidTheory = MkPresentation Theory.Signature
-                              Theory.Axiom $ \case
-    LftNeutrality => lftNeutrality Neutral Product
-    RgtNeutrality => rgtNeutrality Neutral Product
-    Associativity => associativity         Product
+MonoidTheory = MkPresentation Theory.Signature Theory.Axiom $ \case
+                 LftNeutrality => lftNeutrality Neutral Product
+                 RgtNeutrality => rgtNeutrality Neutral Product
+                 Associativity => associativity         Product
 
 public export
 MonoidStructure : Type
-MonoidStructure =
-  SetoidAlgebra Signature
+MonoidStructure = SetoidAlgebra Signature
+
 
 public export
 Monoid : Type
