@@ -75,16 +75,29 @@ modules = Frex
         , Data.Setoid.Definition
         , Data.Setoid.Either
         , Data.Setoid.Pair
+        , Data.Setoid.Fun
         , Data.Setoid.Vect
         , Data.Setoid.Vect.Functional
         , Data.Setoid.Vect.Inductive
         , Data.Setoid.List
         , Data.Unit
         , Data.Vect.Extra1
+        , Data.Category
+        , Data.Category.Core
+        , Data.Category.Core.Category
+        , Data.Category.Core.Functor
+        , Data.Category.Core.NatTrans
+        , Data.Category.Construction.Op
+        , Data.Category.Construction.Pair
+        , Data.Category.Setoid
+        , Data.Category.Adjunction
+        , Data.Category.Adjunction.Triangular
+        , Data.Category.Adjunction.Universal
+        , Data.Category.Adjunction.Equivalence
+        , Data.Category.Colimit.Universal
         , Syntax.PreorderReasoning.Setoid
         , Utils.String
         , Language.Reflection.Relation
-
 
 depends = contrib
 sourcedir = "src"
